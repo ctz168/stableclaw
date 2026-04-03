@@ -9,6 +9,7 @@ import type { GatewayService } from "../../daemon/service.js";
 import { renderSystemdUnavailableHints } from "../../daemon/systemd-hints.js";
 import { isSystemdUserServiceAvailable } from "../../daemon/systemd.js";
 import { isGatewaySecretRefUnavailableError } from "../../gateway/credentials.js";
+import { clearMdnsCache } from "../../infra/bonjour-cache-cleanup.js";
 import { isWSL } from "../../infra/wsl.js";
 import { defaultRuntime } from "../../runtime.js";
 import { resolveGatewayTokenForDriftCheck } from "./gateway-token-drift.js";
@@ -304,6 +305,11 @@ export async function runServiceStop(params: {
   } catch (err) {
     fail(`${params.serviceNoun} stop failed: ${String(err)}`);
     return;
+  }
+
+  // Clear mDNS cache to avoid name conflicts on next start
+  if (params.serviceNoun === "Gateway") {
+    await clearMdnsCache();
   }
 
   let stopped = false;

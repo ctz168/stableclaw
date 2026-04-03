@@ -1,6 +1,7 @@
 import { isRestartEnabled } from "../../config/commands.js";
 import { readBestEffortConfig, resolveGatewayPort } from "../../config/config.js";
 import { resolveGatewayService } from "../../daemon/service.js";
+import { clearMdnsCache } from "../../infra/bonjour-cache-cleanup.js";
 import { probeGateway } from "../../gateway/probe.js";
 import {
   findVerifiedGatewayListenerPidsOnPortSync,
@@ -86,6 +87,10 @@ async function stopGatewayWithoutServiceManager(port: number) {
   for (const pid of pids) {
     signalVerifiedGatewayPidSync(pid, "SIGTERM");
   }
+
+  // Clear mDNS cache to avoid name conflicts on next start
+  await clearMdnsCache();
+
   return {
     result: "stopped" as const,
     message: `Gateway stop signal sent to unmanaged process${pids.length === 1 ? "" : "es"} on port ${port}: ${formatGatewayPidList(pids)}.`,

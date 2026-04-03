@@ -1,13 +1,6 @@
 # 🦞 StableClaw — 企业级稳定版 AI 助手
 
 <p align="center">
-    <picture>
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo-text-dark.svg">
-        <img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo-text.svg" alt="StableClaw" width="500">
-    </picture>
-</p>
-
-<p align="center">
   <strong>EXFOLIATE! EXFOLIATE!</strong>
 </p>
 
@@ -64,6 +57,7 @@ $ vim ~/.openclaw/config.json
 - ✅ **立即失败模式** - 已有实例时立即拒绝，不等待
 - ✅ **清晰错误提示** - 告知用户如何停止现有实例
 - ✅ **进程状态检查** - 自动检测和处理僵尸进程
+- ✅ **mDNS 缓存清理** - 停止时自动清理 Bonjour 缓存，避免重启时的名称冲突
 
 **使用示例：**
 
@@ -76,6 +70,15 @@ $ openclaw gateway run
 $ openclaw gateway run
 ✗ Error: gateway already running (pid 12345)
   Use 'openclaw gateway stop' to stop it before starting a new instance.
+
+# 停止 gateway（自动清理 mDNS 缓存）
+$ openclaw gateway stop
+✓ Gateway stopped
+✓ mDNS cache cleared
+
+# 再次启动（不会出现名称冲突）
+$ openclaw gateway run
+✓ Gateway started successfully
 ```
 
 ---
