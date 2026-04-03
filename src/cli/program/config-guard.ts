@@ -120,6 +120,33 @@ export async function ensureConfigReady(params: {
     `${muted("Run:")} ${commandText(formatCliCommand("openclaw doctor --fix"))}`,
   );
   if (!allowInvalid) {
+    // Attempt automatic rollback to last valid backup before exiting
+    try {
+      const { handleInvalidConfig } = await import("../../gateway/config-error-handler.js");
+      const { CONFIG_PATH: configPath } = await import("../../config/paths.js");
+      const rollbackResult = await handleInvalidConfig(snapshot, { configPath: snapshot.path });
+      if (rollbackResult.rolledBack) {
+        params.runtime.error("");
+        params.runtime.error("Configuration rolled back to last valid version.");
+        if (rollbackResult.invalidConfigPath) {
+          params.runtime.error(`Invalid config preserved at: ${rollbackResult.invalidConfigPath}`);
+        }
+        params.runtime.error("Retrying...");
+        // Re-read the config after rollback
+        const { readConfigFileSnapshot: reReadSnapshot } = await import("../../config/config.js");
+        const newSnapshot = await reReadSnapshot();
+        if (newSnapshot.valid) {
+          params.runtime.error("Configuration loaded successfully after rollback.");
+          return; // Continue with the rolled-back config
+        }
+        // Rollback didn't fix it
+        params.runtime.error("Rolled-back config is also invalid. Manual fix required.");
+      } else {
+        params.runtime.error("No valid backup available for rollback.");
+      }
+    } catch {
+      // Rollback failed, continue to exit
+    }
     params.runtime.exit(1);
   }
 }

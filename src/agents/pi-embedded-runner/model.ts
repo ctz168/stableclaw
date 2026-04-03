@@ -254,6 +254,7 @@ function findInlineModelMatch(params: {
   modelId: string;
 }) {
   const inlineModels = buildInlineProviderModels(params.providers);
+  // 1. Exact match by id
   const exact = inlineModels.find(
     (entry) => entry.provider === params.provider && entry.id === params.modelId,
   );
@@ -261,10 +262,24 @@ function findInlineModelMatch(params: {
     return exact;
   }
   const normalizedProvider = normalizeProviderId(params.provider);
-  return inlineModels.find(
+  // 2. Match by id with normalized provider
+  const normalized = inlineModels.find(
     (entry) =>
       normalizeProviderId(entry.provider) === normalizedProvider && entry.id === params.modelId,
   );
+  if (normalized) {
+    return normalized;
+  }
+  // 3. Match by name field (users often reference models by name, not API id)
+  const byName = inlineModels.find(
+    (entry) =>
+      normalizeProviderId(entry.provider) === normalizedProvider &&
+      entry.name === params.modelId,
+  );
+  if (byName) {
+    return byName;
+  }
+  return undefined;
 }
 
 export { buildModelAliasLines };
@@ -524,7 +539,10 @@ function resolveConfiguredFallbackModel(params: {
 }): Model<Api> | undefined {
   const { provider, modelId, cfg, agentDir, runtimeHooks } = params;
   const providerConfig = resolveConfiguredProviderConfig(cfg, provider);
-  const configuredModel = providerConfig?.models?.find((candidate) => candidate.id === modelId);
+  // Match by id first, then by name (users reference models by name, not API id)
+  const configuredModel =
+    providerConfig?.models?.find((candidate) => candidate.id === modelId) ??
+    providerConfig?.models?.find((candidate) => candidate.name === modelId);
   const providerHeaders = sanitizeModelHeaders(providerConfig?.headers, {
     stripSecretRefMarkers: true,
   });
@@ -551,19 +569,21 @@ function resolveConfiguredFallbackModel(params: {
     capability: "llm",
     transport: "stream",
   });
+  // Use configuredModel.id (API model id) when available, otherwise fall back to modelId
+  const apiModelId = configuredModel?.id ?? modelId;
   return normalizeResolvedModel({
     provider,
     cfg,
     agentDir,
     model: {
-      id: modelId,
-      name: modelId,
+      id: apiModelId,
+      name: configuredModel?.name ?? modelId,
       api: requestConfig.api ?? "openai-responses",
       provider,
       baseUrl: requestConfig.baseUrl,
       reasoning: configuredModel?.reasoning ?? false,
-      input: ["text"],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      input: configuredModel?.input ?? ["text"],
+      cost: configuredModel?.cost ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       contextWindow:
         configuredModel?.contextWindow ??
         providerConfig?.models?.[0]?.contextWindow ??

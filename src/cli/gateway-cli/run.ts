@@ -27,6 +27,7 @@ import { formatCliCommand } from "../command-format.js";
 import { inheritOptionFromParent } from "../command-options.js";
 import { forceFreePortAndWait, waitForPortBindable } from "../ports.js";
 import { withProgress } from "../progress.js";
+import * as readline from "node:readline";
 import { ensureDevGatewayConfig } from "./dev.js";
 import { runGatewayLoop } from "./run-loop.js";
 import {
@@ -180,6 +181,40 @@ function isHealthyGatewayLockError(err: unknown): boolean {
   );
 }
 
+/**
+ * Interactive prompt asking the user whether to kill an existing gateway
+ * process or exit. Returns "kill" or "exit".
+ */
+async function promptKillOrExit(existingPid: number): Promise<"kill" | "exit"> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stderr,
+  });
+
+  return new Promise((resolve) => {
+    const prompt = `An existing gateway is running (pid ${existingPid}).\n` +
+      `  [K] Kill the existing process and restart\n` +
+      `  [E] Exit (do not start a new gateway)\n` +
+      `  Choose [K/e]: `;
+    process.stderr.write(prompt);
+
+    rl.question("", (answer) => {
+      rl.close();
+      const trimmed = answer.trim().toLowerCase();
+      if (trimmed === "k" || trimmed === "kill" || trimmed === "y" || trimmed === "yes" || trimmed === "") {
+        resolve("kill");
+      } else {
+        resolve("exit");
+      }
+    });
+
+    // Handle Ctrl+C
+    rl.on("close", () => {
+      resolve("exit");
+    });
+  });
+}
+
 async function runGatewayCommand(opts: GatewayRunOpts) {
   const isDevProfile = process.env.OPENCLAW_PROFILE?.trim().toLowerCase() === "dev";
   const devMode = Boolean(opts.dev) || isDevProfile;
@@ -237,27 +272,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   setupGlobalPluginErrorHandlers();
   gatewayLog.info("plugin error handlers initialized");
   
-  // Check if the last configuration was invalid
-  if (wasLastConfigInvalid()) {
-    const status = getConfigStatus();
-    if (status.error) {
-      gatewayLog.warn(
-        "⚠️  Last configuration change was invalid. Gateway will start with the last valid configuration."
-      );
-      gatewayLog.warn(
-        `   Error: ${status.error.message}`
-      );
-      if (status.error.invalidConfigPath) {
-        gatewayLog.warn(
-          `   Invalid config saved to: ${status.error.invalidConfigPath}`
-        );
-      }
-      gatewayLog.warn(
-        "   Fix the configuration errors and restart the gateway to apply changes."
-      );
-    }
-  }
-  
+  // Load config (config-guard already validated/rolled-back if needed)
   const cfg = loadConfig();
   const portOverride = parsePort(opts.port);
   if (opts.port !== undefined && portOverride === null) {
@@ -521,6 +536,67 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   } catch (err) {
     if (isGatewayLockError(err)) {
       const errMessage = describeUnknownError(err);
+      // Extract PID from error message for interactive prompt
+      const pidMatch = typeof errMessage === "string" ? errMessage.match(/pid (\d+)/) : null;
+      const existingPid = pidMatch ? parseInt(pidMatch[1], 10) : null;
+      
+      // Interactive prompt: ask user what to do with the existing process
+      const isInteractive = process.stdin.isTTY && !opts.force;
+      
+      if (isInteractive && existingPid) {
+        defaultRuntime.error(
+          `Gateway failed to start: ${errMessage}`,
+        );
+        defaultRuntime.error("");
+        
+        const choice = await promptKillOrExit(existingPid);
+        
+        if (choice === "kill") {
+          gatewayLog.info(`Killing existing gateway process (pid ${existingPid})...`);
+          try {
+            process.kill(existingPid, "SIGTERM");
+            // Wait for graceful shutdown
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // Check if still alive
+            try {
+              process.kill(existingPid, 0);
+              // Still alive, escalate to SIGKILL
+              gatewayLog.warn(`Process ${existingPid} did not exit gracefully, sending SIGKILL...`);
+              process.kill(existingPid, "SIGKILL");
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            } catch {
+              // Process is dead, good
+            }
+            // Wait for port to be free
+            await waitForPortBindable(port, { timeoutMs: 3000, intervalMs: 150 });
+            gatewayLog.info(`Existing gateway stopped. Restarting...`);
+            // Retry startup
+            try {
+              await startLoop();
+              return;
+            } catch (retryErr) {
+              if (isGatewayLockError(retryErr)) {
+                defaultRuntime.error(`Gateway still locked after killing old process: ${describeUnknownError(retryErr)}`);
+                defaultRuntime.exit(1);
+                return;
+              }
+              throw retryErr;
+            }
+          } catch (killErr) {
+            defaultRuntime.error(`Failed to kill process ${existingPid}: ${String(killErr)}`);
+            defaultRuntime.error(`Use ${formatCliCommand("openclaw gateway stop")} or kill it manually.`);
+            defaultRuntime.exit(1);
+            return;
+          }
+        } else {
+          // User chose to exit
+          defaultRuntime.error(`Gateway not started. Use ${formatCliCommand("openclaw gateway stop")} to stop the existing instance first.`);
+          defaultRuntime.exit(0);
+          return;
+        }
+      }
+      
+      // Non-interactive or no PID: existing behavior
       defaultRuntime.error(
         `Gateway failed to start: ${errMessage}\nIf the gateway is supervised, stop it with: ${formatCliCommand("openclaw gateway stop")}`,
       );
