@@ -93,70 +93,79 @@ export function createAcpxRuntimeService(
 
       lifecycleRevision += 1;
       const currentRevision = lifecycleRevision;
-      void (async () => {
-        try {
-          await ensureAcpx({
-            command: pluginConfig.command,
-            logger: ctx.logger,
-            expectedVersion: pluginConfig.expectedVersion,
-            allowInstall: pluginConfig.allowPluginLocalInstall,
-            stripProviderAuthEnvVars: pluginConfig.stripProviderAuthEnvVars,
-            spawnOptions: {
-              strictWindowsCmdWrapper: pluginConfig.strictWindowsCmdWrapper,
-            },
-          });
-          if (currentRevision !== lifecycleRevision) {
-            return;
-          }
-          let lastFailureMessage: string | undefined;
-          for (let attempt = 0; attempt <= healthProbeRetryDelaysMs.length; attempt += 1) {
-            await runtime?.probeAvailability();
-            if (currentRevision !== lifecycleRevision) {
-              return;
-            }
-            if (runtime?.isHealthy()) {
-              ctx.logger.info(
-                attempt === 0
-                  ? "acpx runtime backend ready"
-                  : `acpx runtime backend ready after ${attempt + 1} probe attempts`,
-              );
-              return;
-            }
-
-            const doctorReport = await runtime?.doctor?.();
-            if (currentRevision !== lifecycleRevision) {
-              return;
-            }
-            if (doctorReport) {
-              lastFailureMessage = formatDoctorFailureMessage(doctorReport);
-            } else {
-              lastFailureMessage = "acpx runtime backend remained unhealthy after probe";
-            }
-
-            const retryDelayMs = healthProbeRetryDelaysMs[attempt];
-            if (retryDelayMs == null) {
-              break;
-            }
-            ctx.logger.warn(
-              `acpx runtime backend probe attempt ${attempt + 1} failed: ${lastFailureMessage}; retrying in ${retryDelayMs}ms`,
-            );
-            await delay(retryDelayMs);
-            if (currentRevision !== lifecycleRevision) {
-              return;
-            }
-          }
-          ctx.logger.warn(
-            `acpx runtime backend probe failed: ${lastFailureMessage ?? "backend remained unhealthy after setup"}`,
-          );
-        } catch (err) {
-          if (currentRevision !== lifecycleRevision) {
-            return;
-          }
-          ctx.logger.warn(
-            `acpx runtime setup failed: ${err instanceof Error ? err.message : String(err)}`,
-          );
+      
+      // Wait for acpx setup to complete (with retries)
+      // This ensures the plugin fails fast if the backend is unavailable
+      try {
+        await ensureAcpx({
+          command: pluginConfig.command,
+          logger: ctx.logger,
+          expectedVersion: pluginConfig.expectedVersion,
+          allowInstall: pluginConfig.allowPluginLocalInstall,
+          stripProviderAuthEnvVars: pluginConfig.stripProviderAuthEnvVars,
+          spawnOptions: {
+            strictWindowsCmdWrapper: pluginConfig.strictWindowsCmdWrapper,
+          },
+        });
+        if (currentRevision !== lifecycleRevision) {
+          return;
         }
-      })();
+        
+        let lastFailureMessage: string | undefined;
+        for (let attempt = 0; attempt <= healthProbeRetryDelaysMs.length; attempt += 1) {
+          await runtime?.probeAvailability();
+          if (currentRevision !== lifecycleRevision) {
+            return;
+          }
+          if (runtime?.isHealthy()) {
+            ctx.logger.info(
+              attempt === 0
+                ? "acpx runtime backend ready"
+                : `acpx runtime backend ready after ${attempt + 1} probe attempts`,
+            );
+            return;
+          }
+
+          const doctorReport = await runtime?.doctor?.();
+          if (currentRevision !== lifecycleRevision) {
+            return;
+          }
+          if (doctorReport) {
+            lastFailureMessage = formatDoctorFailureMessage(doctorReport);
+          } else {
+            lastFailureMessage = "acpx runtime backend remained unhealthy after probe";
+          }
+
+          const retryDelayMs = healthProbeRetryDelaysMs[attempt];
+          if (retryDelayMs == null) {
+            break;
+          }
+          ctx.logger.warn(
+            `acpx runtime backend probe attempt ${attempt + 1} failed: ${lastFailureMessage}; retrying in ${retryDelayMs}ms`,
+          );
+          await delay(retryDelayMs);
+          if (currentRevision !== lifecycleRevision) {
+            return;
+          }
+        }
+        
+        // Backend failed to become healthy - throw error to trigger plugin disable
+        throw new Error(
+          `acpx runtime backend probe failed: ${lastFailureMessage ?? "backend remained unhealthy after setup"}`,
+        );
+      } catch (err) {
+        if (currentRevision !== lifecycleRevision) {
+          return;
+        }
+        
+        // Unregister backend and throw error to trigger plugin disable
+        unregisterAcpRuntimeBackend(ACPX_BACKEND_ID);
+        runtime = null;
+        
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        ctx.logger.error(`acpx runtime setup failed: ${errorMsg}`);
+        throw err;
+      }
     },
     async stop(_ctx: OpenClawPluginServiceContext): Promise<void> {
       lifecycleRevision += 1;
