@@ -350,16 +350,73 @@ function mapZodIssueToConfigIssue(issue: unknown): ConfigValidationIssue {
   const message = typeof record?.message === "string" ? record.message : "Invalid input";
   const allowedValuesSummary = summarizeAllowedValues(collectAllowedValuesFromUnknownIssue(issue));
 
-  if (!allowedValuesSummary) {
-    return { path, message };
+  // Build base issue
+  const configIssue: ConfigValidationIssue = {
+    path,
+    message: allowedValuesSummary
+      ? appendAllowedValuesHint(message, allowedValuesSummary)
+      : message,
+    allowedValues: allowedValuesSummary?.values,
+    allowedValuesHiddenCount: allowedValuesSummary?.hiddenCount,
+  };
+
+  // Add error enhancement: suggestion, expected, received
+  const code = typeof record?.code === "string" ? record.code : "";
+  
+  // Type errors: add expected/received types and suggestions
+  if (code === "invalid_type") {
+    const expected = typeof record?.expected === "string" ? record.expected : "";
+    const received = typeof record?.received === "string" ? record.received : "";
+    
+    configIssue.expected = expected;
+    configIssue.received = received;
+    
+    // Generate helpful suggestion for type errors
+    if (expected === "string" && received === "undefined") {
+      configIssue.suggestion = `Add a string value for "${path}" in your configuration file.`;
+    } else if (expected === "number" && received === "string") {
+      configIssue.suggestion = `Convert the string value to a number. Remove quotes around numeric values.`;
+    } else if (expected === "boolean" && (received === "string" || received === "number")) {
+      configIssue.suggestion = `Use true or false (without quotes) instead of ${received}.`;
+    } else if (expected === "array" && received === "object") {
+      configIssue.suggestion = `Use square brackets [] instead of curly braces {} for array values.`;
+    } else if (expected === "object" && received === "array") {
+      configIssue.suggestion = `Use curly braces {} instead of square brackets [] for object values.`;
+    }
+  }
+  
+  // Missing required field
+  if (code === "invalid_literal" && /required/i.test(message)) {
+    configIssue.suggestion = `Add the required field "${path}" to your configuration.`;
+  }
+  
+  // Invalid enum value
+  if (code === "invalid_enum_value" || code === "invalid_value") {
+    if (allowedValuesSummary && allowedValuesSummary.values.length > 0) {
+      const values = allowedValuesSummary.values.map(v => 
+        typeof v === "string" ? `"${v}"` : String(v)
+      ).join(", ");
+      configIssue.suggestion = `Use one of the allowed values: ${values}.`;
+    }
+  }
+  
+  // JSON parsing errors (for common mistakes)
+  if (message.includes("Expected") && message.includes("but received")) {
+    // Try to extract helpful information from JSON5 parsing errors
+    if (message.includes("JSON")) {
+      configIssue.suggestion = "Check for common JSON syntax errors: missing commas, unmatched brackets, or improper quotes.";
+    }
+  }
+  
+  // Unrecognized keys
+  if (code === "unrecognized_keys" && record?.keys) {
+    const keys = Array.isArray(record.keys) ? record.keys : [];
+    if (keys.length > 0) {
+      configIssue.suggestion = `Remove or rename the unknown key(s): ${keys.map(k => `"${k}"`).join(", ")}. Check for typos or consult the documentation.`;
+    }
   }
 
-  return {
-    path,
-    message: appendAllowedValuesHint(message, allowedValuesSummary),
-    allowedValues: allowedValuesSummary.values,
-    allowedValuesHiddenCount: allowedValuesSummary.hiddenCount,
-  };
+  return configIssue;
 }
 
 function isWorkspaceAvatarPath(value: string, workspaceDir: string): boolean {

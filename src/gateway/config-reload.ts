@@ -9,6 +9,7 @@ import type {
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import { isPlainObject } from "../utils.js";
 import { buildGatewayReloadPlan, type GatewayReloadPlan } from "./config-reload-plan.js";
+import { handleInvalidConfig, clearConfigError } from "./config-error-handler.js";
 
 export { buildGatewayReloadPlan };
 export type { ChannelKind, GatewayReloadPlan } from "./config-reload-plan.js";
@@ -147,12 +148,27 @@ export function startGatewayConfigReloader(opts: {
     return true;
   };
 
-  const handleInvalidSnapshot = (snapshot: ConfigFileSnapshot): boolean => {
+  const handleInvalidSnapshot = async (snapshot: ConfigFileSnapshot): Promise<boolean> => {
     if (snapshot.valid) {
       return false;
     }
-    const issues = formatConfigIssueLines(snapshot.issues, "").join(", ");
-    opts.log.warn(`config reload skipped (invalid config): ${issues}`);
+    
+    // Enhanced error handling: call the error handler
+    const result = await handleInvalidConfig(snapshot, {
+      configPath: opts.watchPath,
+    });
+    
+    // Log the result
+    if (result.rolledBack) {
+      opts.log.error(
+        `Configuration validation failed. Automatic rollback completed. Check ${result.invalidConfigPath || "backup files"} for details.`
+      );
+    } else {
+      opts.log.error(
+        `Configuration validation failed. Gateway will continue with the last valid configuration. ${result.errorMessage}`
+      );
+    }
+    
     return true;
   };
 
@@ -221,9 +237,11 @@ export function startGatewayConfigReloader(opts: {
       if (handleMissingSnapshot(snapshot)) {
         return;
       }
-      if (handleInvalidSnapshot(snapshot)) {
+      if (await handleInvalidSnapshot(snapshot)) {
         return;
       }
+      // Clear any previous error status since we're applying a valid config
+      clearConfigError();
       await applySnapshot(snapshot.config);
     } catch (err) {
       opts.log.error(`config reload failed: ${String(err)}`);

@@ -11,6 +11,7 @@ import {
   resolveGatewayPort,
 } from "../../config/config.js";
 import { hasConfiguredSecretInput } from "../../config/types.secrets.js";
+import { wasLastConfigInvalid, getConfigStatus } from "../../config/config-status.js";
 import { resolveGatewayAuth } from "../../gateway/auth.js";
 import type { GatewayWsLogStyle } from "../../gateway/ws-logging.js";
 import { setGatewayWsLogStyle } from "../../gateway/ws-logging.js";
@@ -230,6 +231,28 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   }
 
   gatewayLog.info("loading configuration…");
+  
+  // Check if the last configuration was invalid
+  if (wasLastConfigInvalid()) {
+    const status = getConfigStatus();
+    if (status.error) {
+      gatewayLog.warn(
+        "⚠️  Last configuration change was invalid. Gateway will start with the last valid configuration."
+      );
+      gatewayLog.warn(
+        `   Error: ${status.error.message}`
+      );
+      if (status.error.invalidConfigPath) {
+        gatewayLog.warn(
+          `   Invalid config saved to: ${status.error.invalidConfigPath}`
+        );
+      }
+      gatewayLog.warn(
+        "   Fix the configuration errors and restart the gateway to apply changes."
+      );
+    }
+  }
+  
   const cfg = loadConfig();
   const portOverride = parsePort(opts.port);
   if (opts.port !== undefined && portOverride === null) {

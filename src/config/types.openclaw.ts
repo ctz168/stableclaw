@@ -139,6 +139,12 @@ export type ConfigValidationIssue = {
   message: string;
   allowedValues?: string[];
   allowedValuesHiddenCount?: number;
+  /** Optional suggestion for fixing the issue */
+  suggestion?: string;
+  /** Expected type or format (for type errors) */
+  expected?: string;
+  /** Actual value or type that was received */
+  received?: string;
 };
 
 export type LegacyConfigIssue = {
