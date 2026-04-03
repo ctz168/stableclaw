@@ -39,6 +39,12 @@ import {
   restoreMemoryPluginState,
 } from "./memory-state.js";
 import { isPathInside, safeStatSync } from "./path-safety.js";
+import {
+  recordPluginError,
+  isPluginDisabled,
+  enablePlugin,
+  withPluginErrorHandling,
+} from "./plugin-error-handler.js";
 import { createPluginRegistry, type PluginRecord, type PluginRegistry } from "./registry.js";
 import { resolvePluginCacheInputs } from "./roots.js";
 import {
@@ -645,6 +651,15 @@ function recordPluginError(params: {
     source: params.record.source,
     message: `${params.diagnosticMessagePrefix}${displayError}`,
   });
+
+  // Record plugin error for health tracking and auto-disable
+  recordPluginError({
+    pluginId: params.pluginId,
+    type: "load",
+    severity: "error",
+    message: displayError,
+    error: params.error instanceof Error ? params.error : new Error(displayError),
+  });
 }
 
 function pushDiagnostics(diagnostics: PluginDiagnostic[], append: PluginDiagnostic[]) {
@@ -655,7 +670,9 @@ function maybeThrowOnPluginLoadError(
   registry: PluginRegistry,
   throwOnLoadError: boolean | undefined,
 ): void {
-  if (!throwOnLoadError) {
+  // Default behavior: don't throw on plugin load errors
+  // This allows gateway to start even if some plugins fail
+  if (throwOnLoadError !== true) {
     return;
   }
   if (!registry.plugins.some((entry) => entry.status === "error")) {
