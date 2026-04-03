@@ -2317,7 +2317,22 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       });
 
       if (deps.fs.existsSync(configPath)) {
-        await maintainConfigBackups(configPath, deps.fs.promises);
+        await maintainConfigBackups(configPath, deps.fs.promises, {
+          validateBeforeBackup: (rawContent: string) => {
+            try {
+              const parsed = parseConfigJson5(rawContent, deps.json5);
+              if (!parsed.ok) return false;
+              // Use lightweight raw validation (no plugin loading) to keep
+              // the backup gate fast — schema-level correctness is sufficient
+              // to reject obviously corrupt configs from entering the ring.
+              const result = validateConfigObjectRawWithPlugins(parsed.parsed, { env: deps.env });
+              return result.ok;
+            } catch {
+              return false;
+            }
+          },
+          log: deps.logger,
+        });
       }
 
       try {

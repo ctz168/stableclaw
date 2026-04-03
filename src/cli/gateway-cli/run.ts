@@ -272,6 +272,32 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   setupGlobalPluginErrorHandlers();
   gatewayLog.info("plugin error handlers initialized");
   
+  // Warn if the previous session ended with an invalid config that was rolled back.
+  // This tells the operator that something went wrong last time and the config on
+  // disk was automatically restored from a backup.
+  if (wasLastConfigInvalid()) {
+    const status = getConfigStatus();
+    const errorDetail = status.error?.message ?? "unknown validation error";
+    const invalidPath = status.error?.invalidConfigPath;
+    const backupPath = status.lastValidBackupPath;
+    gatewayLog.warn(
+      `Previous session had an invalid configuration that was rolled back automatically.`,
+    );
+    gatewayLog.warn(`  Last error: ${errorDetail}`);
+    if (invalidPath) {
+      gatewayLog.warn(`  Invalid config preserved at: ${invalidPath}`);
+    }
+    if (backupPath) {
+      gatewayLog.warn(`  Rolled back from backup: ${backupPath}`);
+    }
+    gatewayLog.warn(
+      `  Please review the invalid config and fix the root cause before making further changes.`,
+    );
+    // Clear the invalid status now that we've warned the user
+    const { clearConfigStatus } = await import("../../config/config-status.js");
+    clearConfigStatus();
+  }
+  
   // Load config (config-guard already validated/rolled-back if needed)
   const cfg = loadConfig();
   const portOverride = parsePort(opts.port);

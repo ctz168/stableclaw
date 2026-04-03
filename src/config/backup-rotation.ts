@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs";
 
 export const CONFIG_BACKUP_COUNT = 5;
 
@@ -12,6 +13,26 @@ export interface BackupRotationFs {
 export interface BackupMaintenanceFs extends BackupRotationFs {
   copyFile: (from: string, to: string) => Promise<void>;
 }
+
+/**
+ * Optional validator for backup content. Returns true if the content is
+ * safe to keep as a backup (i.e. the config is valid). Return false to
+ * **reject** the backup — the invalid content must NOT enter the backup ring.
+ */
+export type BackupContentValidator = (rawContent: string) => boolean;
+
+export type MaintainConfigBackupsOptions = {
+  ioFs: BackupMaintenanceFs;
+  /**
+   * Optional content validator. When provided, the current config file is
+   * read and validated BEFORE being copied into the backup ring. If the
+   * validator returns false the backup is skipped entirely — the invalid
+   * config must never become a .bak file.
+   */
+  validateBeforeBackup?: BackupContentValidator;
+  /** Logger used when a backup is rejected. */
+  log?: { warn: (msg: string) => void };
+};
 
 export async function rotateConfigBackups(
   configPath: string,
@@ -110,12 +131,39 @@ export async function cleanOrphanBackups(
 
 /**
  * Run the full backup maintenance cycle around config writes.
- * Order matters: rotate ring -> create new .bak -> harden modes -> prune orphan .bak.* files.
+ * Order matters: validate -> rotate ring -> create new .bak -> harden modes -> prune orphan .bak.* files.
+ *
+ * **ROOT-CAUSE FIX**: If a content validator is supplied and the current on-disk
+ * config file FAILS validation, the backup is **rejected** — the invalid config
+ * must never enter the backup ring. This prevents a scenario where an externally
+ * corrupted config gets backed up and then later restored via rollback, silently
+ * replacing a good configuration.
  */
 export async function maintainConfigBackups(
   configPath: string,
   ioFs: BackupMaintenanceFs,
+  options?: MaintainConfigBackupsOptions,
 ): Promise<void> {
+  // ── Pre-flight: validate current on-disk content ──────────────────
+  if (options?.validateBeforeBackup) {
+    try {
+      const rawContent = await fs.promises.readFile(configPath, "utf-8");
+      if (!options.validateBeforeBackup(rawContent)) {
+        options.log?.warn?.(
+          `config backup REJECTED: on-disk config at ${configPath} failed validation — ` +
+            `invalid content must not enter the backup ring`,
+        );
+        return; // <-- do NOT back up, do NOT rotate, abort entirely
+      }
+    } catch (err) {
+      // If we cannot even read the file, definitely don't back it up
+      options.log?.warn?.(
+        `config backup REJECTED: could not read ${configPath} for validation — ${String(err)}`,
+      );
+      return;
+    }
+  }
+
   await rotateConfigBackups(configPath, ioFs);
   await ioFs.copyFile(configPath, `${configPath}.bak`).catch(() => {
     // best-effort

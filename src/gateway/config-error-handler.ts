@@ -10,6 +10,7 @@ import {
 } from "../config/config-status.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
+import { validateConfigObjectRaw } from "../config/validation.js";
 
 /**
  * Configuration error handler for hot reload safety.
@@ -250,6 +251,14 @@ async function rollbackToValidConfig(options: {
 /**
  * Find the most recent valid backup file.
  * Checks openclaw.json.bak, openclaw.json.bak.1, etc.
+ *
+ * **ROOT-CAUSE FIX**: Only JSON.parse is NOT enough — a backup file could contain
+ * structurally valid JSON that still fails the OpenClaw Zod schema (e.g. missing
+ * required fields, wrong types). Such a backup must NOT be used for rollback because
+ * restoring it would just replace one broken config with another.
+ *
+ * We now run `validateConfigObjectRaw()` (lightweight, no plugin loading) on each
+ * candidate. Only backups that pass full schema validation are considered.
  */
 async function findLatestValidBackup(configPath: string): Promise<string | undefined> {
   const candidates = [
@@ -263,13 +272,20 @@ async function findLatestValidBackup(configPath: string): Promise<string | undef
   for (const candidate of candidates) {
     try {
       if (fs.existsSync(candidate)) {
-        // Try to parse the backup to verify it's valid
         const content = await fs.promises.readFile(candidate, "utf-8");
-        JSON.parse(content); // Simple JSON validation
+        const parsed = JSON.parse(content);
+        // Full schema validation — not just JSON syntax
+        const result = validateConfigObjectRaw(parsed);
+        if (!result.ok) {
+          configLog.warn(
+            `backup ${candidate} rejected for rollback: schema validation failed (${result.issues.map(i => i.message).join(", ")})`,
+          );
+          continue; // skip this invalid backup
+        }
         return candidate;
       }
     } catch {
-      // Skip invalid backup, try the next one
+      // Skip unreadable / unparseable backup, try the next one
       continue;
     }
   }
