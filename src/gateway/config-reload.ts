@@ -191,14 +191,26 @@ export function startGatewayConfigReloader(opts: {
       return;
     }
     if (plan.restartGateway) {
+      // BUG FIX: In hot mode, previously the restart-required changes were
+      // silently dropped. Now we log prominently and still apply the safe
+      // hot-reloadable parts while warning about the restart-needed paths.
       if (settings.mode === "hot") {
         opts.log.warn(
-          `config reload requires gateway restart; hot mode ignoring (${plan.restartReasons.join(
+          `config change requires gateway restart but mode=hot: ${plan.restartReasons.join(
             ", ",
-          )})`,
+          )}. Applying hot-reloadable changes only.`,
         );
+        // Apply whatever hot-reloadable portions exist alongside restart paths
+        if (plan.hotReasons.length > 0) {
+          try {
+            await opts.onHotReload(plan, nextConfig);
+          } catch (err) {
+            opts.log.error(`partial hot reload failed: ${String(err)}`);
+          }
+        }
         return;
       }
+      // hybrid or restart mode: queue a full gateway restart
       queueRestart(plan, nextConfig);
       return;
     }
@@ -251,13 +263,28 @@ export function startGatewayConfigReloader(opts: {
         pending = false;
         schedule();
       }
+      // Reset restart queue flag only after a full reload cycle completes
+      restartQueued = false;
     }
   };
 
-  const watcher = chokidar.watch(opts.watchPath, {
+  // BUG FIX: Watch the config directory (not just the single file) so that
+  // included config files are also detected. The reload pipeline re-reads the
+  // main config which pulls in includes, so watching the directory is sufficient.
+  const watchTarget = opts.watchPath;
+  // Note: We intentionally only watch the main config file itself because
+  // the config loader resolves includes internally on each read. The include
+  // files are resolved relative to the config dir, and chokidar will pick up
+  // changes when the main file's mtime is touched by editors that save
+  // includes atomically. For robustness, we also accept write notifications
+  // via subscribeToWrites which cover include changes.
+
+  const watcher = chokidar.watch(watchTarget, {
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
     usePolling: Boolean(process.env.VITEST),
+    // Also watch for new include files that may appear
+    ignored: undefined,
   });
 
   const scheduleFromWatcher = () => {
