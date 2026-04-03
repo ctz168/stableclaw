@@ -104,7 +104,7 @@ $ openclaw gateway run
 
 ```bash
 # 安装插件（立即生效）
-$ openclaw plugin install my-plugin
+$ stableclaw plugin install my-plugin
 Downloading my-plugin…
 Installing to /path/to/extensions/my-plugin…
 Plugin my-plugin hot-reloaded successfully
@@ -325,14 +325,14 @@ pnpm install
 pnpm build
 
 # 启动 gateway
-pnpm openclaw gateway run
+pnpm stableclaw gateway run
 ```
 
 ### 配置向导
 
 ```bash
 # 运行配置向导
-pnpm openclaw onboard --install-daemon
+pnpm stableclaw onboard --install-daemon
 ```
 
 ---

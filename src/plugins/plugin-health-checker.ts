@@ -29,7 +29,7 @@ export class PluginHealthChecker {
 
   constructor(config?: Partial<PluginHealthCheckerConfig>) {
     this.config = {
-      checkIntervalMs: config?.checkIntervalMs ?? 60_000, // 1 minute
+      checkIntervalMs: config?.checkIntervalMs ?? 10_000, // 10 seconds (was 1 minute)
       maxConsecutiveErrors: config?.maxConsecutiveErrors ?? 3,
       autoRecoveryEnabled: config?.autoRecoveryEnabled ?? true,
     };

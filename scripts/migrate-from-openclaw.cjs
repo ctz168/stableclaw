@@ -22,7 +22,6 @@
  *   --skip-memory        Skip memory migration
  *   --skip-tasks         Skip tasks migration
  *   --force              Force migration even if StableClaw exists
- *   --create-backup      Create backup of existing StableClaw data
  *   --openclaw-dir       Manually specify OpenClaw directory
  *   --help               Show this help message
  */
@@ -214,7 +213,6 @@ function parseArgs() {
     skipMemory: false,
     skipTasks: false,
     force: false,
-    createBackup: false,
     openclawDir: null,
     help: false,
   };
@@ -228,7 +226,6 @@ function parseArgs() {
     else if (arg === '--skip-memory') options.skipMemory = true;
     else if (arg === '--skip-tasks') options.skipTasks = true;
     else if (arg === '--force') options.force = true;
-    else if (arg === '--create-backup') options.createBackup = true;
     else if (arg === '--openclaw-dir' && i + 1 < args.length) {
       options.openclawDir = args[++i];
     }
@@ -256,15 +253,14 @@ ${colors.bright}Options:${colors.reset}
   --skip-memory        Skip memory migration
   --skip-tasks         Skip tasks migration
   --force              Force migration even if StableClaw exists
-  --create-backup      Create backup of existing StableClaw data
   --help, -h           Show this help message
 
 ${colors.bright}Examples:${colors.reset}
   # Preview migration
   node migrate-from-openclaw.js --dry-run
 
-  # Full migration with backup
-  node migrate-from-openclaw.js --create-backup
+  # Full migration
+  node migrate-from-openclaw.js --force
 
   # Migrate only config and credentials
   node migrate-from-openclaw.js --skip-plugins --skip-logs --skip-memory --skip-tasks
@@ -305,9 +301,9 @@ async function copyFile(source, target, options) {
       return { ok: false, error: `Source not found: ${source}` };
     }
 
-    if (fs.existsSync(target) && options.createBackup) {
-      const backupPath = `${target}.backup-${Date.now()}`;
-      fs.copyFileSync(target, backupPath);
+    // Delete target if exists (no backup)
+    if (fs.existsSync(target)) {
+      fs.unlinkSync(target);
     }
 
     const targetDir = path.dirname(target);
@@ -326,9 +322,9 @@ async function copyDirectory(source, target, options) {
       return { ok: false, error: `Source not found: ${source}` };
     }
 
-    if (fs.existsSync(target) && options.createBackup) {
-      const backupPath = `${target}.backup-${Date.now()}`;
-      fs.cpSync(source, backupPath, { recursive: true });
+    // Delete target directory if exists (no backup)
+    if (fs.existsSync(target)) {
+      fs.rmSync(target, { recursive: true, force: true });
     }
 
     fs.mkdirSync(target, { recursive: true });

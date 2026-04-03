@@ -35,7 +35,7 @@ export { getCachedGatewayModelPricing };
 
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const CACHE_TTL_MS = 24 * 60 * 60_000;
-const FETCH_TIMEOUT_MS = 15_000;
+const FETCH_TIMEOUT_MS = 5_000; // Reduced from 15s to 5s for faster failure
 const PROVIDER_ALIAS_TO_OPENROUTER: Record<string, string> = {
   "google-gemini-cli": "google",
   kimi: "moonshotai",
@@ -440,9 +440,12 @@ export function startGatewayModelPricingRefresh(params: {
   config: OpenClawConfig;
   fetchImpl?: typeof fetch;
 }): () => void {
-  void refreshGatewayModelPricingCache(params).catch((error: unknown) => {
-    log.warn(`pricing bootstrap failed: ${String(error)}`);
-  });
+  // Fire-and-forget in background; don't block startup
+  setTimeout(() => {
+    void refreshGatewayModelPricingCache(params).catch((error: unknown) => {
+      log.warn(`pricing bootstrap failed: ${String(error)}`);
+    });
+  }, 0);
   return () => {
     clearRefreshTimer();
   };

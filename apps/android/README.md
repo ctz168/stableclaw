@@ -140,7 +140,7 @@ Use `adb reverse` so Android `localhost:18789` tunnels to your laptop `localhost
 Terminal A (gateway):
 
 ```bash
-pnpm openclaw gateway --port 18789 --verbose
+pnpm stableclaw gateway --port 18789 --verbose
 ```
 
 Terminal B (USB tunnel):

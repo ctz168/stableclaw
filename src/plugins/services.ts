@@ -1,6 +1,7 @@
 import type { OpenClawConfig } from "../config/config.js";
 import { STATE_DIR } from "../config/paths.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
+import { recordPluginError, disablePlugin } from "./plugin-error-handler.js";
 import type { PluginRegistry } from "./registry.js";
 import type { OpenClawPluginServiceContext, PluginLogger } from "./types.js";
 
@@ -55,9 +56,22 @@ export async function startPluginServices(params: {
     } catch (err) {
       const error = err as Error;
       const stack = error?.stack?.trim();
+      const errorMsg = error?.message ?? String(err);
+      
       log.error(
-        `plugin service failed (${service.id}, plugin=${entry.pluginId}, root=${entry.rootDir ?? "unknown"}): ${error?.message ?? String(err)}${stack ? `\n${stack}` : ""}`,
+        `plugin service failed (${service.id}, plugin=${entry.pluginId}, root=${entry.rootDir ?? "unknown"}): ${errorMsg}${stack ? `\n${stack}` : ""}`,
       );
+      
+      // Record error and disable plugin
+      recordPluginError({
+        pluginId: entry.pluginId,
+        type: "runtime",
+        severity: "error",
+        message: `Service ${service.id} startup failed: ${errorMsg}`,
+        error: error instanceof Error ? error : new Error(errorMsg),
+      });
+      
+      disablePlugin(entry.pluginId, `Service ${service.id} startup failed: ${errorMsg}`);
     }
   }
 

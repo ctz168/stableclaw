@@ -4,7 +4,16 @@
  */
 
 import { logDebug, logWarn } from "../logger.js";
-import { detectPlatform, type Platform } from "./platform.js";
+
+type Platform = "win32" | "darwin" | "linux" | "other";
+
+function detectPlatform(): Platform {
+  const platform = process.platform;
+  if (platform === "win32" || platform === "darwin" || platform === "linux") {
+    return platform;
+  }
+  return "other";
+}
 
 /**
  * Clear mDNS/DNS cache to remove stale service entries.

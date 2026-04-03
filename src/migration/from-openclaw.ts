@@ -22,7 +22,6 @@ export type MigrationResult = {
   migratedItems: string[];
   warnings: string[];
   errors: string[];
-  backupPath?: string;
 };
 
 export type MigrationOptions = {
@@ -34,7 +33,6 @@ export type MigrationOptions = {
   skipMemory?: boolean;
   skipTasks?: boolean;
   force?: boolean;
-  createBackup?: boolean;
   openclawDir?: string; // Optional: manually specified OpenClaw directory
 };
 
@@ -195,10 +193,9 @@ async function copyFileWithBackup(
       return { ok: false, error: `Source file not found: ${source}` };
     }
 
-    // Create backup if target exists
-    if (fs.existsSync(target) && options.createBackup) {
-      const backupPath = `${target}.backup-${Date.now()}`;
-      await fs.promises.copyFile(target, backupPath);
+    // Delete target if exists (no backup)
+    if (fs.existsSync(target)) {
+      await fs.promises.unlink(target);
     }
 
     // Create target directory
@@ -224,10 +221,9 @@ async function copyDirectoryWithBackup(
       return { ok: false, error: `Source directory not found: ${source}` };
     }
 
-    // Create backup if target exists
-    if (fs.existsSync(target) && options.createBackup) {
-      const backupPath = `${target}.backup-${Date.now()}`;
-      await fs.promises.cp(source, backupPath, { recursive: true });
+    // Delete target directory if exists (no backup)
+    if (fs.existsSync(target)) {
+      await fs.promises.rm(target, { recursive: true, force: true });
     }
 
     // Create target directory

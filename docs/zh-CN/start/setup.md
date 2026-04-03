@@ -45,20 +45,20 @@ openclaw setup
 在此仓库内部，使用本地 CLI 入口：
 
 ```bash
-openclaw setup
+stableclaw setup
 ```
 
-如果你还没有全局安装，通过 `pnpm openclaw setup` 运行它。
+如果你还没有全局安装，通过 `pnpm stableclaw setup` 运行它。
 
 ## 稳定工作流（macOS 应用优先）
 
-1. 安装并启动 **OpenClaw.app**（菜单栏）。
+1. 安装并启动 **StableClaw.app**（菜单栏）。
 2. 完成新手引导/权限检查清单（TCC 提示）。
 3. 确保 Gateway 网关是**本地**并正在运行（应用管理它）。
 4. 链接表面（示例：WhatsApp）：
 
 ```bash
-openclaw channels login
+stableclaw channels login
 ```
 
 5. 完整性检查：

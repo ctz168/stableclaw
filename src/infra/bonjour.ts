@@ -65,9 +65,9 @@ type ServiceStateTracker = {
 
 type ConsoleLogFn = (...args: unknown[]) => void;
 
-const WATCHDOG_INTERVAL_MS = 5_000;
+const WATCHDOG_INTERVAL_MS = 10_000; // Increased from 5s to reduce CPU usage
 const REPAIR_DEBOUNCE_MS = 30_000;
-const STUCK_ANNOUNCING_MS = 8_000;
+const STUCK_ANNOUNCING_MS = 15_000; // Increased from 8s to allow more time for announcing
 const CIAO_SELF_PROBE_RETRY_FRAGMENT =
   "failed probing with reason: Error: Can't probe for a service which is announced already.";
 

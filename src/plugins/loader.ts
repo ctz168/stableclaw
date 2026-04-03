@@ -134,6 +134,56 @@ type CachedPluginState = {
 const MAX_PLUGIN_REGISTRY_CACHE_ENTRIES = 128;
 let pluginRegistryCacheEntryCap = MAX_PLUGIN_REGISTRY_CACHE_ENTRIES;
 const registryCache = new Map<string, CachedPluginState>();
+
+// Persist allowlist warning cache across reloads to avoid spamming logs
+const PERSISTENT_WARNING_CACHE_FILE = "plugin-allowlist-warnings.json";
+let persistentWarningCache: Set<string> | null = null;
+
+function getPersistentWarningCache(env: NodeJS.ProcessEnv = process.env): Set<string> {
+  if (persistentWarningCache !== null) {
+    return persistentWarningCache;
+  }
+  
+  try {
+    const stateDir = env.OPENCLAW_STATE_DIR?.trim() || 
+      (process.platform === "win32" 
+        ? path.join(env.USERPROFILE || env.HOME || "", ".openclaw")
+        : path.join(env.HOME || "", ".openclaw"));
+    
+    const cachePath = path.join(stateDir, PERSISTENT_WARNING_CACHE_FILE);
+    
+    if (fs.existsSync(cachePath)) {
+      const content = fs.readFileSync(cachePath, "utf-8");
+      const data = JSON.parse(content);
+      persistentWarningCache = new Set(Array.isArray(data) ? data : []);
+    } else {
+      persistentWarningCache = new Set();
+    }
+  } catch {
+    persistentWarningCache = new Set();
+  }
+  
+  return persistentWarningCache;
+}
+
+function savePersistentWarningCache(cache: Set<string>, env: NodeJS.ProcessEnv = process.env): void {
+  try {
+    const stateDir = env.OPENCLAW_STATE_DIR?.trim() || 
+      (process.platform === "win32" 
+        ? path.join(env.USERPROFILE || env.HOME || "", ".openclaw")
+        : path.join(env.HOME || "", ".openclaw"));
+    
+    if (!fs.existsSync(stateDir)) {
+      fs.mkdirSync(stateDir, { recursive: true });
+    }
+    
+    const cachePath = path.join(stateDir, PERSISTENT_WARNING_CACHE_FILE);
+    fs.writeFileSync(cachePath, JSON.stringify([...cache], null, 2), "utf-8");
+  } catch {
+    // Ignore errors
+  }
+}
+
 const openAllowlistWarningCache = new Set<string>();
 const LAZY_RUNTIME_REFLECTION_KEYS = [
   "version",
@@ -865,6 +915,7 @@ function warnWhenAllowlistIsOpen(params: {
   allow: string[];
   warningCacheKey: string;
   discoverablePlugins: Array<{ id: string; source: string; origin: PluginRecord["origin"] }>;
+  env?: NodeJS.ProcessEnv;
 }) {
   if (!params.pluginsEnabled) {
     return;
@@ -878,15 +929,24 @@ function warnWhenAllowlistIsOpen(params: {
   if (autoDiscoverable.length === 0) {
     return;
   }
-  if (openAllowlistWarningCache.has(params.warningCacheKey)) {
+  
+  // Use persistent cache to avoid repeating warnings
+  const cache = getPersistentWarningCache(params.env);
+  if (cache.has(params.warningCacheKey)) {
     return;
   }
+  
   const preview = autoDiscoverable
     .slice(0, 6)
     .map((entry) => `${entry.id} (${entry.source})`)
     .join(", ");
   const extra = autoDiscoverable.length > 6 ? ` (+${autoDiscoverable.length - 6} more)` : "";
+  
+  // Add to cache and persist
+  cache.add(params.warningCacheKey);
   openAllowlistWarningCache.add(params.warningCacheKey);
+  savePersistentWarningCache(cache, params.env);
+  
   params.logger.warn(
     `[plugins] plugins.allow is empty; discovered non-bundled plugins may auto-load: ${preview}${extra}. Set plugins.allow to explicit trusted ids.`,
   );
@@ -1093,6 +1153,7 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
     pluginsEnabled: normalized.enabled,
     allow: normalized.allow,
     warningCacheKey: cacheKey,
+    env,
     // Keep warning input scoped as well so partial snapshot loads only mention the
     // plugins that were intentionally requested for this registry.
     discoverablePlugins: manifestRegistry.plugins
@@ -1649,6 +1710,7 @@ export async function loadOpenClawPluginCliRegistry(
     pluginsEnabled: normalized.enabled,
     allow: normalized.allow,
     warningCacheKey: `${cacheKey}::cli-metadata`,
+    env,
     discoverablePlugins: manifestRegistry.plugins
       .filter((plugin) => !onlyPluginIdSet || onlyPluginIdSet.has(plugin.id))
       .map((plugin) => ({

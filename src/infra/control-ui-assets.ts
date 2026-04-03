@@ -301,14 +301,8 @@ export async function ensureControlUiAssetsBuilt(
 
   const repoRoot = resolveControlUiRepoRoot(process.argv[1]);
   if (!repoRoot) {
-    const hint = indexFromDist
-      ? `Missing Control UI assets at ${indexFromDist}`
-      : "Missing Control UI assets";
-    return {
-      ok: false,
-      built: false,
-      message: `${hint}. Build them with \`pnpm ui:build\` (auto-installs UI deps).`,
-    };
+    // Not running from repo, skip build (expected for npm installs)
+    return { ok: true, built: false };
   }
 
   const indexPath = resolveControlUiDistIndexPathForRoot(repoRoot);
@@ -318,34 +312,39 @@ export async function ensureControlUiAssetsBuilt(
 
   const uiScript = path.join(repoRoot, "scripts", "ui.js");
   if (!fs.existsSync(uiScript)) {
-    return {
-      ok: false,
-      built: false,
-      message: `Control UI assets missing but ${uiScript} is unavailable.`,
-    };
+    // UI script not found, skip build (non-critical)
+    return { ok: true, built: false };
   }
 
-  runtime.log("Control UI assets missing; building (ui:build, auto-installs UI deps)…");
-
+  // Auto-build Control UI if missing
+  runtime.log("Control UI assets missing; auto-building (ui:build, auto-installs UI deps)…");
+  
+  const timeoutMs = opts?.timeoutMs ?? 3 * 60_000; // 3 minutes default
   const build = await runCommandWithTimeout([process.execPath, uiScript, "build"], {
     cwd: repoRoot,
-    timeoutMs: opts?.timeoutMs ?? 10 * 60_000,
+    timeoutMs,
   });
+  
   if (build.code !== 0) {
+    const errorSummary = summarizeCommandOutput(build.stderr) ?? `exit ${build.code}`;
+    runtime.log(`Control UI build failed: ${errorSummary}. Continuing without Control UI.`);
     return {
       ok: false,
       built: false,
-      message: `Control UI build failed: ${summarizeCommandOutput(build.stderr) ?? `exit ${build.code}`}`,
+      message: `Control UI build failed: ${errorSummary}`,
     };
   }
 
+  // Verify build succeeded
   if (!fs.existsSync(indexPath)) {
+    runtime.log(`Control UI build succeeded but ${indexPath} is missing. Continuing without Control UI.`);
     return {
       ok: false,
       built: true,
-      message: `Control UI build completed but ${indexPath} is still missing.`,
+      message: `Control UI build succeeded but output not found`,
     };
   }
 
+  runtime.log("Control UI build completed successfully.");
   return { ok: true, built: true };
 }

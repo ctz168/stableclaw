@@ -13,6 +13,13 @@ import {
   type PackageManifest,
 } from "./manifest.js";
 import { formatPosixMode, isPathInside, safeRealpathSync, safeStatSync } from "./path-safety.js";
+import {
+  loadPersistentCache,
+  savePersistentCache,
+  isCacheValid,
+  cachedCandidatesToResult,
+  clearPersistentCache,
+} from "./persistent-cache.js";
 import { resolvePluginCacheInputs, resolvePluginSourceRoots } from "./roots.js";
 import type { PluginBundleFormat, PluginDiagnostic, PluginFormat, PluginOrigin } from "./types.js";
 
@@ -44,10 +51,13 @@ export type PluginDiscoveryResult = {
 const discoveryCache = new Map<string, { expiresAt: number; result: PluginDiscoveryResult }>();
 
 // Keep a short cache window to collapse bursty reloads during startup flows.
-const DEFAULT_DISCOVERY_CACHE_MS = 1000;
+// Increased from 1s to 10s to reduce repeated scans during startup
+const DEFAULT_DISCOVERY_CACHE_MS = 10_000;
 
 export function clearPluginDiscoveryCache(): void {
   discoveryCache.clear();
+  // Also clear persistent cache
+  clearPersistentCache(process.env);
 }
 
 function resolveDiscoveryCacheMs(env: NodeJS.ProcessEnv): number {
@@ -553,8 +563,13 @@ function discoverInDirectory(params: {
   diagnostics: PluginDiagnostic[];
   seen: Set<string>;
   skipDirectories?: Set<string>;
+  failFast?: boolean;
 }) {
   if (!fs.existsSync(params.dir)) {
+    return;
+  }
+  // Check for previous errors if failFast is enabled
+  if (params.failFast && params.diagnostics.some(d => d.level === "error")) {
     return;
   }
   let entries: fs.Dirent[] = [];
@@ -693,6 +708,7 @@ function discoverFromPath(params: {
   candidates: PluginCandidate[];
   diagnostics: PluginDiagnostic[];
   seen: Set<string>;
+  failFast?: boolean;
 }) {
   const resolved = resolveUserPath(params.rawPath, params.env);
   if (!fs.existsSync(resolved)) {
@@ -835,9 +851,24 @@ export function discoverOpenClawPlugins(params: {
   ownershipUid?: number | null;
   cache?: boolean;
   env?: NodeJS.ProcessEnv;
+  failFast?: boolean; // Stop on first error
 }): PluginDiscoveryResult {
   const env = params.env ?? process.env;
   const cacheEnabled = params.cache !== false && shouldUseDiscoveryCache(env);
+  const workspaceDir = params.workspaceDir?.trim();
+  const workspaceRoot = workspaceDir ? resolveUserPath(workspaceDir, env) : undefined;
+  const roots = resolvePluginSourceRoots({ workspaceDir: workspaceRoot, env });
+
+  // Try to load from persistent cache first
+  if (cacheEnabled) {
+    const persistentCache = loadPersistentCache(env);
+    if (persistentCache && isCacheValid(persistentCache, roots)) {
+      // Cache hit! Return cached results immediately
+      return cachedCandidatesToResult(persistentCache);
+    }
+  }
+
+  // Cache miss or disabled - perform full discovery
   const cacheKey = buildDiscoveryCacheKey({
     workspaceDir: params.workspaceDir,
     extraPaths: params.extraPaths,
@@ -854,9 +885,6 @@ export function discoverOpenClawPlugins(params: {
   const candidates: PluginCandidate[] = [];
   const diagnostics: PluginDiagnostic[] = [];
   const seen = new Set<string>();
-  const workspaceDir = params.workspaceDir?.trim();
-  const workspaceRoot = workspaceDir ? resolveUserPath(workspaceDir, env) : undefined;
-  const roots = resolvePluginSourceRoots({ workspaceDir: workspaceRoot, env });
 
   const extra = params.extraPaths ?? [];
   for (const extraPath of extra) {
@@ -876,7 +904,12 @@ export function discoverOpenClawPlugins(params: {
       candidates,
       diagnostics,
       seen,
+      failFast: params.failFast,
     });
+    // Check for errors and stop if failFast is enabled
+    if (params.failFast && diagnostics.some(d => d.level === "error")) {
+      return { candidates, diagnostics };
+    }
   }
   if (roots.workspace && workspaceRoot) {
     discoverInDirectory({
@@ -887,7 +920,11 @@ export function discoverOpenClawPlugins(params: {
       candidates,
       diagnostics,
       seen,
+      failFast: params.failFast,
     });
+    if (params.failFast && diagnostics.some(d => d.level === "error")) {
+      return { candidates, diagnostics };
+    }
   }
 
   if (roots.stock) {
@@ -898,7 +935,11 @@ export function discoverOpenClawPlugins(params: {
       candidates,
       diagnostics,
       seen,
+      failFast: params.failFast,
     });
+    if (params.failFast && diagnostics.some(d => d.level === "error")) {
+      return { candidates, diagnostics };
+    }
   }
 
   // Keep auto-discovered global extensions behind bundled plugins.
@@ -910,14 +951,19 @@ export function discoverOpenClawPlugins(params: {
     candidates,
     diagnostics,
     seen,
+    failFast: params.failFast,
   });
 
   const result = { candidates, diagnostics };
+  
+  // Save to both in-memory cache and persistent cache
   if (cacheEnabled) {
     const ttl = resolveDiscoveryCacheMs(env);
     if (ttl > 0) {
       discoveryCache.set(cacheKey, { expiresAt: Date.now() + ttl, result });
     }
+    // Save to persistent cache for fast startup
+    savePersistentCache(result, roots, env);
   }
   return result;
 }

@@ -66,17 +66,17 @@ cd openclaw
 pnpm install
 pnpm ui:build # 首次运行时会自动安装 UI 依赖
 pnpm build
-openclaw onboard --install-daemon
+stableclaw onboard --install-daemon
 ```
 
-如果你还没有全局安装，可以在仓库目录中通过 `pnpm openclaw ...` 运行新手引导。
+如果你还没有全局安装，可以在仓库目录中通过 `pnpm stableclaw ...` 运行新手引导。
 
 ## 多实例快速开始（可选）
 
 ```bash
-OPENCLAW_CONFIG_PATH=~/.openclaw/a.json \
-OPENCLAW_STATE_DIR=~/.openclaw-a \
-openclaw gateway --port 19001
+OPENCLAW_CONFIG_PATH=~/.stableclaw/a.json \
+OPENCLAW_STATE_DIR=~/.stableclaw-a \
+stableclaw gateway --port 19001
 ```
 
 ## 发送测试消息

@@ -15,7 +15,6 @@ export type MigrateOptions = {
   skipMemory?: boolean;
   skipTasks?: boolean;
   force?: boolean;
-  createBackup?: boolean;
   openclawDir?: string;
 };
 
@@ -47,7 +46,6 @@ export function registerMigrateCli(program: Command) {
     .option("--skip-memory", "Skip memory migration", false)
     .option("--skip-tasks", "Skip tasks migration", false)
     .option("--force", "Force migration even if StableClaw already exists", false)
-    .option("--create-backup", "Create backup of existing StableClaw data", false)
     .option("--openclaw-dir <path>", "Manually specify OpenClaw configuration directory")
     .action(async (opts: MigrateOptions) => {
       try {
@@ -104,7 +102,6 @@ export function registerMigrateCli(program: Command) {
           skipMemory: opts.skipMemory,
           skipTasks: opts.skipTasks,
           force: opts.force,
-          createBackup: opts.createBackup,
           openclawDir: opts.openclawDir,
         };
 
