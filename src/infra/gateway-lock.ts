@@ -14,6 +14,8 @@ const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_POLL_INTERVAL_MS = 100;
 const DEFAULT_STALE_MS = 30_000;
 const DEFAULT_PORT_PROBE_TIMEOUT_MS = 1000;
+// For strict singleton mode: fail immediately if another instance is running
+const STRICT_SINGLETON_TIMEOUT_MS = 0;
 
 type LockPayload = {
   pid: number;
@@ -235,6 +237,14 @@ async function readLockPayload(lockPath: string): Promise<LockPayload | null> {
   }
 }
 
+/**
+ * Resolve the global singleton lock path.
+ * This lock enforces strict single-instance mode regardless of configuration.
+ */
+function resolveGlobalGatewayLockPath(lockDir = resolveGatewayLockDir()) {
+  return path.join(lockDir, "gateway.global.lock");
+}
+
 function resolveGatewayLockPath(env: NodeJS.ProcessEnv, lockDir = resolveGatewayLockDir()) {
   const stateDir = resolveStateDir(env);
   const configPath = resolveConfigPath(env, stateDir);
@@ -263,10 +273,56 @@ export async function acquireGatewayLock(
   const now = opts.now ?? Date.now;
   const sleep =
     opts.sleep ?? (async (ms: number) => await new Promise((resolve) => setTimeout(resolve, ms)));
+  
+  // Step 1: Acquire global singleton lock (strict single-instance enforcement)
+  const globalLockPath = resolveGlobalGatewayLockPath(opts.lockDir);
+  await fs.mkdir(path.dirname(globalLockPath), { recursive: true });
+  
+  const startedAt = now();
+  let globalLockHandle: fsSync.FileHandle | null = null;
+  let lastGlobalPayload: LockPayload | null = null;
+  
+  // Try to acquire global lock with immediate failure
+  while (now() - startedAt < 100) { // 100ms window for global lock
+    try {
+      globalLockHandle = await fs.open(globalLockPath, "wx");
+      break;
+    } catch (err) {
+      const code = (err as { code?: unknown }).code;
+      if (code !== "EEXIST") {
+        throw new GatewayLockError(`failed to acquire global gateway lock at ${globalLockPath}`, err);
+      }
+      
+      // Check if the global lock owner is still alive
+      lastGlobalPayload = await readLockPayload(globalLockPath);
+      const ownerPid = lastGlobalPayload?.pid;
+      const ownerStatus = ownerPid
+        ? await resolveGatewayOwnerStatus(ownerPid, lastGlobalPayload, platform, port, opts.readProcessCmdline)
+        : "unknown";
+      
+      if (ownerStatus === "dead" && ownerPid) {
+        await fs.rm(globalLockPath, { force: true });
+        continue;
+      }
+      
+      // Another gateway is running - fail immediately
+      const owner = ownerPid ? ` (pid ${ownerPid})` : "";
+      throw new GatewayLockError(
+        `gateway already running${owner}. Use 'openclaw gateway stop' to stop it before starting a new instance.`,
+      );
+    }
+  }
+  
+  if (!globalLockHandle) {
+    throw new GatewayLockError(
+      `failed to acquire global gateway lock at ${globalLockPath}`,
+    );
+  }
+  
+  // Step 2: Acquire config-specific lock
   const { lockPath, configPath } = resolveGatewayLockPath(env, opts.lockDir);
   await fs.mkdir(path.dirname(lockPath), { recursive: true });
 
-  const startedAt = now();
   let lastPayload: LockPayload | null = null;
 
   while (now() - startedAt < timeoutMs) {
@@ -282,17 +338,34 @@ export async function acquireGatewayLock(
         payload.startTime = startTime;
       }
       await handle.writeFile(JSON.stringify(payload), "utf8");
+      
+      // Write global lock payload
+      const globalPayload: LockPayload = {
+        pid: process.pid,
+        createdAt: new Date(now()).toISOString(),
+        configPath,
+      };
+      if (typeof startTime === "number" && Number.isFinite(startTime)) {
+        globalPayload.startTime = startTime;
+      }
+      await globalLockHandle.writeFile(JSON.stringify(globalPayload), "utf8");
+      
       return {
         lockPath,
         configPath,
         release: async () => {
           await handle.close().catch(() => undefined);
+          await globalLockHandle?.close().catch(() => undefined);
           await fs.rm(lockPath, { force: true });
+          await fs.rm(globalLockPath, { force: true });
         },
       };
     } catch (err) {
       const code = (err as { code?: unknown }).code;
       if (code !== "EEXIST") {
+        // Clean up global lock on config lock failure
+        await globalLockHandle?.close().catch(() => undefined);
+        await fs.rm(globalLockPath, { force: true });
         throw new GatewayLockError(`failed to acquire gateway lock at ${lockPath}`, err);
       }
 
@@ -333,6 +406,10 @@ export async function acquireGatewayLock(
     }
   }
 
+  // Clean up global lock on timeout
+  await globalLockHandle?.close().catch(() => undefined);
+  await fs.rm(globalLockPath, { force: true });
+  
   const owner = lastPayload?.pid ? ` (pid ${lastPayload.pid})` : "";
   throw new GatewayLockError(`gateway already running${owner}; lock timeout after ${timeoutMs}ms`);
 }

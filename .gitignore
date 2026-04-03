@@ -40,3 +40,6 @@ coverage
 
 # Config status files (runtime state)
 .config-status.json
+
+# Gateway lock files (runtime state)
+gateway.*.lock
