@@ -232,6 +232,11 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
 
   gatewayLog.info("loading configuration…");
   
+  // Setup global plugin error handlers
+  const { setupGlobalPluginErrorHandlers } = await import("../../plugins/plugin-error-boundary.js");
+  setupGlobalPluginErrorHandlers();
+  gatewayLog.info("plugin error handlers initialized");
+  
   // Check if the last configuration was invalid
   if (wasLastConfigInvalid()) {
     const status = getConfigStatus();

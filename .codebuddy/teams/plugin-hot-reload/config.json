@@ -1,0 +1,33 @@
+{
+  "name": "plugin-hot-reload",
+  "leadAgentId": "427d29efcf934f469e53efefaf41606b",
+  "workspacePath": "c:/Users/Administrator/Desktop/stableclaw",
+  "createdAt": "2026-04-03T09:16:46.341Z",
+  "options": {
+    "workspacePath": "c:/Users/Administrator/Desktop/stableclaw",
+    "isAutoTeam": false
+  },
+  "members": [
+    {
+      "memberId": "team-lead@plugin-hot-reload",
+      "name": "team-lead",
+      "role": "Team Lead - coordinates the team and interacts with the user"
+    },
+    {
+      "memberId": "planner@plugin-hot-reload",
+      "name": "planner",
+      "role": "计划组织agent - 规划插件热重载实现"
+    },
+    {
+      "memberId": "tester@plugin-hot-reload",
+      "name": "tester",
+      "role": "测试agent - 验证插件热重载功能"
+    },
+    {
+      "memberId": "coder@plugin-hot-reload",
+      "name": "coder",
+      "role": "编码agent - 实现插件热重载功能"
+    }
+  ],
+  "isAutoTeam": false
+}
