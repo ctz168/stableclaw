@@ -33,12 +33,14 @@
 **问题：** OpenClaw 原版在配置文件修改后，如果配置无效会导致 gateway 崩溃或拒绝启动。
 
 **StableClaw 解决方案：**
+
 - ✅ **配置状态持久化** - 跟踪配置有效性状态，维护最后有效配置快照
 - ✅ **自动回滚机制** - 配置无效时自动回滚到上一个有效配置
 - ✅ **详细错误诊断** - 提供智能修复建议和错误位置定位
 - ✅ **零停机配置更新** - 配置错误不影响 gateway 运行
 
 **使用示例：**
+
 ```bash
 # 修改配置文件（即使出错也不影响运行）
 $ vim ~/.openclaw/config.json
@@ -57,12 +59,14 @@ $ vim ~/.openclaw/config.json
 **问题：** OpenClaw 原版可能启动多个 gateway 实例，导致端口冲突、资源浪费和状态混乱。
 
 **StableClaw 解决方案：**
+
 - ✅ **全局单例锁** - `gateway.global.lock` 强制严格单例
 - ✅ **立即失败模式** - 已有实例时立即拒绝，不等待
 - ✅ **清晰错误提示** - 告知用户如何停止现有实例
 - ✅ **进程状态检查** - 自动检测和处理僵尸进程
 
 **使用示例：**
+
 ```bash
 # 第一次启动
 $ openclaw gateway run
@@ -81,17 +85,20 @@ $ openclaw gateway run
 **问题：** OpenClaw 原版安装/卸载插件需要重启 gateway，插件错误可能导致 gateway 崩溃。
 
 **StableClaw 解决方案：**
+
 - ✅ **插件安装热重载** - 安装插件后自动加载，无需重启 gateway
 - ✅ **插件卸载热卸载** - 卸载插件前自动清理，无需重启 gateway
 - ✅ **插件错误隔离** - 插件错误自动禁用，不影响 gateway 运行
 - ✅ **健康监控机制** - 定期检查插件健康状态，自动恢复临时性问题
 
 **技术实现：**
+
 - **热重载管理器** (`plugin-hot-reload.ts`) - 管理插件加载、卸载、重载
 - **健康检查器** (`plugin-health-checker.ts`) - 定期健康检查和自动恢复
 - **错误边界** (`plugin-error-boundary.ts`) - 捕获所有插件错误并隔离
 
 **使用示例：**
+
 ```bash
 # 安装插件（立即生效）
 $ openclaw plugin install my-plugin
@@ -113,6 +120,7 @@ Plugin my-plugin hot-reloaded successfully
 **问题：** OpenClaw 原版在遇到错误时可能直接崩溃或停止服务。
 
 **StableClaw 解决方案：**
+
 - ✅ **全局错误捕获** - 捕获未处理的异常和 Promise 拒绝
 - ✅ **自动错误隔离** - 将错误限制在最小范围内
 - ✅ **详细错误日志** - 记录完整的错误上下文和堆栈
@@ -123,12 +131,14 @@ Plugin my-plugin hot-reloaded successfully
 ### 5. 📊 健康监控和自动化运维
 
 **特色功能：**
+
 - ✅ **插件健康检查** - 定期检查插件状态（默认 1 分钟）
 - ✅ **自动恢复机制** - 尝试恢复降级的插件
 - ✅ **健康状态报告** - 提供插件健康状态查询接口
 - ✅ **连续错误检测** - 自动禁用持续失败的插件
 
 **监控日志示例：**
+
 ```
 [plugin-health] Starting plugin health checker (interval: 60000ms)
 [plugin-health] Checking health of plugin my-plugin (status: degraded)
@@ -147,18 +157,21 @@ Plugin my-plugin hot-reloaded successfully
 #### 迁移步骤（推荐）
 
 **步骤 1：启动 OpenClaw**
+
 ```bash
 # 先启动 OpenClaw（让迁移工具自动检测）
 openclaw gateway run
 ```
 
 **步骤 2：执行迁移**
+
 ```bash
 # 自动检测运行中的 OpenClaw 并迁移
 stableclaw migrate from-openclaw --create-backup
 ```
 
 **步骤 3：验证迁移**
+
 ```bash
 # 检查迁移状态
 stableclaw migrate status
@@ -201,44 +214,52 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 #### 自动检测机制
 
 迁移工具会自动：
+
 1. ✅ **检测运行中的 OpenClaw 进程**
 2. ✅ **提取配置目录路径**（从运行进程）
 3. ✅ **迁移所有数据**（配置、插件、凭证、数据）
 4. ✅ **生成详细报告**
 
 如果 OpenClaw 未运行，迁移工具会：
+
 - 搜索常见配置目录位置
 - 提示用户启动 OpenClaw 或手动指定路径
 
 #### 迁移内容
 
 **核心数据：**
+
 - ✅ **配置文件**：`openclaw.json` → `stableclaw.json`
 - ✅ **插件目录**：`extensions/` (所有已安装的插件)
 - ✅ **凭证密钥**：`credentials/` (API 密钥、令牌)
 
 **重要数据：**
+
 - ✅ **身份认证**：`identity/` (设备认证、身份信息) ⭐ **重要**
 - ✅ **配置备份**：`backups/` (历史配置备份)
 - ✅ **微信数据**：`openclaw-weixin/` (微信账户信息) ⭐ **重要**
 - ✅ **执行审批**：`exec-approvals.json` (执行权限设置)
 
 **运行数据：**
+
 - ✅ **记忆数据**：`memory/` (对话记忆、上下文) ⭐ **重要**
 - ✅ **任务数据**：`tasks/` (定时任务、后台任务)
 - ✅ **代理配置**：`agents/` (Agent 配置和状态)
 - ✅ **设备信息**：`devices/` (已配对设备)
 
 **渠道数据：**
+
 - ✅ **Telegram**：`telegram/`
 - ✅ **Discord**：`discord/`
 - ✅ **Slack**：`slack/`
 
 **工作区数据：**
+
 - ✅ **画布**：`canvas/`
 - ✅ **工作区**：`workspace/` (包含 Skills)
 
 **其他数据：**
+
 - ✅ **日志文件**：`logs/`
 - ✅ **投递队列**：`delivery-queue/`
 - ✅ **Shell 补全**：`completions/`
@@ -247,17 +268,18 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 
 #### 迁移选项
 
-| 选项 | 说明 |
-|------|------|
-| `--dry-run` | 预览迁移，不修改文件 |
-| `--skip-plugins` | 跳过插件迁移 |
-| `--skip-credentials` | 跳过凭证迁移 |
-| `--skip-logs` | 跳过日志迁移 |
-| `--force` | 强制迁移（覆盖现有数据）|
-| `--create-backup` | 创建备份 |
-| `--openclaw-dir` | 手动指定 OpenClaw 目录 |
+| 选项                 | 说明                     |
+| -------------------- | ------------------------ |
+| `--dry-run`          | 预览迁移，不修改文件     |
+| `--skip-plugins`     | 跳过插件迁移             |
+| `--skip-credentials` | 跳过凭证迁移             |
+| `--skip-logs`        | 跳过日志迁移             |
+| `--force`            | 强制迁移（覆盖现有数据） |
+| `--create-backup`    | 创建备份                 |
+| `--openclaw-dir`     | 手动指定 OpenClaw 目录   |
 
 **优势**：
+
 - 🎯 **傻瓜式操作**：只需启动 OpenClaw，其余自动完成
 - 🚀 **零停机迁移**：迁移过程不影响 OpenClaw 使用
 - 🔒 **数据安全**：自动备份机制，支持回滚
@@ -268,17 +290,17 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 
 ## 🆚 与 OpenClaw 对比
 
-| 特性 | OpenClaw 原版 | StableClaw |
-|------|--------------|-----------|
-| 配置热重载 | ✅ 支持 | ✅ 支持 + 安全回滚 |
-| 配置错误处理 | ⚠️ 可能崩溃 | ✅ 自动回滚，零停机 |
-| 多实例防护 | ⚠️ 可能启动多个 | ✅ 严格单例，立即失败 |
-| 插件安装/卸载 | ⚠️ 需要重启 | ✅ 热插拔，零停机 |
-| 插件错误处理 | ⚠️ 可能崩溃 | ✅ 自动隔离和禁用 |
-| 健康监控 | ❌ 无 | ✅ 定期检查 + 自动恢复 |
-| 错误诊断 | ⚠️ 基础 | ✅ 详细建议和定位 |
-| **一键迁移** | ❌ 无 | ✅ 多种迁移方式 |
-| 企业级稳定性 | ⚠️ 个人使用 | ✅ 生产环境就绪 |
+| 特性          | OpenClaw 原版   | StableClaw             |
+| ------------- | --------------- | ---------------------- |
+| 配置热重载    | ✅ 支持         | ✅ 支持 + 安全回滚     |
+| 配置错误处理  | ⚠️ 可能崩溃     | ✅ 自动回滚，零停机    |
+| 多实例防护    | ⚠️ 可能启动多个 | ✅ 严格单例，立即失败  |
+| 插件安装/卸载 | ⚠️ 需要重启     | ✅ 热插拔，零停机      |
+| 插件错误处理  | ⚠️ 可能崩溃     | ✅ 自动隔离和禁用      |
+| 健康监控      | ❌ 无           | ✅ 定期检查 + 自动恢复 |
+| 错误诊断      | ⚠️ 基础         | ✅ 详细建议和定位      |
+| **一键迁移**  | ❌ 无           | ✅ 多种迁移方式        |
+| 企业级稳定性  | ⚠️ 个人使用     | ✅ 生产环境就绪        |
 
 ---
 
@@ -405,14 +427,7 @@ stableclaw/
 - 实时画布渲染
 - 端到端加密
 
----
-
-## 📞 联系方式
-
-- **Discord:** [https://discord.gg/clawd](https://discord.gg/clawd)
-- **GitHub:** [https://github.com/your-username/stableclaw](https://github.com/your-username/stableclaw)
-
----
+--
 
 <p align="center">
   <strong>Made with ❤️ by the StableClaw Team</strong>
