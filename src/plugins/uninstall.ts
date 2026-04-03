@@ -238,6 +238,18 @@ export async function uninstallPlugin(
   const installRecord = config.plugins?.installs?.[pluginId];
   const isLinked = installRecord?.source === "path";
 
+  // Trigger hot unload before removing from config
+  try {
+    const { unloadPlugin } = await import("./plugin-hot-reload.js");
+    const unloadResult = await unloadPlugin({ pluginId, config });
+    if (!unloadResult.ok) {
+      console.warn(`Plugin ${pluginId} hot-unload warning: ${unloadResult.error}`);
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn(`Plugin ${pluginId} hot-unload error: ${errorMsg}`);
+  }
+
   // Remove from config
   const { config: newConfig, actions: configActions } = removePluginFromConfig(config, pluginId, {
     channelIds,

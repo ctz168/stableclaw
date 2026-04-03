@@ -203,6 +203,25 @@ export async function ensureChannelSetupPluginInstalled(params: {
       version: result.version,
       ...buildNpmResolutionInstallFields(result.npmResolution),
     });
+
+    // Trigger hot reload for the newly installed plugin
+    try {
+      const { loadNewPlugin } = await import("../../plugins/plugin-hot-reload.js");
+      const reloadResult = await loadNewPlugin({
+        pluginId: result.pluginId,
+        installPath: result.targetDir,
+        config: next,
+      });
+      if (reloadResult.ok) {
+        runtime.log?.(`Plugin ${result.pluginId} hot-reloaded successfully`);
+      } else {
+        runtime.log?.(`Plugin ${result.pluginId} hot-reload failed: ${reloadResult.error}`);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      runtime.log?.(`Plugin ${result.pluginId} hot-reload error: ${errorMsg}`);
+    }
+
     return { cfg: next, installed: true, pluginId: result.pluginId };
   }
 

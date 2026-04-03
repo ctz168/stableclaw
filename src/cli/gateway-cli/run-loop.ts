@@ -38,6 +38,17 @@ export async function runGatewayLoop(params: {
   let shuttingDown = false;
   let restartResolver: (() => void) | null = null;
 
+  // Start plugin health checker
+  let healthChecker: Awaited<ReturnType<typeof import("../../plugins/plugin-health-checker.js").getPluginHealthChecker>> | null = null;
+  try {
+    const { getPluginHealthChecker } = await import("../../plugins/plugin-health-checker.js");
+    healthChecker = getPluginHealthChecker();
+    healthChecker.start();
+    gatewayLog.info("plugin health checker started");
+  } catch (error) {
+    gatewayLog.warn(`Failed to start plugin health checker: ${String(error)}`);
+  }
+
   const cleanupSignals = () => {
     process.removeListener("SIGTERM", onSigterm);
     process.removeListener("SIGINT", onSigint);
@@ -45,6 +56,8 @@ export async function runGatewayLoop(params: {
   };
   const exitProcess = (code: number) => {
     cleanupSignals();
+    // Stop health checker before exit
+    healthChecker?.stop();
     params.runtime.exit(code);
   };
   const releaseLockIfHeld = async (): Promise<boolean> => {
