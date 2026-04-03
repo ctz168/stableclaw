@@ -303,6 +303,15 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "migrate",
+    description: "Migrate from other OpenClaw-based projects",
+    hasSubcommands: true,
+    register: async (program) => {
+      const mod = await import("../migrate-cli.js");
+      mod.registerMigrateCli(program);
+    },
+  },
+  {
     name: "completion",
     description: "Generate shell completion script",
     hasSubcommands: false,

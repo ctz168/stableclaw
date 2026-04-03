@@ -22,8 +22,6 @@
 
 **StableClaw** 是基于 [OpenClaw](https://github.com/openclaw/openclaw) **v2026.4.3** 版本的**企业级稳定增强版**，专注于生产环境的稳定性、可靠性和可维护性。
 
-**OpenClaw** 是一个个人 AI 助手，运行在你自己的设备上。它支持多种消息渠道（WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage 等），可以说话和倾听（macOS/iOS/Android），并能渲染实时画布。
-
 **StableClaw** 在 OpenClaw 的基础上，增加了多项企业级增强功能，特别适合需要高可用性、零停机维护和自动化运维的生产环境。
 
 ---
