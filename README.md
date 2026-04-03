@@ -138,6 +138,61 @@ Plugin my-plugin hot-reloaded successfully
 
 ---
 
+### 6. 🔄 一键迁移功能
+
+**问题：** OpenClaw 用户升级到 StableClaw 需要手动迁移配置、插件和数据，过程繁琐且容易出错。
+
+**解决方案：** 提供多种迁移方式，零停机平滑迁移。
+
+#### 方式1：内置命令（推荐）
+
+```bash
+# 预览迁移
+stableclaw migrate from-openclaw --dry-run
+
+# 执行迁移并创建备份
+stableclaw migrate from-openclaw --create-backup
+
+# 检查迁移状态
+stableclaw migrate status
+```
+
+#### 方式2：独立脚本（无需安装）
+
+```bash
+# 下载并运行迁移脚本
+node migrate-from-openclaw.js --dry-run
+node migrate-from-openclaw.js --create-backup
+```
+
+#### 迁移内容
+
+- ✅ **配置文件**：`openclaw.json` → `stableclaw.json`
+- ✅ **插件目录**：`extensions/` (所有已安装的插件)
+- ✅ **凭证密钥**：`credentials/` (API 密钥、令牌)
+- ✅ **数据文件**：`logs/`, `memory/`, `tasks/`, `devices/`
+- ✅ **渠道数据**：`telegram/`, `discord/`, `slack/`
+- ✅ **工作区**：`canvas/`, `workspace/`
+
+#### 迁移选项
+
+| 选项 | 说明 |
+|------|------|
+| `--dry-run` | 预览迁移，不修改文件 |
+| `--skip-plugins` | 跳过插件迁移 |
+| `--skip-credentials` | 跳过凭证迁移 |
+| `--skip-logs` | 跳过日志迁移 |
+| `--force` | 强制迁移（覆盖现有数据）|
+| `--create-backup` | 创建备份 |
+
+**优势**：
+- 🚀 **零停机迁移**：迁移过程不影响 OpenClaw 使用
+- 🔒 **数据安全**：自动备份机制，支持回滚
+- ⚡ **灵活选择**：可选择性地迁移特定内容
+- 🎯 **详细报告**：提供完整的迁移日志和错误诊断
+
+---
+
 ## 🆚 与 OpenClaw 对比
 
 | 特性 | OpenClaw 原版 | StableClaw |
@@ -149,6 +204,7 @@ Plugin my-plugin hot-reloaded successfully
 | 插件错误处理 | ⚠️ 可能崩溃 | ✅ 自动隔离和禁用 |
 | 健康监控 | ❌ 无 | ✅ 定期检查 + 自动恢复 |
 | 错误诊断 | ⚠️ 基础 | ✅ 详细建议和定位 |
+| **一键迁移** | ❌ 无 | ✅ 多种迁移方式 |
 | 企业级稳定性 | ⚠️ 个人使用 | ✅ 生产环境就绪 |
 
 ---
