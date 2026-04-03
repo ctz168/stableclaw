@@ -11,6 +11,7 @@ import {
   SUBAGENT_PROGRESS_PHASE_ERROR,
   SUBAGENT_PROGRESS_PHASE_KILLED,
   SUBAGENT_PROGRESS_PHASE_TIMEOUT,
+  emitSubagentFailureRecovery,
 } from "./subagent-progress.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { type DeliveryContext, normalizeDeliveryContext } from "../utils/delivery-context.js";
@@ -557,6 +558,23 @@ function ensureListener() {
           parentSessionKey: entry.requesterSessionKey,
           label: entry.label,
         });
+        // Trigger failure recovery interface for errors
+        try {
+          const taskPreview = entry.task?.length > 80 ? `${entry.task.slice(0, 77)}...` : entry.task;
+          const taskLabel = entry.label || taskPreview || "unnamed task";
+          emitSubagentFailureRecovery({
+            runId: evt.runId,
+            sessionKey: entry.childSessionKey,
+            parentSessionKey: entry.requesterSessionKey,
+            failureReason: "error",
+            description: `Sub-agent encountered error while executing task: "${taskLabel}"`,
+            task: entry.task,
+            label: entry.label,
+            errorDetail: error,
+          });
+        } catch {
+          // Recovery interface is best-effort; never break core flow.
+        }
         schedulePendingLifecycleError({
           runId: evt.runId,
           endedAt,
@@ -573,20 +591,42 @@ function ensureListener() {
         ? SUBAGENT_PROGRESS_PHASE_TIMEOUT
         : SUBAGENT_PROGRESS_PHASE_COMPLETED;
       const durationMs = entry.startedAt ? endedAt - entry.startedAt : undefined;
+      const durationSec = Math.round((durationMs ?? 0) / 1000);
+      const taskPreview = entry.task?.length > 80 ? `${entry.task.slice(0, 77)}...` : entry.task;
+      const taskLabel = entry.label || taskPreview || "unnamed task";
       emitSubagentProgress({
         runId: evt.runId,
         phase: progressPhase,
         message: evt.data?.aborted
-          ? `Sub-agent timed out after ${Math.round((durationMs ?? 0) / 1000)}s`
-          : `Sub-agent completed in ${Math.round((durationMs ?? 0) / 1000)}s`,
+          ? `⏰ Sub-agent timed out after ${durationSec}s — task: "${taskLabel}"`
+          : `✅ Sub-agent completed in ${durationSec}s — task: "${taskLabel}"`,
         detail: {
           outcome: outcome.status,
           totalDurationMs: durationMs,
+          task: entry.task,
+          label: entry.label,
         },
         sessionKey: entry.childSessionKey,
         parentSessionKey: entry.requesterSessionKey,
         label: entry.label,
       });
+      // Trigger failure recovery interface for timeouts (non-silent)
+      if (evt.data?.aborted) {
+        try {
+          emitSubagentFailureRecovery({
+            runId: evt.runId,
+            sessionKey: entry.childSessionKey,
+            parentSessionKey: entry.requesterSessionKey,
+            failureReason: "timeout",
+            description: `Sub-agent timed out after ${durationSec}s while executing task: "${taskLabel}"`,
+            task: entry.task,
+            label: entry.label,
+            durationMs: durationMs,
+          });
+        } catch {
+          // Recovery interface is best-effort; never break core flow.
+        }
+      }
       await completeSubagentRun({
         runId: evt.runId,
         endedAt,

@@ -404,16 +404,17 @@ export async function spawnSubagentDirect(
   const cfg = loadSubagentConfig();
 
   // When agent omits runTimeoutSeconds, use the config default.
-  // Falls back to 0 (no timeout) if config key is also unset,
-  // preserving current behavior for existing deployments.
+  // Falls back to DEFAULT_SUBAGENT_TIMEOUT_SECONDS (3 min) if config key is also unset.
+  const DEFAULT_SUBAGENT_TIMEOUT_SECONDS = 180; // 3 minutes
+  const MAX_SUBAGENT_TIMEOUT_SECONDS = 600; // 10 minutes (hard ceiling)
   const cfgSubagentTimeout =
     typeof cfg?.agents?.defaults?.subagents?.runTimeoutSeconds === "number" &&
     Number.isFinite(cfg.agents.defaults.subagents.runTimeoutSeconds)
-      ? Math.max(0, Math.floor(cfg.agents.defaults.subagents.runTimeoutSeconds))
-      : 0;
+      ? Math.min(Math.max(0, Math.floor(cfg.agents.defaults.subagents.runTimeoutSeconds)), MAX_SUBAGENT_TIMEOUT_SECONDS)
+      : DEFAULT_SUBAGENT_TIMEOUT_SECONDS;
   const runTimeoutSeconds =
     typeof params.runTimeoutSeconds === "number" && Number.isFinite(params.runTimeoutSeconds)
-      ? Math.max(0, Math.floor(params.runTimeoutSeconds))
+      ? Math.min(Math.max(0, Math.floor(params.runTimeoutSeconds)), MAX_SUBAGENT_TIMEOUT_SECONDS)
       : cfgSubagentTimeout;
   let modelApplied = false;
   let threadBindingReady = false;

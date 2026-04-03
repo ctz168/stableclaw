@@ -173,7 +173,8 @@ export const AgentDefaultsSchema = z
     blockStreamingChunk: BlockStreamingChunkSchema.optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
     humanDelay: HumanDelaySchema.optional(),
-    timeoutSeconds: z.number().int().positive().optional(),
+    timeoutSeconds: z.number().int().min(0).max(600).optional()
+      .describe("Agent execution timeout in seconds. Default: 180 (3 minutes). Max: 600 (10 minutes). Set to 0 to disable timeout."),
     mediaMaxMb: z.number().positive().optional(),
     imageMaxDimensionPx: z.number().int().positive().optional(),
     typingIntervalSeconds: z.number().int().positive().optional(),
@@ -204,7 +205,8 @@ export const AgentDefaultsSchema = z
         archiveAfterMinutes: z.number().int().min(0).optional(),
         model: AgentModelSchema.optional(),
         thinking: z.string().optional(),
-        runTimeoutSeconds: z.number().int().min(0).optional(),
+        runTimeoutSeconds: z.number().int().min(0).max(600).optional()
+          .describe("Sub-agent execution timeout in seconds. Default: 180 (3 min). Max: 600 (10 min). Set to 0 to disable."),
         announceTimeoutMs: z.number().int().positive().optional(),
         requireAgentId: z.boolean().optional(),
       })

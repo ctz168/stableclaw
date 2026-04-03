@@ -8,6 +8,7 @@ import type { SubagentRunOutcome } from "./subagent-announce.js";
 import {
   emitSubagentProgress,
   SUBAGENT_PROGRESS_PHASE_KILLED,
+  SUBAGENT_PROGRESS_PHASE_ERROR,
 } from "./subagent-progress.js";
 import {
   SUBAGENT_ENDED_OUTCOME_KILLED,
@@ -140,15 +141,32 @@ export function createSubagentRunManager(params: {
       // sweeper only archives runs that have `archiveAtMs` set, so runs with
       // cleanup="keep" or spawnMode="session" would accumulate indefinitely.
       //
-      // FIX: Log the error and attempt a best-effort termination so the
-      // parent agent gets feedback instead of silently hanging.
+      // FIX: Log the error, emit a progress event, and attempt a best-effort
+      // termination so the parent agent gets feedback instead of silently hanging.
       const errorMessage = err instanceof Error ? err.message : String(err);
       log.error(`waitForSubagentCompletion RPC failed for ${runId}: ${errorMessage}`);
       const entry = params.runs.get(runId);
       if (entry && typeof entry.endedAt !== "number") {
+        const taskPreview = entry.task?.length > 80 ? `${entry.task.slice(0, 77)}...` : entry.task;
+        const taskLabel = entry.label || taskPreview || "unnamed task";
         log.warn(
           `Marking subagent run ${runId} as terminated due to wait RPC failure (run was stuck)`,
         );
+        // Emit progress event so the UI/user knows the subagent crashed
+        emitSubagentProgress({
+          runId: entry.runId,
+          phase: SUBAGENT_PROGRESS_PHASE_ERROR,
+          message: `❌ Sub-agent RPC failed — task: "${taskLabel}" — error: ${errorMessage}`,
+          detail: {
+            errorMessage,
+            recoverable: false,
+            task: entry.task,
+            label: entry.label,
+          },
+          sessionKey: entry.childSessionKey,
+          parentSessionKey: entry.requesterSessionKey,
+          label: entry.label,
+        });
         params.markSubagentRunTerminated({
           runId,
           reason: `wait-rpc-failed: ${errorMessage}`,

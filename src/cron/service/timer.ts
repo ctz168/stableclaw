@@ -69,7 +69,7 @@ type StartupCatchupPlan = {
   deferredJobIds: string[];
 };
 
-export async function executeJobCoreWithTimeout(
+export function executeJobCoreWithTimeout(
   state: CronServiceState,
   job: CronJob,
 ): Promise<Awaited<ReturnType<typeof executeJobCore>>> {
@@ -85,8 +85,9 @@ export async function executeJobCoreWithTimeout(
       executeJobCore(state, job, runAbortController.signal),
       new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          runAbortController.abort(timeoutErrorMessage());
-          reject(new Error(timeoutErrorMessage()));
+          const taskLabel = job.name || job.id || "unnamed";
+          runAbortController.abort(timeoutErrorMessage(taskLabel));
+          reject(new Error(timeoutErrorMessage(taskLabel)));
         }, jobTimeoutMs);
       }),
     ]);
@@ -104,8 +105,9 @@ function resolveRunConcurrency(state: CronServiceState): number {
   }
   return Math.max(1, Math.floor(raw));
 }
-function timeoutErrorMessage(): string {
-  return "cron: job execution timed out";
+function timeoutErrorMessage(taskLabel?: string): string {
+  const label = taskLabel ? ` "${taskLabel}"` : "";
+  return `cron: job execution timed out${label}`;
 }
 
 function isAbortError(err: unknown): boolean {

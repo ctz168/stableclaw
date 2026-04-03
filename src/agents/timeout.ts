@@ -1,6 +1,7 @@
 import type { OpenClawConfig } from "../config/config.js";
 
-const DEFAULT_AGENT_TIMEOUT_SECONDS = 48 * 60 * 60;
+const DEFAULT_AGENT_TIMEOUT_SECONDS = 3 * 60; // 3 minutes
+const MAX_AGENT_TIMEOUT_SECONDS = 10 * 60; // 10 minutes (hard ceiling)
 const MAX_SAFE_TIMEOUT_MS = 2_147_000_000;
 
 const normalizeNumber = (value: unknown): number | undefined =>
@@ -9,7 +10,8 @@ const normalizeNumber = (value: unknown): number | undefined =>
 export function resolveAgentTimeoutSeconds(cfg?: OpenClawConfig): number {
   const raw = normalizeNumber(cfg?.agents?.defaults?.timeoutSeconds);
   const seconds = raw ?? DEFAULT_AGENT_TIMEOUT_SECONDS;
-  return Math.max(seconds, 1);
+  // Clamp to [1, MAX_AGENT_TIMEOUT_SECONDS] to prevent runaway agents.
+  return Math.min(Math.max(seconds, 1), MAX_AGENT_TIMEOUT_SECONDS);
 }
 
 export function resolveAgentTimeoutMs(opts: {
@@ -24,6 +26,11 @@ export function resolveAgentTimeoutMs(opts: {
   const defaultMs = clampTimeoutMs(resolveAgentTimeoutSeconds(opts.cfg) * 1000);
   // Use the maximum timer-safe timeout to represent "no timeout" when explicitly set to 0.
   const NO_TIMEOUT_MS = MAX_SAFE_TIMEOUT_MS;
+  // Max agent timeout ceiling: 10 minutes. Override values exceeding this
+  // are clamped. A literal 0 still means "no timeout".
+  const maxAgentTimeoutMs = MAX_AGENT_TIMEOUT_SECONDS * 1000;
+  const clampToAgentCeiling = (valueMs: number) =>
+    Math.min(clampTimeoutMs(valueMs), maxAgentTimeoutMs);
   const overrideMs = normalizeNumber(opts.overrideMs);
   if (overrideMs !== undefined) {
     if (overrideMs === 0) {
@@ -32,7 +39,7 @@ export function resolveAgentTimeoutMs(opts: {
     if (overrideMs < 0) {
       return defaultMs;
     }
-    return clampTimeoutMs(overrideMs);
+    return clampToAgentCeiling(overrideMs);
   }
   const overrideSeconds = normalizeNumber(opts.overrideSeconds);
   if (overrideSeconds !== undefined) {
@@ -42,7 +49,7 @@ export function resolveAgentTimeoutMs(opts: {
     if (overrideSeconds < 0) {
       return defaultMs;
     }
-    return clampTimeoutMs(overrideSeconds * 1000);
+    return clampToAgentCeiling(overrideSeconds * 1000);
   }
   return defaultMs;
 }

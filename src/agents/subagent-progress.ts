@@ -333,3 +333,242 @@ export function createSubagentProgressTracker(): {
     },
   };
 }
+
+// ─── Failure Recovery Interface ────────────────────────────────────
+
+/**
+ * A failure recovery request that can be presented to the user.
+ *
+ * When a sub-agent fails (timeout, error, killed), the system creates
+ * a recovery request that UI layers can use to prompt the user for
+ * input. The user's response is then forwarded to resume the agent.
+ */
+export type SubagentFailureRecoveryRequest = {
+  /** Unique identifier for this recovery request */
+  recoveryId: string;
+  /** The runId of the failed sub-agent */
+  runId: string;
+  /** Session key of the failed sub-agent */
+  sessionKey?: string;
+  /** Parent agent's session key */
+  parentSessionKey?: string;
+  /** What happened: "timeout" | "error" | "killed" */
+  failureReason: string;
+  /** Human-readable description of what failed */
+  description: string;
+  /** The original task that was being executed */
+  task?: string;
+  /** Label/tag for the sub-agent */
+  label?: string;
+  /** When the failure occurred (epoch ms) */
+  failedAt: number;
+  /** How long the agent ran before failing (ms) */
+  durationMs?: number;
+  /** Error details (for error failures) */
+  errorDetail?: string;
+};
+
+/**
+ * Callback type for handling user recovery input.
+ *
+ * UI layers register this callback to receive the user's text input
+ * when they choose to resume a failed agent. The callback should
+ * forward the input to the appropriate session/agent for continuation.
+ *
+ * @param recoveryId - The recovery request ID
+ * @param userInput - The user's text input for continuing the task
+ * @returns Promise that resolves when the input has been delivered
+ */
+export type SubagentRecoveryHandler = (
+  recoveryId: string,
+  userInput: string,
+) => Promise<void>;
+
+/**
+ * Callback type for handling failure recovery requests.
+ *
+ * When a sub-agent fails, this callback is invoked with the recovery
+ * request. The UI layer should present the user with an input prompt
+ * (e.g., a text box) showing the failure context and allowing them
+ * to type a continuation message.
+ *
+ * @param request - The failure recovery request
+ */
+export type SubagentFailureHandler = (request: SubagentFailureRecoveryRequest) => void;
+
+// ─── Recovery Registry ─────────────────────────────────────────────
+
+let activeFailureHandler: SubagentFailureHandler | null = null;
+let activeRecoveryHandler: SubagentRecoveryHandler | null = null;
+const pendingRecoveryRequests = new Map<string, SubagentFailureRecoveryRequest>();
+
+/**
+ * Register a handler that will be called when a sub-agent fails.
+ *
+ * The UI layer calls this to receive failure notifications and
+ * present the user with an input prompt for recovery.
+ *
+ * ```ts
+ * import { onSubagentFailure, submitRecoveryInput } from "./subagent-progress.js";
+ *
+ * // Register to receive failure events
+ * onSubagentFailure((request) => {
+ *   // Show user a prompt:
+ *   // "Agent '[label]' failed: [description]. Type a message to continue:"
+ *   showInputPrompt(request);
+ * });
+ *
+ * // When user types and submits:
+ * async function handleUserInput(recoveryId: string, text: string) {
+ *   await submitRecoveryInput(recoveryId, text);
+ * }
+ * ```
+ *
+ * @param handler - Callback invoked on sub-agent failure
+ */
+export function onSubagentFailure(handler: SubagentFailureHandler): () => void {
+  activeFailureHandler = handler;
+  return () => {
+    if (activeFailureHandler === handler) {
+      activeFailureHandler = null;
+    }
+  };
+}
+
+/**
+ * Register a handler that processes user recovery input.
+ *
+ * The gateway or channel layer implements this to deliver the user's
+ * input to the appropriate agent session for continuation.
+ *
+ * ```ts
+ * import { setRecoveryHandler } from "./subagent-progress.js";
+ *
+ * setRecoveryHandler(async (recoveryId, userInput) => {
+ *   const request = getPendingRecoveryRequest(recoveryId);
+ *   if (!request) return;
+ *   // Deliver userInput to the parent session via gateway
+ *   await callGateway({
+ *     method: "agent",
+ *     params: {
+ *       sessionKey: request.parentSessionKey,
+ *       message: `[Recovery from failure] ${userInput}`,
+ *       deliver: true,
+ *     },
+ *   });
+ * });
+ * ```
+ *
+ * @param handler - Callback invoked with user's recovery input
+ */
+export function setRecoveryHandler(handler: SubagentRecoveryHandler): () => void {
+  activeRecoveryHandler = handler;
+  return () => {
+    if (activeRecoveryHandler === handler) {
+      activeRecoveryHandler = null;
+    }
+  };
+}
+
+/**
+ * Submit user recovery input for a failed sub-agent.
+ *
+ * Called by the UI layer when the user provides input to continue
+ * after a failure. The input is forwarded to the registered
+ * recovery handler (set via `setRecoveryHandler`).
+ *
+ * @param recoveryId - The recovery request ID
+ * @param userInput - The user's text input for continuing
+ * @returns true if a handler was registered and called, false otherwise
+ */
+export async function submitRecoveryInput(
+  recoveryId: string,
+  userInput: string,
+): Promise<boolean> {
+  if (!activeRecoveryHandler) {
+    return false;
+  }
+  try {
+    await activeRecoveryHandler(recoveryId, userInput);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get a pending recovery request by ID.
+ *
+ * @param recoveryId - The recovery request ID
+ * @returns The recovery request if still pending, undefined if already handled
+ */
+export function getPendingRecoveryRequest(
+  recoveryId: string,
+): SubagentFailureRecoveryRequest | undefined {
+  return pendingRecoveryRequests.get(recoveryId);
+}
+
+/**
+ * Get all pending recovery requests.
+ * Useful for UI initialization to show existing failed tasks.
+ */
+export function getAllPendingRecoveryRequests(): SubagentFailureRecoveryRequest[] {
+  return [...pendingRecoveryRequests.values()];
+}
+
+/**
+ * Clear a pending recovery request after it has been handled.
+ */
+export function clearPendingRecoveryRequest(recoveryId: string): void {
+  pendingRecoveryRequests.delete(recoveryId);
+}
+
+/**
+ * Emit a failure recovery event. Called by the agent engine when
+ * a sub-agent fails in a way that the user might want to recover from.
+ *
+ * This creates a recovery request and invokes the registered failure
+ * handler. The handler (typically a UI layer) should present the user
+ * with an input prompt showing the failure context.
+ *
+ * The recovery request is stored in `pendingRecoveryRequests` until
+ * the user responds or it is explicitly cleared.
+ */
+export function emitSubagentFailureRecovery(params: {
+  runId: string;
+  sessionKey?: string;
+  parentSessionKey?: string;
+  failureReason: "timeout" | "error" | "killed";
+  description: string;
+  task?: string;
+  label?: string;
+  durationMs?: number;
+  errorDetail?: string;
+}): string {
+  const recoveryId = `recovery:${params.runId}:${Date.now()}`;
+  const request: SubagentFailureRecoveryRequest = {
+    recoveryId,
+    runId: params.runId,
+    sessionKey: params.sessionKey,
+    parentSessionKey: params.parentSessionKey,
+    failureReason: params.failureReason,
+    description: params.description,
+    task: params.task,
+    label: params.label,
+    failedAt: Date.now(),
+    durationMs: params.durationMs,
+    errorDetail: params.errorDetail,
+  };
+  pendingRecoveryRequests.set(recoveryId, request);
+
+  // Invoke the failure handler if one is registered
+  if (activeFailureHandler) {
+    try {
+      activeFailureHandler(request);
+    } catch {
+      // Handler errors should not propagate
+    }
+  }
+
+  return recoveryId;
+}

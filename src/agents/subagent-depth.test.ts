@@ -115,9 +115,9 @@ describe("getSubagentDepthFromSessionStore", () => {
 });
 
 describe("resolveAgentTimeoutMs", () => {
-  it("defaults to 48 hours when config does not override the timeout", () => {
-    expect(resolveAgentTimeoutSeconds()).toBe(48 * 60 * 60);
-    expect(resolveAgentTimeoutMs({})).toBe(48 * 60 * 60 * 1000);
+  it("defaults to 3 minutes when config does not override the timeout", () => {
+    expect(resolveAgentTimeoutSeconds()).toBe(3 * 60);
+    expect(resolveAgentTimeoutMs({})).toBe(3 * 60 * 1000);
   });
 
   it("uses a timer-safe sentinel for no-timeout overrides", () => {
@@ -125,8 +125,19 @@ describe("resolveAgentTimeoutMs", () => {
     expect(resolveAgentTimeoutMs({ overrideMs: 0 })).toBe(2_147_000_000);
   });
 
-  it("clamps very large timeout overrides to timer-safe values", () => {
-    expect(resolveAgentTimeoutMs({ overrideSeconds: 9_999_999 })).toBe(2_147_000_000);
-    expect(resolveAgentTimeoutMs({ overrideMs: 9_999_999_999 })).toBe(2_147_000_000);
+  it("clamps very large timeout overrides to 10-minute ceiling", () => {
+    expect(resolveAgentTimeoutMs({ overrideSeconds: 9_999_999 })).toBe(600_000);
+    expect(resolveAgentTimeoutMs({ overrideMs: 9_999_999_999 })).toBe(600_000);
+  });
+
+  it("clamps overrides exceeding 10-minute ceiling to 10 minutes", () => {
+    expect(resolveAgentTimeoutMs({ overrideSeconds: 900 })).toBe(600_000);
+    expect(resolveAgentTimeoutMs({ overrideMs: 900_000 })).toBe(600_000);
+    expect(resolveAgentTimeoutMs({ overrideSeconds: 600 })).toBe(600_000); // exactly 10 min OK
+  });
+
+  it("allows values under 10 minutes to pass through", () => {
+    expect(resolveAgentTimeoutMs({ overrideSeconds: 180 })).toBe(180_000);
+    expect(resolveAgentTimeoutMs({ overrideSeconds: 60 })).toBe(60_000);
   });
 });

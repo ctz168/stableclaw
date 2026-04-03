@@ -500,17 +500,20 @@ export async function runSubagentAnnounceFlow(params: {
       outcome = { status: "unknown" };
     }
 
-    // Build status label
+    // Build status label — include duration and task name for timeout clarity
+    const taskLabel = params.label || params.task || "task";
+    const durationSec = params.startedAt && params.endedAt
+      ? Math.round((params.endedAt - params.startedAt) / 1000)
+      : undefined;
     const statusLabel =
       outcome.status === "ok"
         ? "completed successfully"
         : outcome.status === "timeout"
-          ? "timed out"
+          ? `timed out after ${durationSec ?? "unknown"}s — task: "${taskLabel}"`
           : outcome.status === "error"
             ? `failed: ${outcome.error || "unknown error"}`
             : "finished with unknown status";
 
-    const taskLabel = params.label || params.task || "task";
     const announceSessionId = childSessionId || "unknown";
     const findings = childCompletionFindings || reply || "(no output)";
 
