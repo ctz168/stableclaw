@@ -4,6 +4,14 @@ import { resolveContextEngine } from "../context-engine/registry.js";
 import type { SubagentEndReason } from "../context-engine/types.js";
 import { callGateway } from "../gateway/call.js";
 import { onAgentEvent } from "../infra/agent-events.js";
+import {
+  emitSubagentProgress,
+  SUBAGENT_PROGRESS_PHASE_STARTED,
+  SUBAGENT_PROGRESS_PHASE_COMPLETED,
+  SUBAGENT_PROGRESS_PHASE_ERROR,
+  SUBAGENT_PROGRESS_PHASE_KILLED,
+  SUBAGENT_PROGRESS_PHASE_TIMEOUT,
+} from "./subagent-progress.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { type DeliveryContext, normalizeDeliveryContext } from "../utils/delivery-context.js";
 import { ensureRuntimePluginsLoaded } from "./runtime-plugins.js";
@@ -105,7 +113,14 @@ const SUBAGENT_ANNOUNCE_TIMEOUT_MS = 120_000;
  * retry is still in progress. Defer terminal error cleanup briefly so a
  * subsequent lifecycle `start` / `end` can cancel premature failure announces.
  */
-const LIFECYCLE_ERROR_RETRY_GRACE_MS = 15_000;
+/**
+ * Default grace period before treating a lifecycle `error` event as terminal.
+ * Provider/model retry may produce transient errors that resolve within seconds;
+ * this grace period allows a subsequent `start`/`end` event to cancel the error.
+ *
+ * Configurable via `agents.defaults.subagents.lifecycleErrorGraceSeconds`.
+ */
+const DEFAULT_LIFECYCLE_ERROR_RETRY_GRACE_MS = 15_000;
 
 function persistSubagentRuns() {
   subagentRegistryDeps.persistSubagentRunsToDisk(subagentRuns);
@@ -138,6 +153,19 @@ function clearAllPendingLifecycleErrors() {
   pendingLifecycleErrorByRunId.clear();
 }
 
+function resolveLifecycleErrorGraceMs(): number {
+  try {
+    const cfg = subagentRegistryDeps.loadConfig();
+    const graceSeconds = cfg.agents?.defaults?.subagents?.lifecycleErrorGraceSeconds;
+    if (typeof graceSeconds === "number" && graceSeconds > 0) {
+      return Math.min(graceSeconds * 1000, 300_000); // cap at 5 minutes
+    }
+  } catch {
+    // config not available yet during bootstrap
+  }
+  return DEFAULT_LIFECYCLE_ERROR_RETRY_GRACE_MS;
+}
+
 function schedulePendingLifecycleError(params: { runId: string; endedAt: number; error?: string }) {
   clearPendingLifecycleError(params.runId);
   const timer = setTimeout(() => {
@@ -165,7 +193,7 @@ function schedulePendingLifecycleError(params: { runId: string; endedAt: number;
       accountId: entry.requesterOrigin?.accountId,
       triggerCleanup: true,
     });
-  }, LIFECYCLE_ERROR_RETRY_GRACE_MS);
+  }, resolveLifecycleErrorGraceMs());
   timer.unref?.();
   pendingLifecycleErrorByRunId.set(params.runId, {
     timer,
@@ -501,6 +529,16 @@ function ensureListener() {
           }
           persistSubagentRuns();
         }
+        // Emit progress event for UI tracking
+        emitSubagentProgress({
+          runId: evt.runId,
+          phase: SUBAGENT_PROGRESS_PHASE_STARTED,
+          message: `Sub-agent started${entry.model ? ` (model: ${entry.model})` : ""}`,
+          detail: { model: entry.model },
+          sessionKey: entry.childSessionKey,
+          parentSessionKey: entry.requesterSessionKey,
+          label: entry.label,
+        });
         return;
       }
       if (phase !== "end" && phase !== "error") {
@@ -509,6 +547,16 @@ function ensureListener() {
       const endedAt = typeof evt.data?.endedAt === "number" ? evt.data.endedAt : Date.now();
       const error = typeof evt.data?.error === "string" ? evt.data.error : undefined;
       if (phase === "error") {
+        // Emit progress event for error tracking
+        emitSubagentProgress({
+          runId: evt.runId,
+          phase: SUBAGENT_PROGRESS_PHASE_ERROR,
+          message: `Sub-agent error: ${error ?? "unknown"}`,
+          detail: { errorMessage: error ?? "unknown", recoverable: true },
+          sessionKey: entry.childSessionKey,
+          parentSessionKey: entry.requesterSessionKey,
+          label: entry.label,
+        });
         schedulePendingLifecycleError({
           runId: evt.runId,
           endedAt,
@@ -520,6 +568,25 @@ function ensureListener() {
       const outcome: SubagentRunOutcome = evt.data?.aborted
         ? { status: "timeout" }
         : { status: "ok" };
+      // Emit progress event for completion tracking
+      const progressPhase = evt.data?.aborted
+        ? SUBAGENT_PROGRESS_PHASE_TIMEOUT
+        : SUBAGENT_PROGRESS_PHASE_COMPLETED;
+      const durationMs = entry.startedAt ? endedAt - entry.startedAt : undefined;
+      emitSubagentProgress({
+        runId: evt.runId,
+        phase: progressPhase,
+        message: evt.data?.aborted
+          ? `Sub-agent timed out after ${Math.round((durationMs ?? 0) / 1000)}s`
+          : `Sub-agent completed in ${Math.round((durationMs ?? 0) / 1000)}s`,
+        detail: {
+          outcome: outcome.status,
+          totalDurationMs: durationMs,
+        },
+        sessionKey: entry.childSessionKey,
+        parentSessionKey: entry.requesterSessionKey,
+        label: entry.label,
+      });
       await completeSubagentRun({
         runId: evt.runId,
         endedAt,

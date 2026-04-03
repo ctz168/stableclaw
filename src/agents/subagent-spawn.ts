@@ -37,7 +37,14 @@ import {
 } from "./subagent-attachments.js";
 import { resolveSubagentCapabilities } from "./subagent-capabilities.js";
 import { getSubagentDepthFromSessionStore } from "./subagent-depth.js";
-import { countActiveRunsForSession, registerSubagentRun } from "./subagent-registry.js";
+import {
+  countActiveRunsForSession,
+  registerSubagentRun,
+} from "./subagent-registry.js";
+import {
+  emitSubagentProgress,
+  SUBAGENT_PROGRESS_PHASE_SPAWNED,
+} from "./subagent-progress.js";
 import { readStringParam } from "./tools/common.js";
 import {
   resolveDisplaySessionKey,
@@ -889,6 +896,22 @@ export async function spawnSubagentDirect(
   emitSessionLifecycleEvent({
     sessionKey: childSessionKey,
     reason: "create",
+    parentSessionKey: requesterInternalKey,
+    label: label || undefined,
+  });
+
+  // Emit progress event for parallel monitoring UI.
+  emitSubagentProgress({
+    runId: childRunId,
+    phase: SUBAGENT_PROGRESS_PHASE_SPAWNED,
+    message: `Sub-agent spawned: ${targetAgentId}`,
+    detail: {
+      sessionKey: childSessionKey,
+      model: resolvedModel,
+      task,
+      runtime: "subagent",
+    },
+    sessionKey: childSessionKey,
     parentSessionKey: requesterInternalKey,
     label: label || undefined,
   });

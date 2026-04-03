@@ -6,6 +6,10 @@ import { type DeliveryContext, normalizeDeliveryContext } from "../utils/deliver
 import { ensureRuntimePluginsLoaded } from "./runtime-plugins.js";
 import type { SubagentRunOutcome } from "./subagent-announce.js";
 import {
+  emitSubagentProgress,
+  SUBAGENT_PROGRESS_PHASE_KILLED,
+} from "./subagent-progress.js";
+import {
   SUBAGENT_ENDED_OUTCOME_KILLED,
   SUBAGENT_ENDED_REASON_COMPLETE,
   SUBAGENT_ENDED_REASON_ERROR,
@@ -129,8 +133,27 @@ export function createSubagentRunManager(params: {
         accountId: entry.requesterOrigin?.accountId,
         triggerCleanup: true,
       });
-    } catch {
-      // ignore
+    } catch (err) {
+      // Previously this was a silent `catch {}` which meant that if the
+      // gateway RPC failed (timeout, connection reset, etc.), the subagent
+      // run record would remain stuck forever with `endedAt` unset. The
+      // sweeper only archives runs that have `archiveAtMs` set, so runs with
+      // cleanup="keep" or spawnMode="session" would accumulate indefinitely.
+      //
+      // FIX: Log the error and attempt a best-effort termination so the
+      // parent agent gets feedback instead of silently hanging.
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      log.error(`waitForSubagentCompletion RPC failed for ${runId}: ${errorMessage}`);
+      const entry = params.runs.get(runId);
+      if (entry && typeof entry.endedAt !== "number") {
+        log.warn(
+          `Marking subagent run ${runId} as terminated due to wait RPC failure (run was stuck)`,
+        );
+        params.markSubagentRunTerminated({
+          runId,
+          reason: `wait-rpc-failed: ${errorMessage}`,
+        });
+      }
     }
   };
 
@@ -420,6 +443,17 @@ export function createSubagentRunManager(params: {
     if (updated > 0) {
       params.persist();
       for (const entry of entriesByChildSessionKey.values()) {
+        // Emit progress event for killed sub-agent
+        const killDurationMs = entry.startedAt ? now - entry.startedAt : undefined;
+        emitSubagentProgress({
+          runId: entry.runId,
+          phase: SUBAGENT_PROGRESS_PHASE_KILLED,
+          message: `Sub-agent killed: ${reason}${killDurationMs ? ` (ran ${Math.round(killDurationMs / 1000)}s)` : ""}`,
+          detail: { reason, totalDurationMs: killDurationMs },
+          sessionKey: entry.childSessionKey,
+          parentSessionKey: entry.requesterSessionKey,
+          label: entry.label,
+        });
         void persistSubagentSessionTiming(entry).catch((err) => {
           log.warn("failed to persist killed subagent session timing", {
             err,
