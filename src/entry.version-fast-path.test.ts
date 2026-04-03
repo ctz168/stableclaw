@@ -106,7 +106,7 @@ describe("entry root version fast path", () => {
 
     await importEntry("commit-tagged");
     await vi.waitFor(() => {
-      expect(logSpy).toHaveBeenCalledWith("OpenClaw 9.9.9-test (abc1234)");
+      expect(logSpy).toHaveBeenCalledWith("StableClaw 9.9.9-test (abc1234)");
       expect(exitSpy).toHaveBeenCalledWith(0);
     });
 
@@ -119,7 +119,7 @@ describe("entry root version fast path", () => {
 
     await importEntry("plain-version");
     await vi.waitFor(() => {
-      expect(logSpy).toHaveBeenCalledWith("OpenClaw 9.9.9-test");
+      expect(logSpy).toHaveBeenCalledWith("StableClaw 9.9.9-test");
       expect(exitSpy).toHaveBeenCalledWith(0);
     });
 

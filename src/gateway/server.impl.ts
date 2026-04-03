@@ -522,7 +522,7 @@ export async function startGatewayServer(
       );
     } else {
       log.warn(
-        "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token. Persist one with `openclaw config set gateway.auth.mode token` and `openclaw config set gateway.auth.token <token>`.",
+        "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token. Persist one with `stableclaw config set gateway.auth.mode token` and `stableclaw config set gateway.auth.token <token>`.",
       );
     }
   }
@@ -568,7 +568,7 @@ export async function startGatewayServer(
     const lines = formatPluginInstallPathIssue({
       issue: matrixInstallPathIssue,
       pluginLabel: "Matrix",
-      defaultInstallCommand: "openclaw plugins install @openclaw/matrix",
+      defaultInstallCommand: "stableclaw plugins install @openclaw/matrix",
       repoInstallCommand: resolveBundledPluginInstallCommandHint({
         pluginId: "matrix",
         workspaceDir: process.cwd(),

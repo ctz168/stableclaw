@@ -4,6 +4,7 @@ import {
   getAllPluginHealthStatuses,
   recordPluginError,
   enablePlugin,
+  disablePlugin,
 } from "./plugin-error-handler.js";
 import type { PluginHealthStatus } from "./plugin-error-handler.js";
 
@@ -84,7 +85,8 @@ export class PluginHealthChecker {
   private async runCheck(): Promise<void> {
     const allStatuses = getAllPluginHealthStatuses();
 
-    for (const [pluginId, status] of Object.entries(allStatuses)) {
+    for (const status of allStatuses) {
+      const pluginId = status.pluginId;
       await this.checkPlugin(pluginId, status);
     }
   }
@@ -123,6 +125,7 @@ export class PluginHealthChecker {
         severity: "critical",
         message: `Plugin failed after ${status.consecutiveErrors} consecutive errors`,
       });
+      disablePlugin(pluginId, `Plugin failed after ${status.consecutiveErrors} consecutive errors`);
       return;
     }
 
@@ -160,7 +163,7 @@ export class PluginHealthChecker {
   /**
    * Get health status of all plugins
    */
-  getStatus(): Record<string, PluginHealthStatus> {
+  getStatus(): PluginHealthStatus[] {
     return getAllPluginHealthStatuses();
   }
 

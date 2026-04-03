@@ -4,6 +4,7 @@ import type { CanvasHostHandler, CanvasHostServer } from "../canvas-host/server.
 import { type ChannelId, listChannelPlugins } from "../channels/plugins/index.js";
 import { stopGmailWatcher } from "../hooks/gmail-watcher.js";
 import type { HeartbeatRunner } from "../infra/heartbeat-runner.js";
+import { clearMdnsCache } from "../infra/bonjour-cache-cleanup.js";
 import type { PluginServicesHandle } from "../plugins/services.js";
 
 export function createGatewayCloseHandler(params: {
@@ -48,6 +49,12 @@ export function createGatewayCloseHandler(params: {
         } catch {
           /* ignore */
         }
+      }
+      // Clear mDNS cache to avoid name conflicts on restart
+      try {
+        await clearMdnsCache();
+      } catch {
+        /* ignore */
       }
       if (params.tailscaleCleanup) {
         await params.tailscaleCleanup();

@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import type { PluginRegistry, PluginRecord } from "./registry.js";
 import type { PluginDiagnostic } from "./types.js";
 
 const pluginLog = createSubsystemLogger("plugin");
@@ -124,10 +123,8 @@ export function recordPluginError(params: {
   // Update health status
   updatePluginHealthStatus(params.pluginId, pluginError);
 
-  // Auto-disable plugin on any error (strict mode)
-  if (params.severity === "error" || params.severity === "critical") {
-    disablePlugin(params.pluginId, `Plugin error: ${params.message}`);
-  }
+  // Don't auto-disable here; let the health checker handle recovery decisions.
+  // Only log and track the error.
 
   pluginLog.error(
     `[plugin-error] ${params.pluginId} (${params.type}/${params.severity}): ${params.message}`,

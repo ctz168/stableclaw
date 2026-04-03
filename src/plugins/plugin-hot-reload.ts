@@ -13,6 +13,20 @@ const log = createSubsystemLogger("plugin-hot-reload");
  */
 export class PluginHotReloadManager {
   private activePlugins: Map<string, PluginRecord> = new Map();
+  private lock: Promise<void> = Promise.resolve();
+
+  private async withLock<T>(fn: () => Promise<T>): Promise<T> {
+    const release = () => {};
+    const previous = this.lock;
+    let resolveLock: () => void;
+    this.lock = new Promise<void>(r => { resolveLock = r; });
+    await previous;
+    try {
+      return await fn();
+    } finally {
+      resolveLock!();
+    }
+  }
 
   /**
    * Load a newly installed plugin
@@ -22,77 +36,81 @@ export class PluginHotReloadManager {
     installPath: string;
     config: OpenClawConfig;
   }): Promise<{ ok: true } | { ok: false; error: string }> {
-    const { pluginId, installPath, config } = params;
+    return this.withLock(async () => {
+      const { pluginId, installPath, config } = params;
 
-    log.info(`Loading newly installed plugin: ${pluginId}`);
+      log.info(`Loading newly installed plugin: ${pluginId}`);
 
-    // Check if plugin is disabled due to previous errors
-    if (isPluginDisabled(pluginId)) {
-      log.warn(`Plugin ${pluginId} is disabled, skipping load`);
-      return {
-        ok: false,
-        error: `Plugin ${pluginId} is disabled due to previous errors. Enable it first.`,
-      };
-    }
-
-    try {
-      // Get current registry
-      const currentRegistry = getActivePluginRegistry();
-      if (!currentRegistry) {
+      // Check if plugin is disabled due to previous errors
+      if (isPluginDisabled(pluginId)) {
+        log.warn(`Plugin ${pluginId} is disabled, skipping load`);
         return {
           ok: false,
-          error: "No active plugin registry found",
+          error: `Plugin ${pluginId} is disabled due to previous errors. Enable it first.`,
         };
       }
 
-      // Check if plugin already loaded
-      const existingPlugin = currentRegistry.plugins.find((p) => p.id === pluginId);
-      if (existingPlugin) {
-        log.warn(`Plugin ${pluginId} already loaded, skipping`);
+      try {
+        // Get current registry
+        const currentRegistry = getActivePluginRegistry();
+        if (!currentRegistry) {
+          return {
+            ok: false,
+            error: "No active plugin registry found",
+          };
+        }
+
+        // Check if plugin already loaded
+        const existingPlugin = currentRegistry.plugins.find((p) => p.id === pluginId);
+        if (existingPlugin) {
+          log.warn(`Plugin ${pluginId} already loaded, skipping`);
+          return { ok: true };
+        }
+
+        // Create new registry entry for the plugin
+        // TODO: This creates a shallow record. It should use the full loader pipeline
+        //       (including manifest parsing, dependency resolution, hook registration, etc.)
+        //       to ensure the plugin is fully initialized.
+        const newRecord: PluginRecord = {
+          id: pluginId,
+          source: "install",
+          status: "loaded",
+          sourcePath: installPath,
+          loadedAt: new Date().toISOString(),
+        };
+
+        // Add to active plugins
+        this.activePlugins.set(pluginId, newRecord);
+
+        // Update registry
+        const updatedRegistry: PluginRegistry = {
+          ...currentRegistry,
+          plugins: [...currentRegistry.plugins, newRecord],
+        };
+
+        setActivePluginRegistry(updatedRegistry);
+
+        log.info(`Plugin ${pluginId} loaded successfully`);
         return { ok: true };
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        log.error(`Failed to load plugin ${pluginId}: ${errorMsg}`);
+
+        // Record error for health tracking
+        recordPluginError({
+          pluginId,
+          type: "load",
+          severity: "error",
+          message: errorMsg,
+          error: error instanceof Error ? error : new Error(errorMsg),
+        });
+
+        return {
+          ok: false,
+          error: errorMsg,
+        };
       }
-
-      // Create new registry entry for the plugin
-      // Note: This is a simplified version. In practice, we need to call the full loader logic
-      const newRecord: PluginRecord = {
-        id: pluginId,
-        source: "install",
-        status: "loaded",
-        sourcePath: installPath,
-        loadedAt: new Date().toISOString(),
-      };
-
-      // Add to active plugins
-      this.activePlugins.set(pluginId, newRecord);
-
-      // Update registry
-      const updatedRegistry: PluginRegistry = {
-        ...currentRegistry,
-        plugins: [...currentRegistry.plugins, newRecord],
-      };
-
-      setActivePluginRegistry(updatedRegistry);
-
-      log.info(`Plugin ${pluginId} loaded successfully`);
-      return { ok: true };
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to load plugin ${pluginId}: ${errorMsg}`);
-
-      // Record error for health tracking
-      recordPluginError({
-        pluginId,
-        type: "load",
-        severity: "error",
-        message: errorMsg,
-        error: error instanceof Error ? error : new Error(errorMsg),
-      });
-
-      return {
-        ok: false,
-        error: errorMsg,
-      };
-    }
+    });
   }
 
   /**
@@ -102,55 +120,57 @@ export class PluginHotReloadManager {
     pluginId: string;
     config: OpenClawConfig;
   }): Promise<{ ok: true } | { ok: false; error: string }> {
-    const { pluginId, config } = params;
+    return this.withLock(async () => {
+      const { pluginId, config } = params;
 
-    log.info(`Unloading plugin: ${pluginId}`);
+      log.info(`Unloading plugin: ${pluginId}`);
 
-    try {
-      // Get current registry
-      const currentRegistry = getActivePluginRegistry();
-      if (!currentRegistry) {
+      try {
+        // Get current registry
+        const currentRegistry = getActivePluginRegistry();
+        if (!currentRegistry) {
+          return {
+            ok: false,
+            error: "No active plugin registry found",
+          };
+        }
+
+        // Find the plugin
+        const pluginIndex = currentRegistry.plugins.findIndex((p) => p.id === pluginId);
+        if (pluginIndex === -1) {
+          log.warn(`Plugin ${pluginId} not found in registry, skipping unload`);
+          return { ok: true };
+        }
+
+        // Remove from active plugins
+        this.activePlugins.delete(pluginId);
+
+        // Remove from registry
+        const updatedPlugins = [...currentRegistry.plugins];
+        updatedPlugins.splice(pluginIndex, 1);
+
+        const updatedRegistry: PluginRegistry = {
+          ...currentRegistry,
+          plugins: updatedPlugins,
+        };
+
+        setActivePluginRegistry(updatedRegistry);
+
+        // Enable plugin if it was disabled (prepare for potential reinstall)
+        enablePlugin(pluginId);
+
+        log.info(`Plugin ${pluginId} unloaded successfully`);
+        return { ok: true };
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        log.error(`Failed to unload plugin ${pluginId}: ${errorMsg}`);
+
         return {
           ok: false,
-          error: "No active plugin registry found",
+          error: errorMsg,
         };
       }
-
-      // Find the plugin
-      const pluginIndex = currentRegistry.plugins.findIndex((p) => p.id === pluginId);
-      if (pluginIndex === -1) {
-        log.warn(`Plugin ${pluginId} not found in registry, skipping unload`);
-        return { ok: true };
-      }
-
-      // Remove from active plugins
-      this.activePlugins.delete(pluginId);
-
-      // Remove from registry
-      const updatedPlugins = [...currentRegistry.plugins];
-      updatedPlugins.splice(pluginIndex, 1);
-
-      const updatedRegistry: PluginRegistry = {
-        ...currentRegistry,
-        plugins: updatedPlugins,
-      };
-
-      setActivePluginRegistry(updatedRegistry);
-
-      // Enable plugin if it was disabled (prepare for potential reinstall)
-      enablePlugin(pluginId);
-
-      log.info(`Plugin ${pluginId} unloaded successfully`);
-      return { ok: true };
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to unload plugin ${pluginId}: ${errorMsg}`);
-
-      return {
-        ok: false,
-        error: errorMsg,
-      };
-    }
+    });
   }
 
   /**
@@ -161,18 +181,20 @@ export class PluginHotReloadManager {
     installPath: string;
     config: OpenClawConfig;
   }): Promise<{ ok: true } | { ok: false; error: string }> {
-    const { pluginId, installPath, config } = params;
+    return this.withLock(async () => {
+      const { pluginId, installPath, config } = params;
 
-    log.info(`Reloading plugin: ${pluginId}`);
+      log.info(`Reloading plugin: ${pluginId}`);
 
-    // Unload first
-    const unloadResult = await this.unloadPlugin({ pluginId, config });
-    if (!unloadResult.ok) {
-      return unloadResult;
-    }
+      // Unload first
+      const unloadResult = await this.unloadPlugin({ pluginId, config });
+      if (!unloadResult.ok) {
+        return unloadResult;
+      }
 
-    // Then load
-    return this.loadNewPlugin({ pluginId, installPath, config });
+      // Then load
+      return this.loadNewPlugin({ pluginId, installPath, config });
+    });
   }
 
   /**

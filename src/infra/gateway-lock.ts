@@ -282,8 +282,10 @@ export async function acquireGatewayLock(
   let globalLockHandle: fsSync.FileHandle | null = null;
   let lastGlobalPayload: LockPayload | null = null;
   
-  // Try to acquire global lock with immediate failure
-  while (now() - startedAt < 100) { // 100ms window for global lock
+  // Try to acquire global lock with retry and exponential backoff
+  const globalLockTimeoutMs = 5000; // 5 seconds for global lock acquisition
+  let globalRetryDelayMs = 50;
+  while (now() - startedAt < globalLockTimeoutMs) {
     try {
       globalLockHandle = await fs.open(globalLockPath, "wx");
       break;
@@ -300,20 +302,34 @@ export async function acquireGatewayLock(
         ? await resolveGatewayOwnerStatus(ownerPid, lastGlobalPayload, platform, port, opts.readProcessCmdline)
         : "unknown";
       
-      if (ownerStatus === "dead" && ownerPid) {
+      // Reclaim stale lock files aggressively (dead owners or unknown status on Linux)
+      if (ownerStatus === "dead" || (ownerStatus === "unknown" && platform === "linux")) {
         await fs.rm(globalLockPath, { force: true });
+        // Retry immediately after removing stale lock
         continue;
       }
       
-      // Another gateway is running - fail immediately
-      const owner = ownerPid ? ` (pid ${ownerPid})` : "";
-      throw new GatewayLockError(
-        `gateway already running${owner}. Use 'openclaw gateway stop' to stop it before starting a new instance.`,
-      );
+      // Also check for stale locks by age (even if owner status is unknown)
+      if (ownerStatus === "unknown" && lastGlobalPayload?.createdAt) {
+        const createdAt = Date.parse(lastGlobalPayload.createdAt);
+        if (Number.isFinite(createdAt) && now() - createdAt > staleMs) {
+          await fs.rm(globalLockPath, { force: true });
+          continue;
+        }
+      }
+      
+      // Exponential backoff before next retry
+      await sleep(globalRetryDelayMs);
+      globalRetryDelayMs = Math.min(globalRetryDelayMs * 2, 500);
     }
   }
   
   if (!globalLockHandle) {
+    if (lastGlobalPayload?.pid) {
+      throw new GatewayLockError(
+        `gateway already running (pid ${lastGlobalPayload.pid}). Use 'openclaw gateway stop' to stop it before starting a new instance.`,
+      );
+    }
     throw new GatewayLockError(
       `failed to acquire global gateway lock at ${globalLockPath}`,
     );

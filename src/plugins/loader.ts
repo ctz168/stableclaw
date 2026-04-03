@@ -39,12 +39,7 @@ import {
   restoreMemoryPluginState,
 } from "./memory-state.js";
 import { isPathInside, safeStatSync } from "./path-safety.js";
-import {
-  recordPluginError,
-  isPluginDisabled,
-  enablePlugin,
-  withPluginErrorHandling,
-} from "./plugin-error-handler.js";
+import { recordPluginError as recordPluginHealthError } from "./plugin-error-handler.js";
 import { createPluginRegistry, type PluginRecord, type PluginRegistry } from "./registry.js";
 import { resolvePluginCacheInputs } from "./roots.js";
 import {
@@ -703,7 +698,7 @@ function recordPluginError(params: {
   });
 
   // Record plugin error for health tracking and auto-disable
-  recordPluginError({
+  recordPluginHealthError({
     pluginId: params.pluginId,
     type: "load",
     severity: "error",
