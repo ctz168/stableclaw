@@ -554,6 +554,12 @@ export async function migrateFromOpenClaw(
     { name: "slack", skip: false },
     { name: "canvas", skip: false },
     { name: "workspace", skip: false },
+    // Important: identity, backups, weixin
+    { name: "identity", skip: false },
+    { name: "backups", skip: false },
+    { name: "openclaw-weixin", skip: false },
+    { name: "delivery-queue", skip: false },
+    { name: "completions", skip: false },
   ];
 
   for (const dir of dataDirs) {
@@ -583,6 +589,36 @@ export async function migrateFromOpenClaw(
       } else {
         result.errors.push(`${dir.name} migration failed: ${dirResult.error}`);
         console.error(`✗ ${dir.name} migration failed: ${dirResult.error}`);
+      }
+    }
+  }
+
+  // Migrate important files
+  const importantFiles = [
+    { src: "exec-approvals.json", dest: "exec-approvals.json" },
+  ];
+
+  for (const file of importantFiles) {
+    const srcFile = path.join(detectedOpenClawDir, file.src);
+    const destFile = path.join(stableclawDir, file.dest);
+    
+    if (!fs.existsSync(srcFile)) {
+      continue;
+    }
+    
+    console.log(`Migrating ${file.src}...`);
+    
+    if (options.dryRun) {
+      console.log(`[DRY RUN] Would copy: ${srcFile} → ${destFile}`);
+      result.migratedItems.push(file.src);
+    } else {
+      const fileResult = await copyFileWithBackup(srcFile, destFile, options);
+      if (fileResult.ok) {
+        result.migratedItems.push(file.src);
+        console.log(`✓ Migrated ${file.src}`);
+      } else {
+        result.errors.push(`${file.src} migration failed: ${fileResult.error}`);
+        console.error(`✗ ${file.src} migration failed: ${fileResult.error}`);
       }
     }
   }

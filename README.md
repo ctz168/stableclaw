@@ -212,12 +212,38 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 
 #### 迁移内容
 
+**核心数据：**
 - ✅ **配置文件**：`openclaw.json` → `stableclaw.json`
 - ✅ **插件目录**：`extensions/` (所有已安装的插件)
 - ✅ **凭证密钥**：`credentials/` (API 密钥、令牌)
-- ✅ **数据文件**：`logs/`, `memory/`, `tasks/`, `devices/`
-- ✅ **渠道数据**：`telegram/`, `discord/`, `slack/`
-- ✅ **工作区**：`canvas/`, `workspace/`
+
+**重要数据：**
+- ✅ **身份认证**：`identity/` (设备认证、身份信息) ⭐ **重要**
+- ✅ **配置备份**：`backups/` (历史配置备份)
+- ✅ **微信数据**：`openclaw-weixin/` (微信账户信息) ⭐ **重要**
+- ✅ **执行审批**：`exec-approvals.json` (执行权限设置)
+
+**运行数据：**
+- ✅ **记忆数据**：`memory/` (对话记忆、上下文) ⭐ **重要**
+- ✅ **任务数据**：`tasks/` (定时任务、后台任务)
+- ✅ **代理配置**：`agents/` (Agent 配置和状态)
+- ✅ **设备信息**：`devices/` (已配对设备)
+
+**渠道数据：**
+- ✅ **Telegram**：`telegram/`
+- ✅ **Discord**：`discord/`
+- ✅ **Slack**：`slack/`
+
+**工作区数据：**
+- ✅ **画布**：`canvas/`
+- ✅ **工作区**：`workspace/` (包含 Skills)
+
+**其他数据：**
+- ✅ **日志文件**：`logs/`
+- ✅ **投递队列**：`delivery-queue/`
+- ✅ **Shell 补全**：`completions/`
+
+**注：** Skills 存储在 `workspace/skills/` 目录下，会随 workspace 一起迁移。
 
 #### 迁移选项
 

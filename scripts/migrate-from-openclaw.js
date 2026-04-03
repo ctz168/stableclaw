@@ -270,13 +270,26 @@ ${colors.bright}Examples:${colors.reset}
   node migrate-from-openclaw.js --skip-plugins --skip-logs --skip-memory --skip-tasks
 
 ${colors.bright}Migration Items:${colors.reset}
+  Core:
   - Configuration file (openclaw.json → stableclaw.json)
   - Installed plugins (extensions/)
   - Credentials (credentials/)
-  - Logs (logs/)
-  - Memory (memory/)
-  - Tasks (tasks/)
-  - Devices, agents, telegram, discord, slack, canvas, workspace
+  
+  Important:
+  - Identity (device authentication) ⭐
+  - WeChat data (openclaw-weixin/) ⭐
+  - Memory (conversation context) ⭐
+  - Backups (configuration history)
+  - Exec approvals (execution permissions)
+  
+  Data:
+  - Memory (conversation context)
+  - Tasks (scheduled tasks)
+  - Agents (agent configurations)
+  - Devices (paired devices)
+  - Telegram, Discord, Slack channels
+  - Canvas, Workspace (including Skills)
+  - Logs, Delivery queue, Completions
 
 ${colors.bright}After Migration:${colors.reset}
   1. Install StableClaw: npm install -g stableclaw
@@ -655,6 +668,36 @@ async function main() {
       } else {
         errors.push(`${dir.name} migration failed: ${dirResult.error}`);
         error(`${dir.name} migration failed: ${dirResult.error}`);
+      }
+    }
+  }
+
+  // Migrate important files
+  const importantFiles = [
+    { src: 'exec-approvals.json', dest: 'exec-approvals.json' },
+  ];
+
+  for (const file of importantFiles) {
+    const srcFile = path.join(openclawDir, file.src);
+    const destFile = path.join(stableclawDir, file.dest);
+    
+    if (!fs.existsSync(srcFile)) {
+      continue;
+    }
+    
+    log(`Migrating ${file.src}...`, 'cyan');
+    
+    if (options.dryRun) {
+      info(`[DRY RUN] Would copy: ${srcFile} → ${destFile}`);
+      migratedItems.push(file.src);
+    } else {
+      const fileResult = await copyFile(srcFile, destFile, options);
+      if (fileResult.ok) {
+        migratedItems.push(file.src);
+        success(`Migrated ${file.src}`);
+      } else {
+        errors.push(`${file.src} migration failed: ${fileResult.error}`);
+        error(`${file.src} migration failed: ${fileResult.error}`);
       }
     }
   }
