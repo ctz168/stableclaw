@@ -873,10 +873,46 @@ export async function compactEmbeddedPiSessionDirect(
           // If token estimation throws on a malformed message, fall back to 0 so
           // the sanity check below becomes a no-op instead of crashing compaction.
         }
+
+        // --- Workflow summary integration ---
+        // Load previously saved workflow summaries and inject into compaction
+        // instructions so the LLM preserves critical context from prior tasks.
+        let compactionInstructions = params.customInstructions;
+        try {
+          const {
+            loadMergedWorkflowSummary,
+            resolveWorkflowSummaryConfig,
+          } = await import("../../agents/workflow-summary.js");
+          const wfConfig = resolveWorkflowSummaryConfig(params.config, resolvedWorkspace);
+          if (wfConfig.enabled) {
+            const wfSummary = await loadMergedWorkflowSummary(
+              wfConfig.memoryDir,
+              params.sessionKey,
+            );
+            if (wfSummary) {
+              const wfPrefix =
+                "The following workflow summary captures what was accomplished in prior " +
+                "tasks. PRESERVE all outcomes, decisions, and pending items from it:\n\n";
+              compactionInstructions = compactionInstructions
+                ? `${wfPrefix}${wfSummary}\n\nAdditionally: ${compactionInstructions}`
+                : `${wfPrefix}${wfSummary}`;
+              log.debug(
+                `[compaction] injected workflow summary into compaction instructions ` +
+                  `(${wfSummary.length} chars)`,
+              );
+            }
+          }
+        } catch (wfErr) {
+          // Workflow summary loading is best-effort; don't block compaction.
+          log.debug(
+            `workflow summary injection skipped: ${wfErr instanceof Error ? wfErr.message : String(wfErr)}`,
+          );
+        }
+
         const result = await compactWithSafetyTimeout(
           () => {
             setCompactionSafeguardCancelReason(compactionSessionManager, undefined);
-            return session.compact(params.customInstructions);
+            return session.compact(compactionInstructions);
           },
           compactionTimeoutMs,
           {

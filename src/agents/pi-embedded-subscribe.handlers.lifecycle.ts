@@ -1,3 +1,4 @@
+import { createInternalHookEvent, triggerInternalHook } from "../hooks/internal-hooks.js";
 import { emitAgentEvent } from "../infra/agent-events.js";
 import { createInlineCodeState } from "../markdown/code-spans.js";
 import {
@@ -100,6 +101,25 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
       data: { phase: "end" },
     });
   }
+
+  // Fire-and-forget: trigger internal agent:end hook for workflow summary, etc.
+  const sessionKey = ctx.params.sessionKey ?? ctx.params.sessionId ?? "unknown";
+  void triggerInternalHook(
+    createInternalHookEvent("agent", "end", sessionKey, {
+      runId: ctx.params.runId,
+      sessionId: ctx.params.sessionId,
+      sessionKey: ctx.params.sessionKey,
+      workspaceDir: ctx.params.workspaceDir,
+      cfg: ctx.params.config,
+      isError,
+      error: isError && lastAssistant ? (friendlyError || lastAssistant.errorMessage) : undefined,
+      assistantTexts: ctx.state.assistantTexts,
+      toolMetas: ctx.state.toolMetas,
+      endedAt: Date.now(),
+    }),
+  ).catch(() => {
+    // Internal hook errors are already logged by the trigger function.
+  });
 
   const finalizeAgentEnd = () => {
     ctx.state.blockState.thinking = false;
