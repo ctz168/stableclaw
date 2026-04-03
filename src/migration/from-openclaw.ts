@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import type { OpenClawConfig } from "../config/types.js";
+
+const execAsync = promisify(exec);
 
 export type MigrationSource = "openclaw";
 
@@ -31,10 +35,137 @@ export type MigrationOptions = {
   skipTasks?: boolean;
   force?: boolean;
   createBackup?: boolean;
+  openclawDir?: string; // Optional: manually specified OpenClaw directory
+};
+
+export type OpenClawDetectionResult = {
+  isRunning: boolean;
+  pid?: number;
+  configDir?: string;
+  executablePath?: string;
+  commandLine?: string;
 };
 
 const OPENCLAW_DIR = ".openclaw";
 const STABLECLAW_DIR = ".stableclaw";
+
+/**
+ * Detect running OpenClaw process
+ */
+async function detectRunningOpenClaw(): Promise<OpenClawDetectionResult> {
+  try {
+    const platform = os.platform();
+    
+    if (platform === "win32") {
+      // Windows: use tasklist
+      const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq node.exe" /FO CSV /V');
+      const lines = stdout.split("\n").slice(1); // Skip header
+      
+      for (const line of lines) {
+        if (line.includes("openclaw") || line.includes("stableclaw")) {
+          // Parse CSV line
+          const match = line.match(/"node\.exe","(\d+)"/);
+          if (match) {
+            const pid = parseInt(match[1]);
+            
+            // Try to get command line
+            try {
+              const { stdout: cmdline } = await execAsync(`wmic process where ProcessId=${pid} get CommandLine /format:list`);
+              const cmdMatch = cmdline.match(/CommandLine=(.+)/);
+              
+              if (cmdMatch) {
+                const cmdLine = cmdMatch[1].trim();
+                
+                // Extract config directory from command line or working directory
+                const configDirMatch = cmdLine.match(/--config-dir[= ]([^\s]+)/);
+                const homeDir = path.join(os.homedir(), OPENCLAW_DIR);
+                
+                return {
+                  isRunning: true,
+                  pid,
+                  configDir: configDirMatch ? configDirMatch[1] : homeDir,
+                  commandLine: cmdLine,
+                };
+              }
+            } catch {
+              // If we can't get command line, just return PID
+              return {
+                isRunning: true,
+                pid,
+                configDir: path.join(os.homedir(), OPENCLAW_DIR),
+              };
+            }
+          }
+        }
+      }
+    } else {
+      // Linux/macOS: use ps
+      const { stdout } = await execAsync('ps aux | grep -E "openclaw|stableclaw" | grep -v grep');
+      const lines = stdout.split("\n").filter(l => l.trim());
+      
+      for (const line of lines) {
+        // Parse ps output
+        const parts = line.split(/\s+/);
+        const pid = parseInt(parts[1]);
+        const cmdLine = parts.slice(10).join(" ");
+        
+        // Extract config directory from command line
+        const configDirMatch = cmdLine.match(/--config-dir[= ]([^\s]+)/);
+        const homeDir = path.join(os.homedir(), OPENCLAW_DIR);
+        
+        return {
+          isRunning: true,
+          pid,
+          configDir: configDirMatch ? configDirMatch[1] : homeDir,
+          commandLine: cmdLine,
+        };
+      }
+    }
+    
+    return { isRunning: false };
+  } catch (error) {
+    // No running process found or command failed
+    return { isRunning: false };
+  }
+}
+
+/**
+ * Auto-detect OpenClaw configuration directory
+ */
+async function autoDetectOpenClawDir(): Promise<string | null> {
+  // 1. Check environment variable
+  const envDir = process.env.OPENCLAW_CONFIG_DIR;
+  if (envDir && fs.existsSync(envDir)) {
+    return envDir;
+  }
+  
+  // 2. Check if OpenClaw is running and extract from process
+  const detection = await detectRunningOpenClaw();
+  if (detection.isRunning && detection.configDir && fs.existsSync(detection.configDir)) {
+    return detection.configDir;
+  }
+  
+  // 3. Check default locations
+  const defaultDir = path.join(os.homedir(), OPENCLAW_DIR);
+  if (fs.existsSync(defaultDir)) {
+    return defaultDir;
+  }
+  
+  // 4. Check alternative locations
+  const altDirs = [
+    path.join(os.homedir(), ".config", "openclaw"),
+    path.join(os.homedir(), "AppData", "Roaming", "openclaw"), // Windows
+    path.join(os.homedir(), "Library", "Application Support", "openclaw"), // macOS
+  ];
+  
+  for (const dir of altDirs) {
+    if (fs.existsSync(dir)) {
+      return dir;
+    }
+  }
+  
+  return null;
+}
 
 function getOpenClawDir(): string {
   return path.join(os.homedir(), OPENCLAW_DIR);
@@ -244,12 +375,72 @@ export async function migrateFromOpenClaw(
     errors: [],
   };
 
-  // Check if OpenClaw exists
-  if (!checkOpenClawExists()) {
+  // Step 1: Detect OpenClaw installation
+  console.log("\n🔍 Step 1: Detecting OpenClaw installation...\n");
+  
+  let openclawDir: string | null = options.openclawDir || null;
+  
+  // Check if OpenClaw is running
+  const detection = await detectRunningOpenClaw();
+  if (detection.isRunning) {
+    console.log(`✓ OpenClaw is running (PID: ${detection.pid})`);
+    if (detection.configDir) {
+      console.log(`✓ Found config directory: ${detection.configDir}`);
+      openclawDir = detection.configDir;
+    }
+  } else {
+    console.log("ℹ OpenClaw is not running");
+  }
+  
+  // Auto-detect if not found from running process
+  if (!openclawDir) {
+    console.log("\n🔍 Searching for OpenClaw configuration directory...");
+    openclawDir = await autoDetectOpenClawDir();
+    
+    if (openclawDir) {
+      console.log(`✓ Found OpenClaw directory: ${openclawDir}`);
+    } else {
+      console.log("✗ OpenClaw configuration directory not found");
+      console.log("\n💡 Suggestion: Please start OpenClaw first, or manually specify:");
+      console.log("   stableclaw migrate from-openclaw --openclaw-dir <path>");
+      result.status = "failed";
+      result.errors.push("OpenClaw configuration directory not found.");
+      result.errors.push("Please start OpenClaw first or use --openclaw-dir option.");
+      return result;
+    }
+  }
+  
+  // Verify OpenClaw directory exists
+  if (!fs.existsSync(openclawDir)) {
     result.status = "failed";
-    result.errors.push("OpenClaw installation not found. Cannot migrate.");
+    result.errors.push(`OpenClaw directory does not exist: ${openclawDir}`);
     return result;
   }
+  
+  // Store detected OpenClaw directory
+  const detectedOpenClawDir = openclawDir;
+  
+  // Step 2: Check StableClaw
+  console.log("\n🔍 Step 2: Checking StableClaw status...\n");
+  
+  const stableclawDir = getStableClawDir();
+  const stableclawExists = checkStableClawExists();
+  
+  console.log(`StableClaw directory: ${stableclawDir}`);
+  console.log(`StableClaw exists: ${stableclawExists ? "✓ Yes" : "✗ No"}`);
+  
+  if (stableclawExists && !options.force) {
+    result.status = "failed";
+    result.errors.push("StableClaw already exists. Use --force to overwrite or merge.");
+    result.warnings.push("Existing StableClaw installation detected.");
+    console.log("\n⚠️  StableClaw already exists. Use --force to overwrite.");
+    return result;
+  }
+
+  result.status = "in_progress";
+  
+  // Step 3: Perform migration
+  console.log("\n📦 Step 3: Starting migration...\n");
 
   // Check if StableClaw already exists
   if (checkStableClawExists() && !options.force) {
@@ -268,45 +459,87 @@ export async function migrateFromOpenClaw(
 
   // Migrate config
   console.log("Migrating configuration...");
-  const configResult = await migrateConfig(options);
-  if (configResult.ok) {
-    result.migratedItems.push("config");
-    console.log("✓ Configuration migrated successfully");
+  const openclawConfig = path.join(detectedOpenClawDir, "openclaw.json");
+  const stableclawConfig = path.join(stableclawDir, "stableclaw.json");
+  
+  if (!fs.existsSync(openclawConfig)) {
+    result.errors.push("OpenClaw config file not found");
+    console.error("✗ OpenClaw config file not found");
   } else {
-    result.errors.push(`Config migration failed: ${configResult.error}`);
-    console.error(`✗ Configuration migration failed: ${configResult.error}`);
+    if (options.dryRun) {
+      console.log(`[DRY RUN] Would copy: ${openclawConfig} → ${stableclawConfig}`);
+    } else {
+      const configResult = await copyFileWithBackup(openclawConfig, stableclawConfig, options);
+      if (configResult.ok) {
+        result.migratedItems.push("config");
+        console.log("✓ Configuration migrated successfully");
+      } else {
+        result.errors.push(`Config migration failed: ${configResult.error}`);
+        console.error(`✗ Configuration migration failed: ${configResult.error}`);
+      }
+    }
   }
 
   // Migrate plugins
   console.log("Migrating plugins...");
-  const pluginsResult = await migratePlugins(options);
-  if (pluginsResult.ok) {
-    if (pluginsResult.count && pluginsResult.count > 0) {
-      result.migratedItems.push(`plugins (${pluginsResult.count})`);
-      console.log(`✓ Migrated ${pluginsResult.count} plugins`);
+  if (!options.skipPlugins) {
+    const openclawPlugins = path.join(detectedOpenClawDir, "extensions");
+    const stableclawPlugins = path.join(stableclawDir, "extensions");
+    
+    if (fs.existsSync(openclawPlugins)) {
+      if (options.dryRun) {
+        const entries = await fs.promises.readdir(openclawPlugins, { withFileTypes: true });
+        const pluginCount = entries.filter(e => e.isDirectory()).length;
+        console.log(`[DRY RUN] Would copy ${pluginCount} plugins: ${openclawPlugins} → ${stableclawPlugins}`);
+        result.migratedItems.push(`plugins (${pluginCount})`);
+      } else {
+        const pluginsResult = await copyDirectoryWithBackup(openclawPlugins, stableclawPlugins, options);
+        if (pluginsResult.ok) {
+          const entries = await fs.promises.readdir(stableclawPlugins, { withFileTypes: true });
+          const pluginCount = entries.filter(e => e.isDirectory()).length;
+          result.migratedItems.push(`plugins (${pluginCount})`);
+          console.log(`✓ Migrated ${pluginCount} plugins`);
+        } else {
+          result.errors.push(`Plugins migration failed: ${pluginsResult.error}`);
+          console.error(`✗ Plugins migration failed: ${pluginsResult.error}`);
+        }
+      }
     } else {
       result.warnings.push("No plugins found to migrate");
       console.log("  No plugins found to migrate");
     }
   } else {
-    result.errors.push(`Plugins migration failed: ${pluginsResult.error}`);
-    console.error(`✗ Plugins migration failed: ${pluginsResult.error}`);
+    console.log("  Skipping plugins migration");
   }
 
   // Migrate credentials
   console.log("Migrating credentials...");
-  const credsResult = await migrateCredentials(options);
-  if (credsResult.ok) {
-    if (credsResult.count && credsResult.count > 0) {
-      result.migratedItems.push(`credentials (${credsResult.count})`);
-      console.log(`✓ Migrated ${credsResult.count} credential files`);
+  if (!options.skipCredentials) {
+    const openclawCreds = path.join(detectedOpenClawDir, "credentials");
+    const stableclawCreds = path.join(stableclawDir, "credentials");
+    
+    if (fs.existsSync(openclawCreds)) {
+      if (options.dryRun) {
+        const entries = await fs.promises.readdir(openclawCreds);
+        console.log(`[DRY RUN] Would copy ${entries.length} credential files: ${openclawCreds} → ${stableclawCreds}`);
+        result.migratedItems.push(`credentials (${entries.length})`);
+      } else {
+        const credsResult = await copyDirectoryWithBackup(openclawCreds, stableclawCreds, options);
+        if (credsResult.ok) {
+          const entries = await fs.promises.readdir(stableclawCreds);
+          result.migratedItems.push(`credentials (${entries.length})`);
+          console.log(`✓ Migrated ${entries.length} credential files`);
+        } else {
+          result.errors.push(`Credentials migration failed: ${credsResult.error}`);
+          console.error(`✗ Credentials migration failed: ${credsResult.error}`);
+        }
+      }
     } else {
       result.warnings.push("No credentials found to migrate");
       console.log("  No credentials found to migrate");
     }
   } else {
-    result.errors.push(`Credentials migration failed: ${credsResult.error}`);
-    console.error(`✗ Credentials migration failed: ${credsResult.error}`);
+    console.log("  Skipping credentials migration");
   }
 
   // Migrate data directories
@@ -324,33 +557,45 @@ export async function migrateFromOpenClaw(
   ];
 
   for (const dir of dataDirs) {
+    if (dir.skip) {
+      console.log(`Skipping ${dir.name}...`);
+      continue;
+    }
+    
     console.log(`Migrating ${dir.name}...`);
-    const dirResult = await migrateDataDir(dir.name, options, dir.skip);
-    if (dirResult.ok) {
-      if (dirResult.count && dirResult.count > 0) {
-        result.migratedItems.push(`${dir.name} (${dirResult.count})`);
-        console.log(`✓ Migrated ${dir.name} (${dirResult.count} items)`);
-      }
+    const openclawDataDir = path.join(detectedOpenClawDir, dir.name);
+    const stableclawDataDir = path.join(stableclawDir, dir.name);
+    
+    if (!fs.existsSync(openclawDataDir)) {
+      continue;
+    }
+    
+    if (options.dryRun) {
+      const entries = await fs.promises.readdir(openclawDataDir);
+      console.log(`[DRY RUN] Would copy ${entries.length} items from ${dir.name}: ${openclawDataDir} → ${stableclawDataDir}`);
+      result.migratedItems.push(`${dir.name} (${entries.length})`);
     } else {
-      result.errors.push(`${dir.name} migration failed: ${dirResult.error}`);
-      console.error(`✗ ${dir.name} migration failed: ${dirResult.error}`);
+      const dirResult = await copyDirectoryWithBackup(openclawDataDir, stableclawDataDir, options);
+      if (dirResult.ok) {
+        const entries = await fs.promises.readdir(stableclawDataDir);
+        result.migratedItems.push(`${dir.name} (${entries.length})`);
+        console.log(`✓ Migrated ${dir.name} (${entries.length} items)`);
+      } else {
+        result.errors.push(`${dir.name} migration failed: ${dirResult.error}`);
+        console.error(`✗ ${dir.name} migration failed: ${dirResult.error}`);
+      }
     }
   }
 
   // Determine final status
-  if (result.errors.length === 0) {
-    result.ok = true;
-    result.status = "completed";
-    console.log("\n✅ Migration completed successfully!");
-  } else if (result.migratedItems.length > 0) {
-    result.ok = true;
-    result.status = "partial";
-    console.log("\n⚠️  Migration completed with errors");
-  } else {
-    result.status = "failed";
-    console.log("\n❌ Migration failed");
-  }
-
+  console.log("\n" + "=".repeat(50));
+  console.log("Migration Summary");
+  console.log("=".repeat(50));
+  console.log(`Source:           ${detectedOpenClawDir}`);
+  console.log(`Target:           ${stableclawDir}`);
+  console.log(`Status:           ${result.errors.length === 0 ? "✅ Completed" : result.migratedItems.length > 0 ? "⚠️  Partial" : "❌ Failed"}`);
+  console.log(`Migrated Items:   ${result.migratedItems.join(", ") || "None"}`);
+  
   if (result.warnings.length > 0) {
     console.log("\nWarnings:");
     result.warnings.forEach(w => console.log(`  - ${w}`));
@@ -359,21 +604,37 @@ export async function migrateFromOpenClaw(
   if (result.errors.length > 0) {
     console.log("\nErrors:");
     result.errors.forEach(e => console.error(`  - ${e}`));
+    result.status = result.migratedItems.length > 0 ? "partial" : "failed";
+  } else {
+    result.ok = true;
+    result.status = "completed";
+    console.log("\n✅ Migration completed successfully!");
+    console.log("\nNext steps:");
+    console.log("  1. Run 'stableclaw config get' to verify configuration");
+    console.log("  2. Run 'stableclaw plugins list' to verify plugins");
+    console.log("  3. Run 'stableclaw gateway run' to start using StableClaw");
   }
 
   return result;
 }
 
-export function getMigrationSummary(): {
+export async function getMigrationSummary(): Promise<{
   openclawExists: boolean;
   stableclawExists: boolean;
-  openclawDir: string;
+  openclawDir: string | null;
   stableclawDir: string;
-} {
+  openclawRunning: boolean;
+  openclawPid?: number;
+}> {
+  const detection = await detectRunningOpenClaw();
+  const openclawDir = await autoDetectOpenClawDir();
+  
   return {
-    openclawExists: checkOpenClawExists(),
+    openclawExists: openclawDir !== null,
     stableclawExists: checkStableClawExists(),
-    openclawDir: getOpenClawDir(),
+    openclawDir,
     stableclawDir: getStableClawDir(),
+    openclawRunning: detection.isRunning,
+    openclawPid: detection.pid,
   };
 }

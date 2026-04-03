@@ -16,14 +16,16 @@ export type MigrateOptions = {
   skipTasks?: boolean;
   force?: boolean;
   createBackup?: boolean;
+  openclawDir?: string;
 };
 
-function formatMigrationSummary(summary: ReturnType<typeof getMigrationSummary>): string {
+async function formatMigrationSummary(summary: Awaited<ReturnType<typeof getMigrationSummary>>): Promise<string> {
   const lines: string[] = [];
 
   lines.push(`${theme.bold("Migration Status:")}`);
-  lines.push(`  OpenClaw directory:     ${summary.openclawDir}`);
+  lines.push(`  OpenClaw directory:     ${summary.openclawDir || "Not found"}`);
   lines.push(`  OpenClaw exists:        ${summary.openclawExists ? "✓ Yes" : "✗ No"}`);
+  lines.push(`  OpenClaw running:       ${summary.openclawRunning ? `✓ Yes (PID: ${summary.openclawPid})` : "✗ No"}`);
   lines.push(`  StableClaw directory:   ${summary.stableclawDir}`);
   lines.push(`  StableClaw exists:      ${summary.stableclawExists ? "✓ Yes" : "✗ No"}`);
 
@@ -46,18 +48,24 @@ export function registerMigrateCli(program: Command) {
     .option("--skip-tasks", "Skip tasks migration", false)
     .option("--force", "Force migration even if StableClaw already exists", false)
     .option("--create-backup", "Create backup of existing StableClaw data", false)
+    .option("--openclaw-dir <path>", "Manually specify OpenClaw configuration directory")
     .action(async (opts: MigrateOptions) => {
       try {
         console.log(theme.bold("\n🔄 OpenClaw → StableClaw Migration\n"));
 
         // Show migration summary
-        const summary = getMigrationSummary();
-        console.log(formatMigrationSummary(summary));
+        const summary = await getMigrationSummary();
+        console.log(await formatMigrationSummary(summary));
         console.log();
 
         // Check if OpenClaw exists
-        if (!summary.openclawExists) {
-          defaultRuntime.error("OpenClaw installation not found. Cannot proceed with migration.");
+        if (!summary.openclawExists && !opts.openclawDir) {
+          defaultRuntime.error("OpenClaw installation not found.");
+          console.log("\n💡 Suggestions:");
+          console.log("  1. Start OpenClaw first, then run this command again");
+          console.log("  2. Or use --openclaw-dir to manually specify the path");
+          console.log("\nExample:");
+          console.log("  stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw");
           defaultRuntime.exit(1);
           return;
         }
@@ -97,35 +105,15 @@ export function registerMigrateCli(program: Command) {
           skipTasks: opts.skipTasks,
           force: opts.force,
           createBackup: opts.createBackup,
+          openclawDir: opts.openclawDir,
         };
 
         const result = await migrateFromOpenClaw(migrationOptions);
 
         // Print result
-        console.log("\n" + theme.bold("Migration Summary"));
-        console.log("=".repeat(50));
-        console.log(`Status:           ${result.status}`);
-        console.log(`Migrated Items:   ${result.migratedItems.join(", ") || "None"}`);
-
-        if (result.warnings.length > 0) {
-          console.log("\nWarnings:");
-          result.warnings.forEach(w => console.log(`  ⚠️  ${w}`));
-        }
-
-        if (result.errors.length > 0) {
-          console.log("\nErrors:");
-          result.errors.forEach(e => console.error(`  ❌ ${e}`));
-        }
-
         if (result.ok) {
-          console.log("\n" + theme.success("✓ Migration completed successfully!"));
-          console.log("\nNext steps:");
-          console.log("  1. Run 'stableclaw config get' to verify configuration");
-          console.log("  2. Run 'stableclaw plugins list' to verify plugins");
-          console.log("  3. Run 'stableclaw gateway run' to start using StableClaw");
           defaultRuntime.exit(0);
         } else {
-          console.log("\n" + theme.error("✗ Migration failed"));
           defaultRuntime.exit(1);
         }
       } catch (error) {
@@ -138,11 +126,11 @@ export function registerMigrateCli(program: Command) {
   migrate
     .command("status")
     .description("Check migration status and available sources")
-    .action(() => {
+    .action(async () => {
       console.log(theme.bold("\n📊 Migration Status\n"));
 
-      const summary = getMigrationSummary();
-      console.log(formatMigrationSummary(summary));
+      const summary = await getMigrationSummary();
+      console.log(await formatMigrationSummary(summary));
 
       if (summary.openclawExists && !summary.stableclawExists) {
         console.log("\n" + theme.success("✓ Ready to migrate from OpenClaw"));

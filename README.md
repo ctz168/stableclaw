@@ -142,28 +142,73 @@ Plugin my-plugin hot-reloaded successfully
 
 **问题：** OpenClaw 用户升级到 StableClaw 需要手动迁移配置、插件和数据，过程繁琐且容易出错。
 
-**解决方案：** 提供多种迁移方式，零停机平滑迁移。
+**解决方案：** 自动检测运行中的 OpenClaw，提供傻瓜式迁移流程。
+
+#### 迁移步骤（推荐）
+
+**步骤 1：启动 OpenClaw**
+```bash
+# 先启动 OpenClaw（让迁移工具自动检测）
+openclaw gateway run
+```
+
+**步骤 2：执行迁移**
+```bash
+# 自动检测运行中的 OpenClaw 并迁移
+stableclaw migrate from-openclaw --create-backup
+```
+
+**步骤 3：验证迁移**
+```bash
+# 检查迁移状态
+stableclaw migrate status
+
+# 验证配置
+stableclaw config get
+
+# 验证插件
+stableclaw plugins list
+```
 
 #### 方式1：内置命令（推荐）
 
 ```bash
-# 预览迁移
+# 预览迁移（不修改文件）
 stableclaw migrate from-openclaw --dry-run
 
 # 执行迁移并创建备份
 stableclaw migrate from-openclaw --create-backup
 
-# 检查迁移状态
-stableclaw migrate status
+# 手动指定 OpenClaw 目录（如果未运行）
+stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw
 ```
 
-#### 方式2：独立脚本（无需安装）
+#### 方式2：独立脚本（无需安装 StableClaw）
 
 ```bash
-# 下载并运行迁移脚本
+# 下载迁移脚本
+# 先启动 OpenClaw
+openclaw gateway run
+
+# 运行迁移脚本
 node migrate-from-openclaw.js --dry-run
 node migrate-from-openclaw.js --create-backup
+
+# 手动指定目录
+node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 ```
+
+#### 自动检测机制
+
+迁移工具会自动：
+1. ✅ **检测运行中的 OpenClaw 进程**
+2. ✅ **提取配置目录路径**（从运行进程）
+3. ✅ **迁移所有数据**（配置、插件、凭证、数据）
+4. ✅ **生成详细报告**
+
+如果 OpenClaw 未运行，迁移工具会：
+- 搜索常见配置目录位置
+- 提示用户启动 OpenClaw 或手动指定路径
 
 #### 迁移内容
 
@@ -184,12 +229,14 @@ node migrate-from-openclaw.js --create-backup
 | `--skip-logs` | 跳过日志迁移 |
 | `--force` | 强制迁移（覆盖现有数据）|
 | `--create-backup` | 创建备份 |
+| `--openclaw-dir` | 手动指定 OpenClaw 目录 |
 
 **优势**：
+- 🎯 **傻瓜式操作**：只需启动 OpenClaw，其余自动完成
 - 🚀 **零停机迁移**：迁移过程不影响 OpenClaw 使用
 - 🔒 **数据安全**：自动备份机制，支持回滚
 - ⚡ **灵活选择**：可选择性地迁移特定内容
-- 🎯 **详细报告**：提供完整的迁移日志和错误诊断
+- 🎨 **详细报告**：提供完整的迁移日志和错误诊断
 
 ---
 
