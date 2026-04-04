@@ -109,7 +109,7 @@ const baseEntry: ChannelPluginCatalogEntry = {
     blurb: "Test",
   },
   install: {
-    npmSpec: "@openclaw/zalo",
+    npmSpec: "@stableclaw/zalo",
     localPath: bundledPluginRoot("zalo"),
   },
 };
@@ -186,10 +186,10 @@ describe("ensureChannelSetupPluginInstalled", () => {
     expect(result.cfg.plugins?.entries?.zalo?.enabled).toBe(true);
     expect(result.cfg.plugins?.allow).toContain("zalo");
     expect(result.cfg.plugins?.installs?.zalo?.source).toBe("npm");
-    expect(result.cfg.plugins?.installs?.zalo?.spec).toBe("@openclaw/zalo");
+    expect(result.cfg.plugins?.installs?.zalo?.spec).toBe("@stableclaw/zalo");
     expect(result.cfg.plugins?.installs?.zalo?.installPath).toBe("/tmp/zalo");
     expect(installPluginFromNpmSpec).toHaveBeenCalledWith(
-      expect.objectContaining({ spec: "@openclaw/zalo" }),
+      expect.objectContaining({ spec: "@stableclaw/zalo" }),
     );
   });
 
@@ -225,15 +225,15 @@ describe("ensureChannelSetupPluginInstalled", () => {
       entry: {
         ...baseEntry,
         id: "teams",
-        pluginId: "@openclaw/msteams-plugin",
+        pluginId: "@stableclaw/msteams-plugin",
       },
       prompter,
       runtime,
     });
 
     expect(result.installed).toBe(true);
-    expect(result.pluginId).toBe("@openclaw/msteams-plugin");
-    expect(result.cfg.plugins?.entries?.["@openclaw/msteams-plugin"]?.enabled).toBe(true);
+    expect(result.pluginId).toBe("@stableclaw/msteams-plugin");
+    expect(result.cfg.plugins?.entries?.["@stableclaw/msteams-plugin"]?.enabled).toBe(true);
   });
 
   it("defaults to local on dev channel when local path exists", async () => {
@@ -257,7 +257,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
           {
             pluginId: "zalo",
             localPath: bundledPluginRootAt("/opt/openclaw", "zalo"),
-            npmSpec: "@openclaw/zalo",
+            npmSpec: "@stableclaw/zalo",
           },
         ],
       ]),
@@ -296,7 +296,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
           {
             pluginId: "whatsapp",
             localPath: bundledPluginRootAt("/opt/openclaw", "whatsapp"),
-            npmSpec: "@openclaw/whatsapp",
+            npmSpec: "@stableclaw/whatsapp",
           },
         ],
       ]),
@@ -433,7 +433,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("scopes channel reloads when setup starts from an empty registry", () => {
     const runtime = makeRuntime();
     const cfg: OpenClawConfig = {};
-    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@openclaw/telegram-plugin" });
+    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@stableclaw/telegram-plugin" });
 
     reloadChannelSetupPluginRegistryForChannel({
       cfg,
@@ -449,7 +449,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
         autoEnabledReasons: {},
         workspaceDir: "/tmp/openclaw-workspace",
         cache: false,
-        onlyPluginIds: ["@openclaw/telegram-plugin"],
+        onlyPluginIds: ["@stableclaw/telegram-plugin"],
         includeSetupOnlyChannelPlugins: true,
       }),
     );
@@ -487,7 +487,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("scopes channel reloads when the global registry is populated but the pinned channel registry is empty", () => {
     const runtime = makeRuntime();
     const cfg: OpenClawConfig = {};
-    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@openclaw/telegram-plugin" });
+    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@stableclaw/telegram-plugin" });
     const activeRegistry = createEmptyPluginRegistry();
     activeRegistry.plugins.push(
       createPluginRecord({
@@ -516,7 +516,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       expect.objectContaining({
         activationSourceConfig: cfg,
         autoEnabledReasons: {},
-        onlyPluginIds: ["@openclaw/telegram-plugin"],
+        onlyPluginIds: ["@stableclaw/telegram-plugin"],
       }),
     );
   });
@@ -524,7 +524,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("can load a channel-scoped snapshot without activating the global registry", () => {
     const runtime = makeRuntime();
     const cfg: OpenClawConfig = {};
-    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@openclaw/telegram-plugin" });
+    getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@stableclaw/telegram-plugin" });
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
@@ -540,7 +540,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
         autoEnabledReasons: {},
         workspaceDir: "/tmp/openclaw-workspace",
         cache: false,
-        onlyPluginIds: ["@openclaw/telegram-plugin"],
+        onlyPluginIds: ["@stableclaw/telegram-plugin"],
         includeSetupOnlyChannelPlugins: true,
         activate: false,
       }),
@@ -602,7 +602,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "msteams",
-      pluginId: "@openclaw/msteams-plugin",
+      pluginId: "@stableclaw/msteams-plugin",
       workspaceDir: "/tmp/openclaw-workspace",
     });
 
@@ -613,7 +613,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
         autoEnabledReasons: {},
         workspaceDir: "/tmp/openclaw-workspace",
         cache: false,
-        onlyPluginIds: ["@openclaw/msteams-plugin"],
+        onlyPluginIds: ["@stableclaw/msteams-plugin"],
         includeSetupOnlyChannelPlugins: true,
         activate: false,
       }),

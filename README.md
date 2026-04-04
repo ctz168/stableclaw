@@ -13,9 +13,9 @@
 
 ## 📋 项目简介
 
-**StableClaw** 是基于 [OpenClaw](https://github.com/openclaw/openclaw) **v2026.4.3** 版本的**企业级稳定增强版**，专注于生产环境的稳定性、可靠性和可维护性。
+**StableClaw** 是基于 [StableClaw](https://github.com/openclaw/openclaw) **v2026.4.3** 版本的**企业级稳定增强版**，专注于生产环境的稳定性、可靠性和可维护性。
 
-**StableClaw** 在 OpenClaw 的基础上，增加了多项企业级增强功能，特别适合需要高可用性、零停机维护和自动化运维的生产环境。
+**StableClaw** 在 StableClaw 的基础上，增加了多项企业级增强功能，特别适合需要高可用性、零停机维护和自动化运维的生产环境。
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### 1. 🔄 配置热重载安全机制
 
-**问题：** OpenClaw 原版在配置文件修改后，如果配置无效会导致 gateway 崩溃或拒绝启动。
+**问题：** StableClaw 原版在配置文件修改后，如果配置无效会导致 gateway 崩溃或拒绝启动。
 
 **StableClaw 解决方案：**
 
@@ -49,7 +49,7 @@ $ vim ~/.openclaw/config.json
 
 ### 2. 🔒 严格单例模式
 
-**问题：** OpenClaw 原版可能启动多个 gateway 实例，导致端口冲突、资源浪费和状态混乱。
+**问题：** StableClaw 原版可能启动多个 gateway 实例，导致端口冲突、资源浪费和状态混乱。
 
 **StableClaw 解决方案：**
 
@@ -85,7 +85,7 @@ $ openclaw gateway run
 
 ### 3. 🔌 插件热插拔机制
 
-**问题：** OpenClaw 原版安装/卸载插件需要重启 gateway，插件错误可能导致 gateway 崩溃。
+**问题：** StableClaw 原版安装/卸载插件需要重启 gateway，插件错误可能导致 gateway 崩溃。
 
 **StableClaw 解决方案：**
 
@@ -120,7 +120,7 @@ Plugin my-plugin hot-reloaded successfully
 
 ### 4. 🛡️ 企业级错误处理
 
-**问题：** OpenClaw 原版在遇到错误时可能直接崩溃或停止服务。
+**问题：** StableClaw 原版在遇到错误时可能直接崩溃或停止服务。
 
 **StableClaw 解决方案：**
 
@@ -153,23 +153,23 @@ Plugin my-plugin hot-reloaded successfully
 
 ### 6. 🔄 一键迁移功能
 
-**问题：** OpenClaw 用户升级到 StableClaw 需要手动迁移配置、插件和数据，过程繁琐且容易出错。
+**问题：** StableClaw 用户升级到 StableClaw 需要手动迁移配置、插件和数据，过程繁琐且容易出错。
 
-**解决方案：** 自动检测运行中的 OpenClaw，提供傻瓜式迁移流程。
+**解决方案：** 自动检测运行中的 StableClaw，提供傻瓜式迁移流程。
 
 #### 迁移步骤（推荐）
 
-**步骤 1：启动 OpenClaw**
+**步骤 1：启动 StableClaw**
 
 ```bash
-# 先启动 OpenClaw（让迁移工具自动检测）
+# 先启动 StableClaw（让迁移工具自动检测）
 openclaw gateway run
 ```
 
 **步骤 2：执行迁移**
 
 ```bash
-# 自动检测运行中的 OpenClaw 并迁移
+# 自动检测运行中的 StableClaw 并迁移
 stableclaw migrate from-openclaw --create-backup
 ```
 
@@ -195,7 +195,7 @@ stableclaw migrate from-openclaw --dry-run
 # 执行迁移并创建备份
 stableclaw migrate from-openclaw --create-backup
 
-# 手动指定 OpenClaw 目录（如果未运行）
+# 手动指定 StableClaw 目录（如果未运行）
 stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw
 ```
 
@@ -203,7 +203,7 @@ stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw
 
 ```bash
 # 下载迁移脚本
-# 先启动 OpenClaw
+# 先启动 StableClaw
 openclaw gateway run
 
 # 运行迁移脚本
@@ -218,15 +218,15 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 
 迁移工具会自动：
 
-1. ✅ **检测运行中的 OpenClaw 进程**
+1. ✅ **检测运行中的 StableClaw 进程**
 2. ✅ **提取配置目录路径**（从运行进程）
 3. ✅ **迁移所有数据**（配置、插件、凭证、数据）
 4. ✅ **生成详细报告**
 
-如果 OpenClaw 未运行，迁移工具会：
+如果 StableClaw 未运行，迁移工具会：
 
 - 搜索常见配置目录位置
-- 提示用户启动 OpenClaw 或手动指定路径
+- 提示用户启动 StableClaw 或手动指定路径
 
 #### 迁移内容
 
@@ -279,21 +279,21 @@ node migrate-from-openclaw.js --openclaw-dir ~/.openclaw
 | `--skip-logs`        | 跳过日志迁移             |
 | `--force`            | 强制迁移（覆盖现有数据） |
 | `--create-backup`    | 创建备份                 |
-| `--openclaw-dir`     | 手动指定 OpenClaw 目录   |
+| `--openclaw-dir`     | 手动指定 StableClaw 目录   |
 
 **优势**：
 
-- 🎯 **傻瓜式操作**：只需启动 OpenClaw，其余自动完成
-- 🚀 **零停机迁移**：迁移过程不影响 OpenClaw 使用
+- 🎯 **傻瓜式操作**：只需启动 StableClaw，其余自动完成
+- 🚀 **零停机迁移**：迁移过程不影响 StableClaw 使用
 - 🔒 **数据安全**：自动备份机制，支持回滚
 - ⚡ **灵活选择**：可选择性地迁移特定内容
 - 🎨 **详细报告**：提供完整的迁移日志和错误诊断
 
 ---
 
-## 🆚 与 OpenClaw 对比
+## 🆚 与 StableClaw 对比
 
-| 特性          | OpenClaw 原版   | StableClaw             |
+| 特性          | StableClaw 原版   | StableClaw             |
 | ------------- | --------------- | ---------------------- |
 | 配置热重载    | ✅ 支持         | ✅ 支持 + 安全回滚     |
 | 配置错误处理  | ⚠️ 可能崩溃     | ✅ 自动回滚，零停机    |
@@ -339,7 +339,7 @@ pnpm stableclaw onboard --install-daemon
 
 ## 📖 文档
 
-- [OpenClaw 官方文档](https://docs.openclaw.ai)
+- [StableClaw 官方文档](https://docs.stableclaw.ai)
 - [StableClaw 特色功能文档](./docs/plugin-hot-reload-plan.md)
 - [配置热重载安全机制](./docs/plugin-hot-reload-plan.md)
 - [插件热插拔机制](./docs/plugin-hot-reload-plan.md)
@@ -419,9 +419,9 @@ stableclaw/
 
 ## 🙏 致谢
 
-**StableClaw** 是基于 [OpenClaw](https://github.com/openclaw/openclaw) 项目的二次开发版本，感谢 OpenClaw 团队的出色工作！
+**StableClaw** 是基于 [StableClaw](https://github.com/openclaw/openclaw) 项目的二次开发版本，感谢 StableClaw 团队的出色工作！
 
-### OpenClaw 原版特性
+### StableClaw 原版特性
 
 - 支持 20+ 消息渠道
 - 多模型支持（OpenAI, Anthropic, Google, etc.）
@@ -437,5 +437,5 @@ stableclaw/
 </p>
 
 <p align="center">
-  <sub>Based on OpenClaw v2026.4.3</sub>
+  <sub>Based on StableClaw v2026.4.3</sub>
 </p>

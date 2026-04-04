@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/telegram",
+  "name": "@stableclaw/telegram",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Telegram channel plugin",
@@ -9,7 +9,7 @@
     "@grammyjs/transformer-throttler": "^1.2.1",
     "grammy": "^1.41.1"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ],

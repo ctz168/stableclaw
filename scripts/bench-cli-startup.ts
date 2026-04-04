@@ -425,7 +425,7 @@ function parseOptions(): CliOptions {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw CLI benchmark
+  console.log(`StableClaw CLI benchmark
 
 Usage:
   pnpm tsx scripts/bench-cli-startup.ts [options]

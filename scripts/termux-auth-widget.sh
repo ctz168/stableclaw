@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# OpenClaw Auth Widget for Termux
+# StableClaw Auth Widget for Termux
 # Place in ~/.shortcuts/ for Termux:Widget
 #
 # This widget checks auth status and helps with re-auth if needed.
@@ -69,7 +69,7 @@ case "$STATUS" in
                 termux-toast "Run: ssh $SERVER '$HOME/openclaw/scripts/mobile-reauth.sh'"
                 ;;
             *)
-                termux-toast "Warning: OpenClaw won't work until re-auth"
+                termux-toast "Warning: StableClaw won't work until re-auth"
                 ;;
         esac
         ;;

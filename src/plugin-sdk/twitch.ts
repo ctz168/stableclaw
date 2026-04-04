@@ -39,7 +39,7 @@ export type { WizardPrompter } from "../wizard/prompts.js";
 const twitchSetup = createOptionalChannelSetupSurface({
   channel: "twitch",
   label: "Twitch",
-  npmSpec: "@openclaw/twitch",
+  npmSpec: "@stableclaw/twitch",
 });
 
 export const twitchSetupAdapter = twitchSetup.setupAdapter;

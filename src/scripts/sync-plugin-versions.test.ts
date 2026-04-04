@@ -27,7 +27,7 @@ describe("syncPluginVersions", () => {
       version: "2026.4.1",
     });
     writeJson(path.join(rootDir, "extensions/bluebubbles/package.json"), {
-      name: "@openclaw/bluebubbles",
+      name: "@stableclaw/bluebubbles",
       version: "2026.3.30",
       devDependencies: {
         openclaw: "workspace:*",
@@ -56,7 +56,7 @@ describe("syncPluginVersions", () => {
       };
     };
 
-    expect(summary.updated).toContain("@openclaw/bluebubbles");
+    expect(summary.updated).toContain("@stableclaw/bluebubbles");
     expect(updatedPackage.version).toBe("2026.4.1");
     expect(updatedPackage.devDependencies?.openclaw).toBe("workspace:*");
     expect(updatedPackage.peerDependencies?.openclaw).toBe(">=2026.4.1");

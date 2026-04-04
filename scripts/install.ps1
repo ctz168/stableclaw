@@ -1,4 +1,4 @@
-# OpenClaw Installer for Windows (PowerShell)
+# StableClaw Installer for Windows (PowerShell)
 # Usage: iwr -useb https://openclaw.ai/install.ps1 | iex
 # Or: & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
 
@@ -34,7 +34,7 @@ function Write-Host {
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "${ACCENT}  🦞 OpenClaw Installer$NC" -Level info
+    Write-Host "${ACCENT}  🦞 StableClaw Installer$NC" -Level info
     Write-Host "${MUTED}  All your chats, one OpenClaw.$NC" -Level info
     Write-Host ""
 }
@@ -204,12 +204,12 @@ function Install-OpenClawNpm {
 
     $installSpec = Resolve-PackageInstallSpec -Target $Target
     
-    Write-Host "Installing OpenClaw ($installSpec)..." -Level info
+    Write-Host "Installing StableClaw ($installSpec)..." -Level info
     
     try {
         # Use -ExecutionPolicy Bypass to handle restricted execution policy
         npm install -g $installSpec --no-fund --no-audit 2>&1
-        Write-Host "OpenClaw installed" -Level success
+        Write-Host "StableClaw installed" -Level success
         return $true
     } catch {
         Write-Host "npm install failed: $_" -Level error
@@ -220,7 +220,7 @@ function Install-OpenClawNpm {
 function Install-OpenClawGit {
     param([string]$RepoDir, [switch]$Update)
     
-    Write-Host "Installing OpenClaw from git..." -Level info
+    Write-Host "Installing StableClaw from git..." -Level info
     
     if (!(Test-Path $RepoDir)) {
         Write-Host "  Cloning repository..." -Level info
@@ -255,7 +255,7 @@ function Install-OpenClawGit {
 node "%~dp0..\openclaw\dist\entry.js" %*
 "@ | Out-File -FilePath "$wrapperDir\openclaw.cmd" -Encoding ASCII -Force
     
-    Write-Host "OpenClaw installed" -Level success
+    Write-Host "StableClaw installed" -Level success
     return $true
 }
 
@@ -353,7 +353,7 @@ function Main {
     }
     
     Write-Host ""
-    Write-Host "🦞 OpenClaw installed successfully!" -Level success
+    Write-Host "🦞 StableClaw installed successfully!" -Level success
 }
 
 Main

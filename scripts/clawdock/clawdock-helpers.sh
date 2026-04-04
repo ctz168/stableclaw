@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# ClawDock - Docker helpers for OpenClaw
-# Inspired by Simon Willison's "Running OpenClaw in Docker"
+# ClawDock - Docker helpers for StableClaw
+# Inspired by Simon Willison's "Running StableClaw in Docker"
 # https://til.simonwillison.net/llms/openclaw-docker
 #
 # Installation:
@@ -38,7 +38,7 @@ _cmd() {
 # =============================================================================
 CLAWDOCK_CONFIG="${HOME}/.clawdock/config"
 
-# Common paths to check for OpenClaw
+# Common paths to check for StableClaw
 CLAWDOCK_COMMON_PATHS=(
   "${HOME}/openclaw"
   "${HOME}/workspace/openclaw"
@@ -111,7 +111,7 @@ _clawdock_ensure_dir() {
 
   if [[ -n "$found_path" ]]; then
     echo ""
-    echo "🦞 Found OpenClaw at: $found_path"
+    echo "🦞 Found StableClaw at: $found_path"
     echo -n "   Use this location? [Y/n] "
     read -r response
     if [[ "$response" =~ ^[Nn] ]]; then
@@ -123,7 +123,7 @@ _clawdock_ensure_dir() {
     CLAWDOCK_DIR="$found_path"
   else
     echo ""
-    echo "❌ OpenClaw not found in common locations."
+    echo "❌ StableClaw not found in common locations."
     echo ""
     echo "Clone it first:"
     echo ""
@@ -207,12 +207,12 @@ clawdock-show-config() {
   echo -e "${_CLR_BOLD}Config directory:${_CLR_RESET} ${_CLR_CYAN}${config_dir}${_CLR_RESET}"
   echo ""
 
-  # Show openclaw.json
-  if [[ -f "${config_dir}/openclaw.json" ]]; then
-    echo -e "${_CLR_BOLD}${config_dir}/openclaw.json${_CLR_RESET}"
-    echo -e "${_CLR_DIM}$(cat "${config_dir}/openclaw.json")${_CLR_RESET}"
+  # Show stableclaw.json
+  if [[ -f "${config_dir}/stableclaw.json" ]]; then
+    echo -e "${_CLR_BOLD}${config_dir}/stableclaw.json${_CLR_RESET}"
+    echo -e "${_CLR_DIM}$(cat "${config_dir}/stableclaw.json")${_CLR_RESET}"
   else
-    echo -e "${_CLR_YELLOW}No openclaw.json found${_CLR_RESET}"
+    echo -e "${_CLR_YELLOW}No stableclaw.json found${_CLR_RESET}"
   fi
   echo ""
 
@@ -275,7 +275,7 @@ clawdock-cli() {
 clawdock-update() {
   _clawdock_ensure_dir || return 1
 
-  echo "🔄 Updating OpenClaw..."
+  echo "🔄 Updating StableClaw..."
 
   echo ""
   echo "📥 Pulling latest source..."
@@ -447,7 +447,7 @@ clawdock-approve() {
 
 # Show all available clawdock helper commands
 clawdock-help() {
-  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🦞 ClawDock - Docker Helpers for OpenClaw${_CLR_RESET}\n"
+  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🦞 ClawDock - Docker Helpers for StableClaw${_CLR_RESET}\n"
 
   echo -e "${_CLR_BOLD}${_CLR_MAGENTA}⚡ Basic Operations${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-start)       ${_CLR_DIM}Start the gateway${_CLR_RESET}"

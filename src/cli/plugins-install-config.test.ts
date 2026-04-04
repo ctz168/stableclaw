@@ -46,8 +46,8 @@ function makeSnapshot(overrides: Partial<ConfigFileSnapshot> = {}): ConfigFileSn
 
 describe("loadConfigForInstall", () => {
   const matrixNpmRequest = {
-    rawSpec: "@openclaw/matrix",
-    normalizedSpec: "@openclaw/matrix",
+    rawSpec: "@stableclaw/matrix",
+    normalizedSpec: "@stableclaw/matrix",
   };
 
   beforeEach(() => {

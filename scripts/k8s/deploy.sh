@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy OpenClaw to Kubernetes.
+# Deploy StableClaw to Kubernetes.
 #
 # Secrets are generated in a temp directory and applied server-side.
 # No secret material is ever written to the repo checkout.

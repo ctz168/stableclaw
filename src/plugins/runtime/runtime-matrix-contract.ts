@@ -170,7 +170,7 @@ export {
 const matrixSetup = createOptionalChannelSetupSurface({
   channel: "matrix",
   label: "Matrix",
-  npmSpec: "@openclaw/matrix",
+  npmSpec: "@stableclaw/matrix",
   docsPath: "/channels/matrix",
 });
 

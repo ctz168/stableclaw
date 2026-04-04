@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D9488;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#065F56;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FDF4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D1FAE5;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Background rounded square -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#bgGrad)" filter="url(#shadow)"/>
+  
+  <!-- Crayfish body - main shell -->
+  <ellipse cx="256" cy="300" rx="90" ry="60" fill="url(#bodyGrad)" transform="rotate(-15 256 300)"/>
+  
+  <!-- Head -->
+  <ellipse cx="200" cy="270" rx="55" ry="45" fill="url(#bodyGrad)"/>
+  
+  <!-- Tail fan segments -->
+  <ellipse cx="350" cy="280" rx="25" ry="18" fill="#D1FAE5" transform="rotate(-25 350 280)"/>
+  <ellipse cx="375" cy="265" rx="22" ry="15" fill="#A7F3D0" transform="rotate(-30 375 265)"/>
+  <ellipse cx="395" cy="248" rx="20" ry="14" fill="#6EE7B7" transform="rotate(-35 395 248)"/>
+  <ellipse cx="410" cy="230" rx="18" ry="30" fill="#34D399" transform="rotate(-40 410 230)"/>
+  
+  <!-- Claws - left (larger, front) -->
+  <path d="M170 240 Q140 200 120 170 Q110 150 125 145 Q140 140 150 160 Q155 175 165 195" fill="none" stroke="#F0FDF4" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="118" cy="145" rx="22" ry="16" fill="#F0FDF4" transform="rotate(-20 118 145)"/>
+  <path d="M105 138 Q100 125 108 120 Q118 118 120 130" fill="none" stroke="#F0FDF4" stroke-width="4" stroke-linecap="round"/>
+  <path d="M130 132 Q128 118 137 115 Q145 116 142 128" fill="none" stroke="#F0FDF4" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Claws - right (larger, front) -->
+  <path d="M170 260 Q130 240 110 220 Q95 205 108 198 Q120 195 130 212 Q138 225 148 240" fill="none" stroke="#F0FDF4" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="108" cy="200" rx="20" ry="15" fill="#F0FDF4" transform="rotate(-10 108 200)"/>
+  <path d="M95 195 Q88 182 97 178 Q107 177 108 190" fill="none" stroke="#F0FDF4" stroke-width="4" stroke-linecap="round"/>
+  <path d="M120 190 Q118 176 127 174 Q135 176 132 188" fill="none" stroke="#F0FDF4" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Walking legs (3 pairs) -->
+  <path d="M220 310 Q200 350 185 380" fill="none" stroke="#D1FAE5" stroke-width="6" stroke-linecap="round"/>
+  <path d="M240 320 Q225 365 215 395" fill="none" stroke="#D1FAE5" stroke-width="6" stroke-linecap="round"/>
+  <path d="M265 325 Q255 370 250 400" fill="none" stroke="#D1FAE5" stroke-width="6" stroke-linecap="round"/>
+  <path d="M290 320 Q285 365 282 395" fill="none" stroke="#D1FAE5" stroke-width="5" stroke-linecap="round"/>
+  <path d="M310 310 Q310 355 308 385" fill="none" stroke="#D1FAE5" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Eyes -->
+  <circle cx="185" cy="248" r="8" fill="#065F56"/>
+  <circle cx="183" cy="246" r="3" fill="#0D9488"/>
+  <circle cx="215" cy="252" r="7" fill="#065F56"/>
+  <circle cx="213" cy="250" r="2.5" fill="#0D9488"/>
+  
+  <!-- Antennae -->
+  <path d="M190 240 Q170 210 160 180 Q155 165 165 160" fill="none" stroke="#A7F3D0" stroke-width="3" stroke-linecap="round"/>
+  <path d="M200 242 Q195 210 200 180 Q203 165 213 163" fill="none" stroke="#A7F3D0" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Shell detail lines -->
+  <path d="M220 280 Q250 295 280 285" fill="none" stroke="#A7F3D0" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M225 295 Q255 310 285 300" fill="none" stroke="#A7F3D0" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  
+  <!-- "S" letter subtle branding on shell -->
+  <text x="245" y="300" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#0D9488" opacity="0.3" text-anchor="middle">S</text>
+</svg>

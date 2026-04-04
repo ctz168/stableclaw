@@ -75,7 +75,7 @@ function expectBundledSkills(repoRoot: string, pluginId: string, skills: string[
 function createTlonSkillPlugin(repoRoot: string, skillPath = "node_modules/@tloncorp/tlon-skill") {
   return createPlugin(repoRoot, {
     id: "tlon",
-    packageName: "@openclaw/tlon",
+    packageName: "@stableclaw/tlon",
     manifest: { skills: [skillPath] },
     packageOpenClaw: { extensions: ["./index.ts"] },
   });
@@ -99,7 +99,7 @@ describe("copyBundledPluginMetadata", () => {
     const repoRoot = makeRepoRoot("openclaw-bundled-plugin-meta-");
     const pluginDir = createPlugin(repoRoot, {
       id: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@stableclaw/acpx",
       manifest: { skills: ["./skills"] },
       packageOpenClaw: { extensions: ["./index.ts"] },
     });
@@ -224,7 +224,7 @@ describe("copyBundledPluginMetadata", () => {
     const repoRoot = makeRepoRoot("openclaw-bundled-plugin-retry-");
     const pluginDir = createPlugin(repoRoot, {
       id: "diffs",
-      packageName: "@openclaw/diffs",
+      packageName: "@stableclaw/diffs",
       manifest: { skills: ["./skills"] },
       packageOpenClaw: { extensions: ["./index.ts"] },
     });
@@ -289,7 +289,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["./bundled-skills/@scope/skill"],
     });
     writeJson(path.join(repoRoot, "dist", "extensions", "removed-plugin", "package.json"), {
-      name: "@openclaw/removed-plugin",
+      name: "@stableclaw/removed-plugin",
     });
     fs.mkdirSync(path.join(repoRoot, "extensions"), { recursive: true });
 
@@ -310,7 +310,7 @@ describe("copyBundledPluginMetadata", () => {
       configSchema: { type: "object" },
     });
     writeJson(path.join(staleDistDir, "package.json"), {
-      name: "@openclaw/google-gemini-cli-auth",
+      name: "@stableclaw/google-gemini-cli-auth",
     });
 
     copyBundledPluginMetadata({ repoRoot });
@@ -322,7 +322,7 @@ describe("copyBundledPluginMetadata", () => {
     {
       name: "skips metadata for optional bundled clusters only when explicitly disabled",
       pluginId: "acpx",
-      packageName: "@openclaw/acpx-plugin",
+      packageName: "@stableclaw/acpx-plugin",
       packageOpenClaw: { extensions: ["./index.ts"] },
       env: excludeOptionalEnv,
       expectedExists: false,
@@ -330,10 +330,10 @@ describe("copyBundledPluginMetadata", () => {
     {
       name: "still bundles previously released optional plugins without the opt-in env",
       pluginId: "whatsapp",
-      packageName: "@openclaw/whatsapp",
+      packageName: "@stableclaw/whatsapp",
       packageOpenClaw: {
         extensions: ["./index.ts"],
-        install: { npmSpec: "@openclaw/whatsapp" },
+        install: { npmSpec: "@stableclaw/whatsapp" },
       },
       env: {},
       expectedExists: true,
@@ -356,7 +356,7 @@ describe("copyBundledPluginMetadata", () => {
     const pluginDir = path.join(repoRoot, "extensions", "image-generation-core");
     fs.mkdirSync(pluginDir, { recursive: true });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/image-generation-core",
+      name: "@stableclaw/image-generation-core",
       version: "0.0.1",
       private: true,
       type: "module",
@@ -394,7 +394,7 @@ describe("copyBundledPluginMetadata", () => {
         ),
       ),
     ).toMatchObject({
-      name: "@openclaw/image-generation-core",
+      name: "@stableclaw/image-generation-core",
       type: "module",
     });
   });

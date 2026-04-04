@@ -66,7 +66,7 @@ export async function collectMatrixInstallPathWarnings(cfg: OpenClawConfig): Pro
   return formatPluginInstallPathIssue({
     issue,
     pluginLabel: "Matrix",
-    defaultInstallCommand: "openclaw plugins install @openclaw/matrix",
+    defaultInstallCommand: "openclaw plugins install @stableclaw/matrix",
     repoInstallCommand: resolveBundledPluginInstallCommandHint({
       pluginId: "matrix",
       workspaceDir: process.cwd(),

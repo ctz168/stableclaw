@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/matrix",
+  "name": "@stableclaw/matrix",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw Matrix channel plugin",
   "type": "module",
@@ -12,17 +12,17 @@
     "music-metadata": "^11.12.3"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "stableclaw": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.4.1-beta.1"
+    "stableclaw": ">=2026.4.1-beta.1"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "stableclaw": {
       "optional": true
     }
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -38,7 +38,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/matrix",
+      "npmSpec": "@stableclaw/matrix",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

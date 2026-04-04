@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/microsoft-speech",
+  "name": "@stableclaw/microsoft-speech",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Microsoft speech plugin",
@@ -7,7 +7,7 @@
   "dependencies": {
     "node-edge-tts": "^1.2.10"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ]

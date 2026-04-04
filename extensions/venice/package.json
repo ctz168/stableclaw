@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/venice-provider",
+  "name": "@stableclaw/venice-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Venice provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ]

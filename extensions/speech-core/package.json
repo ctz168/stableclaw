@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/speech-core",
+  "name": "@stableclaw/speech-core",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw speech runtime package",

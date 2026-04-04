@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time host setup for rootless OpenClaw in Podman. Uses the current
+# One-time host setup for rootless StableClaw in Podman. Uses the current
 # non-root user throughout, builds or pulls the image into that user's Podman
 # store, writes config under ~/.openclaw by default, and uses the repo-local
 # launch script at ./scripts/run-openclaw-podman.sh.
@@ -392,7 +392,7 @@ fi
 upsert_env_var "$ENV_FILE" "OPENCLAW_PODMAN_CONTAINER" "$OPENCLAW_CONTAINER_NAME"
 upsert_env_var "$ENV_FILE" "OPENCLAW_PODMAN_IMAGE" "$OPENCLAW_IMAGE"
 
-CONFIG_JSON="$OPENCLAW_CONFIG_DIR/openclaw.json"
+CONFIG_JSON="$OPENCLAW_CONFIG_DIR/stableclaw.json"
 if [[ ! -f "$CONFIG_JSON" ]]; then
   (
     umask 077

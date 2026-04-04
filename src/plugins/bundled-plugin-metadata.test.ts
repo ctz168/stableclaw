@@ -108,7 +108,7 @@ describe("bundled plugin metadata", () => {
     const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-channel-configs-");
 
     writeJson(path.join(tempRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@stableclaw/alpha",
       version: "0.0.1",
       openclaw: {
         extensions: ["./index.ts"],
@@ -185,7 +185,7 @@ describe("bundled plugin metadata", () => {
     const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-public-artifacts-");
 
     writeJson(path.join(tempRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@stableclaw/alpha",
       version: "0.0.1",
       openclaw: {
         extensions: ["./index.ts"],
@@ -230,7 +230,7 @@ describe("bundled plugin metadata", () => {
     const distRoot = path.join(tempRoot, "dist");
 
     writeJson(path.join(distRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@stableclaw/alpha",
       version: "0.0.1",
       openclaw: {
         extensions: ["./index.ts"],

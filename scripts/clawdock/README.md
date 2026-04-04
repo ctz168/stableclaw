@@ -2,7 +2,7 @@
 
 Stop typing `docker-compose` commands. Just type `clawdock-start`.
 
-Inspired by Simon Willison's [Running OpenClaw in Docker](https://til.simonwillison.net/llms/openclaw-docker).
+Inspired by Simon Willison's [Running StableClaw in Docker](https://til.simonwillison.net/llms/openclaw-docker).
 
 - [Quickstart](#quickstart)
 - [Available Commands](#available-commands)
@@ -98,7 +98,7 @@ clawdock-approve <request-id>
 | Command                   | Description                                    |
 | ------------------------- | ---------------------------------------------- |
 | `clawdock-shell`          | Interactive shell inside the gateway container |
-| `clawdock-cli <command>`  | Run OpenClaw CLI commands                      |
+| `clawdock-cli <command>`  | Run StableClaw CLI commands                      |
 | `clawdock-exec <command>` | Execute arbitrary commands in the container    |
 
 ### Web UI & Devices
@@ -130,7 +130,7 @@ clawdock-approve <request-id>
 | `clawdock-health`      | Run gateway health check                  |
 | `clawdock-token`       | Display the gateway authentication token  |
 | `clawdock-cd`          | Jump to the OpenClaw project directory    |
-| `clawdock-config`      | Open the OpenClaw config directory        |
+| `clawdock-config`      | Open the StableClaw config directory        |
 | `clawdock-show-config` | Print config files with redacted values   |
 | `clawdock-workspace`   | Open the workspace directory              |
 | `clawdock-help`        | Show all available commands with examples |
@@ -155,9 +155,9 @@ The Docker setup uses three config files on the host. The container never stores
 | --------------------------- | ------------------------------------------------ | ------------------------------------------------------------------- |
 | `<project>/.env`            | **Docker infra** — image, ports, gateway token   | `OPENCLAW_GATEWAY_TOKEN`, `OPENCLAW_IMAGE`, `OPENCLAW_GATEWAY_PORT` |
 | `~/.openclaw/.env`          | **Secrets** — API keys and bot tokens            | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`         |
-| `~/.openclaw/openclaw.json` | **Behavior config** — models, channels, policies | Model selection, WhatsApp allowlists, agent settings                |
+| `~/.openclaw/stableclaw.json` | **Behavior config** — models, channels, policies | Model selection, WhatsApp allowlists, agent settings                |
 
-**Do NOT** put API keys or bot tokens in `openclaw.json`. Use `~/.openclaw/.env` for all secrets.
+**Do NOT** put API keys or bot tokens in `stableclaw.json`. Use `~/.openclaw/.env` for all secrets.
 
 ### Initial Setup
 
@@ -197,7 +197,7 @@ volumes:
 This means:
 
 - `~/.openclaw/.env` is available inside the container at `/home/node/.openclaw/.env` — OpenClaw loads it automatically as the global env fallback
-- `~/.openclaw/openclaw.json` is available at `/home/node/.openclaw/openclaw.json` — the gateway watches it and hot-reloads most changes
+- `~/.openclaw/stableclaw.json` is available at `/home/node/.openclaw/stableclaw.json` — the gateway watches it and hot-reloads most changes
 - No need to add API keys to `docker-compose.yml` or configure anything inside the container
 - Keys survive `clawdock-update`, `clawdock-rebuild`, and `clawdock-clean` because they live on the host
 
@@ -230,7 +230,7 @@ OpenClaw loads env vars in this order (highest wins, never overrides existing):
 1. **Process environment** — `docker-compose.yml` `environment:` block (gateway token, session keys)
 2. **`.env` in CWD** — project root `.env` (Docker infra vars)
 3. **`~/.openclaw/.env`** — global secrets (API keys, bot tokens)
-4. **`openclaw.json` `env` block** — inline vars, applied only if still missing
+4. **`stableclaw.json` `env` block** — inline vars, applied only if still missing
 5. **Shell env import** — optional login-shell scrape (`OPENCLAW_LOAD_SHELL_ENV=1`)
 
 ## Common Workflows
@@ -322,7 +322,7 @@ clawdock-fix-token
 This will:
 
 1. Read the token from your `.env` file
-2. Configure it in the OpenClaw config
+2. Configure it in the StableClaw config
 3. Restart the gateway
 4. Verify the configuration
 

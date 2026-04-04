@@ -184,7 +184,7 @@ function loadRegistryForMinHostVersionCase(params: {
         origin: "global",
         packageManifest: {
           install: {
-            npmSpec: "@openclaw/synology-chat",
+            npmSpec: "@stableclaw/synology-chat",
             minHostVersion: params.minHostVersion,
           },
         },
@@ -928,7 +928,7 @@ describe("loadPluginManifestRegistry", () => {
         origin: "global",
         packageManifest: {
           install: {
-            npmSpec: "@openclaw/synology-chat",
+            npmSpec: "@stableclaw/synology-chat",
             minHostVersion: ">=2026.3.22",
           },
         },

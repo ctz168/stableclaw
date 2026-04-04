@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/qqbot",
+  "name": "@stableclaw/qqbot",
   "version": "2026.4.1-beta.1",
   "private": false,
   "description": "OpenClaw QQ Bot channel plugin",
@@ -11,17 +11,17 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "openclaw": "workspace:*"
+    "stableclaw": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.4.1-beta.1"
+    "stableclaw": ">=2026.4.1-beta.1"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "stableclaw": {
       "optional": true
     }
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -37,7 +37,7 @@
       "systemImage": "bubble.left.and.bubble.right"
     },
     "install": {
-      "npmSpec": "@openclaw/qqbot",
+      "npmSpec": "@stableclaw/qqbot",
       "localPath": "extensions/qqbot",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"

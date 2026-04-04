@@ -143,9 +143,9 @@ describe("plugins cli update", () => {
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call",
+            spec: "@stableclaw/voice-call",
             installPath: "/tmp/voice-call",
-            resolvedName: "@openclaw/voice-call",
+            resolvedName: "@stableclaw/voice-call",
           },
         },
       },
@@ -157,14 +157,14 @@ describe("plugins cli update", () => {
       outcomes: [],
     });
 
-    await runPluginsCommand(["plugins", "update", "@openclaw/voice-call@beta"]);
+    await runPluginsCommand(["plugins", "update", "@stableclaw/voice-call@beta"]);
 
     expect(updateNpmInstalledPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config,
         pluginIds: ["voice-call"],
         specOverrides: {
-          "voice-call": "@openclaw/voice-call@beta",
+          "voice-call": "@stableclaw/voice-call@beta",
         },
       }),
     );
@@ -244,7 +244,7 @@ describe("plugins cli update", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.0.0",
+            spec: "@stableclaw/alpha@1.0.0",
           },
         },
       },
@@ -254,7 +254,7 @@ describe("plugins cli update", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.1.0",
+            spec: "@stableclaw/alpha@1.1.0",
           },
         },
       },

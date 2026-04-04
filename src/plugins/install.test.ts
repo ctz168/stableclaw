@@ -82,7 +82,7 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     outName: "bad.tgz",
     withDistIndex: false,
     packageJson: {
-      name: "@openclaw/nope",
+      name: "@stableclaw/nope",
       version: "0.0.1",
     } as Record<string, unknown>,
   },
@@ -438,7 +438,7 @@ function setupDualFormatInstallFixture(params: { bundleFormat: "codex" | "claude
   fs.writeFileSync(
     path.join(pluginDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/native-dual",
+      name: "@stableclaw/native-dual",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
@@ -585,7 +585,7 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(installPluginFromDirTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/test-plugin",
+      name: "@stableclaw/test-plugin",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
@@ -603,7 +603,7 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(manifestInstallTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/cognee-openclaw",
+      name: "@stableclaw/cognee-openclaw",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
     }),
@@ -661,7 +661,7 @@ describe("installPluginFromArchive", () => {
       archivePath: archiveV1,
       extensionsDir,
     });
-    expectSuccessfulArchiveInstall({ result: first, stateDir, pluginId: "@openclaw/voice-call" });
+    expectSuccessfulArchiveInstall({ result: first, stateDir, pluginId: "@stableclaw/voice-call" });
 
     const duplicate = await installPluginFromArchive({
       archivePath: archiveV1,
@@ -700,7 +700,7 @@ describe("installPluginFromArchive", () => {
       archivePath,
       extensionsDir,
     });
-    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@openclaw/zipper" });
+    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@stableclaw/zipper" });
   });
 
   it("allows archive installs with dangerous code patterns when forced unsafe install is set", async () => {
@@ -738,7 +738,7 @@ describe("installPluginFromArchive", () => {
   it("installs flat-root plugin archives from ClawHub-style downloads", async () => {
     const result = await installArchivePackageAndReturnResult({
       packageJson: {
-        name: "@openclaw/rootless",
+        name: "@stableclaw/rootless",
         version: "0.0.1",
         openclaw: { extensions: ["./dist/index.js"] },
       },
@@ -766,7 +766,7 @@ describe("installPluginFromArchive", () => {
 
   it("rejects packages without openclaw.extensions", async () => {
     const result = await installArchivePackageAndReturnResult({
-      packageJson: { name: "@openclaw/nope", version: "0.0.1" },
+      packageJson: { name: "@stableclaw/nope", version: "0.0.1" },
       outName: "bad.tgz",
     });
     expect(result.ok).toBe(false);
@@ -782,7 +782,7 @@ describe("installPluginFromArchive", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/legacy-entry-fallback",
+        name: "@stableclaw/legacy-entry-fallback",
         version: "0.0.1",
       }),
       "utf-8",
@@ -1229,7 +1229,7 @@ describe("installPluginFromDir", () => {
     expect(
       infoMessages.some((msg) =>
         msg.includes(
-          'Plugin manifest id "memory-cognee" differs from npm package name "@openclaw/cognee-openclaw"',
+          'Plugin manifest id "memory-cognee" differs from npm package name "@stableclaw/cognee-openclaw"',
         ),
       ),
     ).toBe(true);
@@ -1238,7 +1238,7 @@ describe("installPluginFromDir", () => {
   it("does not warn when a scoped npm package name matches the manifest id", async () => {
     const { pluginDir, extensionsDir } = setupManifestInstallFixture({
       manifestId: "matrix",
-      packageName: "@openclaw/matrix",
+      packageName: "@stableclaw/matrix",
     });
 
     const infoMessages: string[] = [];
@@ -1268,7 +1268,7 @@ describe("installPluginFromDir", () => {
     {
       name: "package name keeps scoped plugin id by default",
       setup: () => setupInstallPluginFromDirFixture(),
-      expectedPluginId: "@openclaw/test-plugin",
+      expectedPluginId: "@stableclaw/test-plugin",
       install: (pluginDir: string, extensionsDir: string) =>
         installPluginFromDir({
           dirPath: pluginDir,
@@ -1278,7 +1278,7 @@ describe("installPluginFromDir", () => {
     {
       name: "unscoped expectedPluginId resolves to scoped install id",
       setup: () => setupInstallPluginFromDirFixture(),
-      expectedPluginId: "@openclaw/test-plugin",
+      expectedPluginId: "@stableclaw/test-plugin",
       install: (pluginDir: string, extensionsDir: string) =>
         installPluginFromDir({
           dirPath: pluginDir,
@@ -1589,8 +1589,8 @@ describe("installPluginFromNpmSpec", () => {
           code: 0,
           stdout: JSON.stringify([
             {
-              id: "@openclaw/voice-call@0.0.1",
-              name: "@openclaw/voice-call",
+              id: "@stableclaw/voice-call@0.0.1",
+              name: "@stableclaw/voice-call",
               version: "0.0.1",
               filename: packedName,
               integrity: "sha512-plugin-test",
@@ -1607,7 +1607,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call@0.0.1",
+      spec: "@stableclaw/voice-call@0.0.1",
       extensionsDir,
       logger: { info: () => {}, warn: () => {} },
     });
@@ -1615,12 +1615,12 @@ describe("installPluginFromNpmSpec", () => {
     if (!result.ok) {
       return;
     }
-    expect(result.npmResolution?.resolvedSpec).toBe("@openclaw/voice-call@0.0.1");
+    expect(result.npmResolution?.resolvedSpec).toBe("@stableclaw/voice-call@0.0.1");
     expect(result.npmResolution?.integrity).toBe("sha512-plugin-test");
 
     expectSingleNpmPackIgnoreScriptsCall({
       calls: run.mock.calls,
-      expectedSpec: "@openclaw/voice-call@0.0.1",
+      expectedSpec: "@stableclaw/voice-call@0.0.1",
     });
 
     expect(packTmpDir).not.toBe("");
@@ -1711,8 +1711,8 @@ describe("installPluginFromNpmSpec", () => {
   it("aborts when integrity drift callback rejects the fetched artifact", async () => {
     const run = vi.mocked(runCommandWithTimeout);
     mockNpmPackMetadataResult(run, {
-      id: "@openclaw/voice-call@0.0.1",
-      name: "@openclaw/voice-call",
+      id: "@stableclaw/voice-call@0.0.1",
+      name: "@stableclaw/voice-call",
       version: "0.0.1",
       filename: "voice-call-0.0.1.tgz",
       integrity: "sha512-new",
@@ -1721,7 +1721,7 @@ describe("installPluginFromNpmSpec", () => {
 
     const onIntegrityDrift = vi.fn(async () => false);
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call@0.0.1",
+      spec: "@stableclaw/voice-call@0.0.1",
       expectedIntegrity: "sha512-old",
       onIntegrityDrift,
     });
@@ -1745,7 +1745,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/not-found",
+      spec: "@stableclaw/not-found",
       logger: { info: () => {}, warn: () => {} },
     });
     expect(result.ok).toBe(false);
@@ -1756,8 +1756,8 @@ describe("installPluginFromNpmSpec", () => {
 
   it("handles prerelease npm specs correctly", async () => {
     const prereleaseMetadata = {
-      id: "@openclaw/voice-call@0.0.2-beta.1",
-      name: "@openclaw/voice-call",
+      id: "@stableclaw/voice-call@0.0.2-beta.1",
+      name: "@stableclaw/voice-call",
       version: "0.0.2-beta.1",
       filename: "voice-call-0.0.2-beta.1.tgz",
       integrity: "sha512-beta",
@@ -1769,13 +1769,13 @@ describe("installPluginFromNpmSpec", () => {
       mockNpmPackMetadataResult(run, prereleaseMetadata);
 
       const result = await installPluginFromNpmSpec({
-        spec: "@openclaw/voice-call",
+        spec: "@stableclaw/voice-call",
         logger: { info: () => {}, warn: () => {} },
       });
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error).toContain("prerelease version 0.0.2-beta.1");
-        expect(result.error).toContain('"@openclaw/voice-call@beta"');
+        expect(result.error).toContain('"@stableclaw/voice-call@beta"');
       }
     }
 
@@ -1807,7 +1807,7 @@ describe("installPluginFromNpmSpec", () => {
         version: "0.0.1",
       });
       const result = await installPluginFromNpmSpec({
-        spec: "@openclaw/voice-call@beta",
+        spec: "@stableclaw/voice-call@beta",
         extensionsDir,
         logger: { info: () => {}, warn: () => {} },
       });
@@ -1816,10 +1816,10 @@ describe("installPluginFromNpmSpec", () => {
         return;
       }
       expect(result.npmResolution?.version).toBe("0.0.2-beta.1");
-      expect(result.npmResolution?.resolvedSpec).toBe("@openclaw/voice-call@0.0.2-beta.1");
+      expect(result.npmResolution?.resolvedSpec).toBe("@stableclaw/voice-call@0.0.2-beta.1");
       expectSingleNpmPackIgnoreScriptsCall({
         calls: run.mock.calls,
-        expectedSpec: "@openclaw/voice-call@beta",
+        expectedSpec: "@stableclaw/voice-call@beta",
       });
       expect(packTmpDir).not.toBe("");
     }

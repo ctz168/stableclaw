@@ -236,7 +236,7 @@ describe("channel plugin catalog", () => {
         writeCatalogFile(
           catalogPath,
           createCatalogEntry({
-            packageName: "@openclaw/demo-channel",
+            packageName: "@stableclaw/demo-channel",
             channelId: "demo-channel",
             label: "Demo Channel",
             blurb: "Demo entry",
@@ -330,7 +330,7 @@ describe("channel plugin catalog", () => {
         writeCatalogFile(
           catalogPath,
           createCatalogEntry({
-            packageName: "@openclaw/env-demo-channel",
+            packageName: "@stableclaw/env-demo-channel",
             channelId: "env-demo-channel",
             label: "Env Demo Channel",
             blurb: "Env demo entry",
@@ -357,7 +357,7 @@ describe("channel plugin catalog", () => {
         writeCatalogFile(
           catalogPath,
           createCatalogEntry({
-            packageName: "@openclaw/default-env-demo",
+            packageName: "@stableclaw/default-env-demo",
             channelId: "default-env-demo",
             label: "Default Env Demo",
             blurb: "Default env demo entry",

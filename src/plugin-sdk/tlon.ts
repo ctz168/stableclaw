@@ -34,7 +34,7 @@ export { createLoggerBackedRuntime } from "./runtime.js";
 const tlonSetup = createOptionalChannelSetupSurface({
   channel: "tlon",
   label: "Tlon",
-  npmSpec: "@openclaw/tlon",
+  npmSpec: "@stableclaw/tlon",
   docsPath: "/channels/tlon",
 });
 

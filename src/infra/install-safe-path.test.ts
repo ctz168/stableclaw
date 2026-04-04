@@ -13,7 +13,7 @@ import {
 
 describe("unscopedPackageName", () => {
   it.each([
-    { value: "@openclaw/matrix", expected: "matrix" },
+    { value: "@stableclaw/matrix", expected: "matrix" },
     { value: " matrix ", expected: "matrix" },
     { value: "", expected: "" },
   ])("normalizes package names for %j", ({ value, expected }) => {
@@ -23,11 +23,11 @@ describe("unscopedPackageName", () => {
 
 describe("packageNameMatchesId", () => {
   it.each([
-    { packageName: "@openclaw/matrix", id: "matrix", expected: true },
-    { packageName: "@openclaw/matrix", id: "@openclaw/matrix", expected: true },
-    { packageName: "@openclaw/matrix", id: "signal", expected: false },
+    { packageName: "@stableclaw/matrix", id: "matrix", expected: true },
+    { packageName: "@stableclaw/matrix", id: "@stableclaw/matrix", expected: true },
+    { packageName: "@stableclaw/matrix", id: "signal", expected: false },
     { packageName: " ", id: "matrix", expected: false },
-    { packageName: "@openclaw/matrix", id: " ", expected: false },
+    { packageName: "@stableclaw/matrix", id: " ", expected: false },
   ])("matches ids for %j", ({ packageName, id, expected }) => {
     expect(packageNameMatchesId(packageName, id)).toBe(expected);
   });
@@ -74,7 +74,7 @@ describe("resolveSafeInstallDir", () => {
     expect(
       resolveSafeInstallDir({
         baseDir: "/tmp/plugins",
-        id: "@openclaw/matrix",
+        id: "@stableclaw/matrix",
         invalidNameMessage: "invalid plugin name",
       }),
     ).toEqual({

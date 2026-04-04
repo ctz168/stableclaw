@@ -169,7 +169,7 @@ function setMinimalChannelsAddRegistryForTests(): void {
   );
 }
 
-function registerMSTeamsSetupPlugin(pluginId = "@openclaw/msteams-plugin"): void {
+function registerMSTeamsSetupPlugin(pluginId = "@stableclaw/msteams-plugin"): void {
   vi.mocked(loadChannelSetupPluginRegistrySnapshotForChannel).mockReturnValue(
     createTestRegistry([{ pluginId, plugin: createMSTeamsSetupPlugin(), source: "test" }]),
   );
@@ -307,7 +307,7 @@ describe("channelsAddCommand", () => {
     expect(loadChannelSetupPluginRegistrySnapshotForChannel).toHaveBeenCalledWith(
       expect.objectContaining({
         channel: "msteams",
-        pluginId: "@openclaw/msteams-plugin",
+        pluginId: "@stableclaw/msteams-plugin",
       }),
     );
     expect(configMocks.writeConfigFile).toHaveBeenCalledWith(
@@ -332,7 +332,7 @@ describe("channelsAddCommand", () => {
     manifestRegistryMocks.loadPluginManifestRegistry.mockReturnValue({
       plugins: [
         {
-          id: "@openclaw/msteams-plugin",
+          id: "@stableclaw/msteams-plugin",
           channels: ["msteams"],
         } as never,
       ],
@@ -354,7 +354,7 @@ describe("channelsAddCommand", () => {
     expect(loadChannelSetupPluginRegistrySnapshotForChannel).toHaveBeenCalledWith(
       expect.objectContaining({
         channel: "msteams",
-        pluginId: "@openclaw/msteams-plugin",
+        pluginId: "@stableclaw/msteams-plugin",
       }),
     );
     expect(configMocks.writeConfigFile).toHaveBeenCalledWith(
@@ -374,7 +374,7 @@ describe("channelsAddCommand", () => {
     setActivePluginRegistry(createTestRegistry());
     const catalogEntry: ChannelPluginCatalogEntry = {
       id: "msteams",
-      pluginId: "@openclaw/msteams-plugin",
+      pluginId: "@stableclaw/msteams-plugin",
       meta: {
         id: "msteams",
         label: "Microsoft Teams",
@@ -383,7 +383,7 @@ describe("channelsAddCommand", () => {
         blurb: "teams channel",
       },
       install: {
-        npmSpec: "@openclaw/msteams",
+        npmSpec: "@stableclaw/msteams",
       },
     };
     catalogMocks.listChannelPluginCatalogEntries.mockReturnValue([catalogEntry]);

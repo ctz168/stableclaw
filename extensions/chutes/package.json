@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/chutes-provider",
+  "name": "@stableclaw/chutes-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Chutes.ai provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ]

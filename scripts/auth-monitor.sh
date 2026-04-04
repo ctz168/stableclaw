@@ -54,7 +54,7 @@ send_notification() {
     if [ -n "$NOTIFY_NTFY" ]; then
         echo "Sending via ntfy.sh to $NOTIFY_NTFY..."
         curl -s -o /dev/null \
-            -H "Title: OpenClaw Auth Alert" \
+            -H "Title: StableClaw Auth Alert" \
             -H "Priority: $priority" \
             -H "Tags: warning,key" \
             -d "$message" \
@@ -78,7 +78,7 @@ HOURS_LEFT=$((DIFF_MS / 3600000))
 MINS_LEFT=$(((DIFF_MS % 3600000) / 60000))
 
 if [ "$DIFF_MS" -lt 0 ]; then
-    send_notification "Claude Code auth EXPIRED! OpenClaw is down. Run: ssh l36 '~/openclaw/scripts/mobile-reauth.sh'" "urgent"
+    send_notification "Claude Code auth EXPIRED! StableClaw is down. Run: ssh l36 '~/openclaw/scripts/mobile-reauth.sh'" "urgent"
     exit 1
 elif [ "$HOURS_LEFT" -lt "$WARN_HOURS" ]; then
     send_notification "Claude Code auth expires in ${HOURS_LEFT}h ${MINS_LEFT}m. Consider re-auth soon." "high"

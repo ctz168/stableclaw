@@ -119,7 +119,7 @@ describe("doctor preview warnings", () => {
           {
             pluginId: "feishu",
             localPath: bundledPath,
-            npmSpec: "@openclaw/feishu",
+            npmSpec: "@stableclaw/feishu",
           },
         ],
       ]),

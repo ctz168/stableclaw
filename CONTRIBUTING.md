@@ -1,4 +1,4 @@
-# Contributing to OpenClaw
+# Contributing to StableClaw
 
 Welcome to the lobster tank! 🦞
 
@@ -87,7 +87,7 @@ Welcome to the lobster tank! 🦞
 
 ## Before You PR
 
-- Test locally with your OpenClaw instance
+- Test locally with your StableClaw instance
 - Run tests: `pnpm build && pnpm check && pnpm test`
 - For extension/plugin changes, run the fast local lane first:
   - `pnpm test:extension <extension-name>`
@@ -156,7 +156,7 @@ We are currently prioritizing:
 
 - **Stability**: Fixing edge cases in channel connections (WhatsApp/Telegram).
 - **UX**: Improving the onboarding wizard and error messages.
-- **Skills**: For skill contributions, head to [ClawHub](https://clawhub.ai/) — the community hub for OpenClaw skills.
+- **Skills**: For skill contributions, head to [ClawHub](https://clawhub.ai/) — the community hub for StableClaw skills.
 - **Performance**: Optimizing token usage and compaction logic.
 
 Check the [GitHub Issues](https://github.com/openclaw/openclaw/issues) for
@@ -167,13 +167,13 @@ you'd like to work on it.
 ## Maintainers
 
 We're selectively expanding the maintainer team.
-If you're an experienced contributor who wants to help shape OpenClaw's direction — whether through code, docs, or community — we'd like to hear from you.
+If you're an experienced contributor who wants to help shape StableClaw's direction — whether through code, docs, or community — we'd like to hear from you.
 
 Being a maintainer is a responsibility, not an honorary title. We expect active, consistent involvement — triaging issues, reviewing PRs, and helping move the project forward.
 
-Still interested? Email contributing@openclaw.ai with:
+Still interested? Email contributing@stableclaw.ai with:
 
-- Links to your PRs on OpenClaw (if you don't have any, start there first)
+- Links to your PRs on StableClaw (if you don't have any, start there first)
 - Links to open source projects you maintain or actively contribute to
 - Your GitHub, Discord, and X/Twitter handles
 - A brief intro: background, experience, and areas of interest
@@ -195,7 +195,7 @@ We take security reports seriously. Report vulnerabilities directly to the repos
 - **ClawHub** — [openclaw/clawhub](https://github.com/openclaw/clawhub)
 - **Trust and threat model** — [openclaw/trust](https://github.com/openclaw/trust)
 
-For issues that don't fit a specific repo, or if you're unsure, email **security@openclaw.ai** and we'll route it.
+For issues that don't fit a specific repo, or if you're unsure, email **security@stableclaw.ai** and we'll route it.
 
 ### Required in Reports
 

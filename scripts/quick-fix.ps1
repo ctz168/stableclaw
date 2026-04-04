@@ -1,7 +1,7 @@
 # Quick fix script for startup issues
 # Run this script to fix common startup problems
 
-Write-Host "🔧 Quick Fix Script for OpenClaw Startup Issues" -ForegroundColor Cyan
+Write-Host "🔧 Quick Fix Script for StableClaw Startup Issues" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Clean build artifacts

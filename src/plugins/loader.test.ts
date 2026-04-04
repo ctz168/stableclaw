@@ -1173,7 +1173,7 @@ describe("loadOpenClawPlugins", () => {
   it("preserves package.json metadata for bundled memory plugins", () => {
     const registry = loadBundledMemoryPluginRegistry({
       packageMeta: {
-        name: "@openclaw/memory-core",
+        name: "@stableclaw/memory-core",
         version: "1.2.3",
         description: "Memory plugin package",
       },
@@ -2837,7 +2837,7 @@ module.exports = {
       fixture: {
         id: "setup-entry-test",
         label: "Setup Entry Test",
-        packageName: "@openclaw/setup-entry-test",
+        packageName: "@stableclaw/setup-entry-test",
         fullBlurb: "full entry should not run in setup-only mode",
         setupBlurb: "setup entry",
         configured: false,
@@ -2866,7 +2866,7 @@ module.exports = {
       fixture: {
         id: "setup-runtime-test",
         label: "Setup Runtime Test",
-        packageName: "@openclaw/setup-runtime-test",
+        packageName: "@stableclaw/setup-runtime-test",
         fullBlurb: "full entry should not run while unconfigured",
         setupBlurb: "setup runtime",
         configured: false,
@@ -2890,7 +2890,7 @@ module.exports = {
       fixture: {
         id: "setup-runtime-preferred-test",
         label: "Setup Runtime Preferred Test",
-        packageName: "@openclaw/setup-runtime-preferred-test",
+        packageName: "@stableclaw/setup-runtime-preferred-test",
         fullBlurb: "full entry should be deferred while startup is still cold",
         setupBlurb: "setup runtime preferred",
         configured: true,
@@ -2922,7 +2922,7 @@ module.exports = {
       fixture: {
         id: "setup-runtime-not-preferred-test",
         label: "Setup Runtime Not Preferred Test",
-        packageName: "@openclaw/setup-runtime-not-preferred-test",
+        packageName: "@stableclaw/setup-runtime-not-preferred-test",
         fullBlurb: "full entry should still load without explicit startup opt-in",
         setupBlurb: "setup runtime not preferred",
         configured: true,
@@ -3032,7 +3032,7 @@ module.exports = {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/cli-metadata-channel",
+          name: "@stableclaw/cli-metadata-channel",
           openclaw: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
         },
         null,
@@ -3137,7 +3137,7 @@ module.exports = {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/full-cli-metadata-channel",
+          name: "@stableclaw/full-cli-metadata-channel",
           openclaw: { extensions: ["./index.cjs"] },
         },
         null,

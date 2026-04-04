@@ -250,8 +250,8 @@ describe("registerPreActionHooks", () => {
 
   it("only allows invalid config for explicit Matrix reinstall requests", async () => {
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/matrix"],
-      processArgv: ["node", "openclaw", "plugins", "install", "@openclaw/matrix"],
+      parseArgv: ["plugins", "install", "@stableclaw/matrix"],
+      processArgv: ["node", "openclaw", "plugins", "install", "@stableclaw/matrix"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -285,13 +285,13 @@ describe("registerPreActionHooks", () => {
 
     vi.clearAllMocks();
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/matrix", "--marketplace", "local/repo"],
+      parseArgv: ["plugins", "install", "@stableclaw/matrix", "--marketplace", "local/repo"],
       processArgv: [
         "node",
         "openclaw",
         "plugins",
         "install",
-        "@openclaw/matrix",
+        "@stableclaw/matrix",
         "--marketplace",
         "local/repo",
       ],

@@ -81,7 +81,7 @@ export { chunkTextForOutbound } from "./text-chunking.js";
 const zalouserSetup = createOptionalChannelSetupSurface({
   channel: "zalouser",
   label: "Zalo Personal",
-  npmSpec: "@openclaw/zalouser",
+  npmSpec: "@stableclaw/zalouser",
   docsPath: "/channels/zalouser",
 });
 

@@ -1,21 +1,21 @@
 {
-  "name": "@openclaw/line",
+  "name": "@stableclaw/line",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw LINE channel plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "stableclaw": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.4.1-beta.1"
+    "stableclaw": ">=2026.4.1-beta.1"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "stableclaw": {
       "optional": true
     }
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -33,7 +33,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/line",
+      "npmSpec": "@stableclaw/line",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     }

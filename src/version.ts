@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 
-declare const __OPENCLAW_VERSION__: string | undefined;
-const CORE_PACKAGE_NAME = "openclaw";
+declare const __STABLECLAW_VERSION__: string | undefined;
+const CORE_PACKAGE_NAME = "stableclaw";
 
 const PACKAGE_JSON_CANDIDATES = [
   "../package.json",
@@ -111,12 +111,12 @@ function resolveVersionFromRuntimeSources(params: {
 }): string {
   const preferredCandidates =
     params.preference === "env-first"
-      ? [params.env["OPENCLAW_VERSION"], params.runtimeVersion]
-      : [params.runtimeVersion, params.env["OPENCLAW_VERSION"]];
+      ? [params.env["STABLECLAW_VERSION"], params.runtimeVersion]
+      : [params.runtimeVersion, params.env["STABLECLAW_VERSION"]];
   return (
     firstNonEmpty(
       ...preferredCandidates,
-      params.env["OPENCLAW_SERVICE_VERSION"],
+      params.env["STABLECLAW_SERVICE_VERSION"],
       params.env["npm_package_version"],
     ) ?? params.fallback
   );
@@ -146,11 +146,11 @@ export function resolveCompatibilityHostVersion(
   });
 }
 
-// Single source of truth for the current OpenClaw version.
+// Single source of truth for the current StableClaw version.
 // - Embedded/bundled builds: injected define or env var.
 // - Dev/npm builds: package.json.
 export const VERSION = resolveBinaryVersion({
   moduleUrl: import.meta.url,
-  injectedVersion: typeof __OPENCLAW_VERSION__ === "string" ? __OPENCLAW_VERSION__ : undefined,
-  bundledVersion: process.env.OPENCLAW_BUNDLED_VERSION,
+  injectedVersion: typeof __STABLECLAW_VERSION__ === "string" ? __STABLECLAW_VERSION__ : undefined,
+  bundledVersion: process.env.STABLECLAW_BUNDLED_VERSION,
 });

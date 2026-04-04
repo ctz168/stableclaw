@@ -129,7 +129,7 @@ export { normalizeStringEntries } from "../shared/string-normalization.js";
 const msteamsSetup = createOptionalChannelSetupSurface({
   channel: "msteams",
   label: "Microsoft Teams",
-  npmSpec: "@openclaw/msteams",
+  npmSpec: "@stableclaw/msteams",
   docsPath: "/channels/msteams",
 });
 

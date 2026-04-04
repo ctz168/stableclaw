@@ -27,7 +27,7 @@ export function registerNodesCli(program: Command) {
             "Invoke a node command directly.",
           ],
           ["openclaw nodes camera snap --node <id>", "Capture a photo from a node camera."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/nodes", "docs.openclaw.ai/cli/nodes")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/nodes", "docs.stableclaw.ai/cli/nodes")}\n`,
     );
 
   registerNodesStatusCommands(nodes);

@@ -99,7 +99,7 @@ function createTelegramCfg(botToken: string, enabled?: boolean): OpenClawConfig 
 function createMSTeamsCatalogEntry(): ChannelPluginCatalogEntry {
   return {
     id: "msteams",
-    pluginId: "@openclaw/msteams-plugin",
+    pluginId: "@stableclaw/msteams-plugin",
     meta: {
       id: "msteams",
       label: "Microsoft Teams",
@@ -108,7 +108,7 @@ function createMSTeamsCatalogEntry(): ChannelPluginCatalogEntry {
       blurb: "teams channel",
     },
     install: {
-      npmSpec: "@openclaw/msteams",
+      npmSpec: "@stableclaw/msteams",
     },
   };
 }
@@ -366,7 +366,7 @@ type PatchedSetupAdapterFields = {
 
 function createMSTeamsPluginRegistryEntry(params?: { includeSetupWizard?: boolean }) {
   return {
-    pluginId: "@openclaw/msteams-plugin",
+    pluginId: "@stableclaw/msteams-plugin",
     source: "test",
     plugin: {
       id: "msteams",
@@ -795,7 +795,7 @@ describe("setupChannels", () => {
         },
         plugins: {
           entries: {
-            "@openclaw/msteams-plugin": { enabled: true },
+            "@stableclaw/msteams-plugin": { enabled: true },
           },
         },
       } as OpenClawConfig,
@@ -805,7 +805,7 @@ describe("setupChannels", () => {
     expect(loadChannelSetupPluginRegistrySnapshotForChannel).toHaveBeenCalledWith(
       expect.objectContaining({
         channel: "msteams",
-        pluginId: "@openclaw/msteams-plugin",
+        pluginId: "@stableclaw/msteams-plugin",
       }),
     );
     expect(multiselect).not.toHaveBeenCalled();
@@ -817,7 +817,7 @@ describe("setupChannels", () => {
     manifestRegistryMocks.loadPluginManifestRegistry.mockReturnValue({
       plugins: [
         {
-          id: "@openclaw/msteams-plugin",
+          id: "@stableclaw/msteams-plugin",
           channels: ["msteams"],
         } as never,
       ],
@@ -846,7 +846,7 @@ describe("setupChannels", () => {
     expect(loadChannelSetupPluginRegistrySnapshotForChannel).toHaveBeenCalledWith(
       expect.objectContaining({
         channel: "msteams",
-        pluginId: "@openclaw/msteams-plugin",
+        pluginId: "@stableclaw/msteams-plugin",
       }),
     );
     expect(multiselect).not.toHaveBeenCalled();

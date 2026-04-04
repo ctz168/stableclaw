@@ -182,7 +182,7 @@ export { setMatrixRuntime } from "./matrix-runtime-surface.js";
 const matrixSetup = createOptionalChannelSetupSurface({
   channel: "matrix",
   label: "Matrix",
-  npmSpec: "@openclaw/matrix",
+  npmSpec: "@stableclaw/matrix",
   docsPath: "/channels/matrix",
 });
 

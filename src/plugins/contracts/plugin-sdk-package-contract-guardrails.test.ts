@@ -392,7 +392,7 @@ describe("plugin-sdk package contract guardrails", () => {
       expect(packedPackageJson.dependencies?.["@aws-sdk/client-bedrock"]).toBe(
         bedrockPackageJson.dependencies?.["@aws-sdk/client-bedrock"],
       );
-      expect(packedPackageJson.dependencies?.["@openclaw/plugin-package-contract"]).toBeUndefined();
+      expect(packedPackageJson.dependencies?.["@stableclaw/plugin-package-contract"]).toBeUndefined();
     } finally {
       rmSync(tempRoot, { recursive: true, force: true });
     }

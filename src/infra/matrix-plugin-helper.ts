@@ -18,7 +18,7 @@ const MATRIX_HELPER_CANDIDATES = [
 ] as const;
 
 export const MATRIX_LEGACY_CRYPTO_INSPECTOR_UNAVAILABLE_MESSAGE =
-  "Legacy Matrix encrypted state was detected, but the Matrix plugin helper is unavailable. Install or repair @openclaw/matrix so OpenClaw can inspect the old rust crypto store before upgrading.";
+  "Legacy Matrix encrypted state was detected, but the Matrix plugin helper is unavailable. Install or repair @stableclaw/matrix so OpenClaw can inspect the old rust crypto store before upgrading.";
 
 type MatrixLegacyCryptoInspectorParams = {
   cryptoRootDir: string;
@@ -156,7 +156,7 @@ export async function loadMatrixLegacyCryptoInspector(params: {
   }
   if (resolution.status === "unsafe") {
     throw new Error(
-      `Matrix plugin helper path is unsafe: ${resolution.candidatePath}. Reinstall @openclaw/matrix and try again.`,
+      `Matrix plugin helper path is unsafe: ${resolution.candidatePath}. Reinstall @stableclaw/matrix and try again.`,
     );
   }
   const helperPath = resolution.helperPath;
@@ -183,7 +183,7 @@ export async function loadMatrixLegacyCryptoInspector(params: {
     const inspectLegacyMatrixCryptoStore = resolveInspectorExport(loaded);
     if (!inspectLegacyMatrixCryptoStore) {
       throw new Error(
-        `Matrix plugin helper at ${helperPath} does not export inspectLegacyMatrixCryptoStore(). Reinstall @openclaw/matrix and try again.`,
+        `Matrix plugin helper at ${helperPath} does not export inspectLegacyMatrixCryptoStore(). Reinstall @stableclaw/matrix and try again.`,
       );
     }
     return inspectLegacyMatrixCryptoStore;

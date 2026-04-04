@@ -568,7 +568,7 @@ export async function startGatewayServer(
     const lines = formatPluginInstallPathIssue({
       issue: matrixInstallPathIssue,
       pluginLabel: "Matrix",
-      defaultInstallCommand: "stableclaw plugins install @openclaw/matrix",
+      defaultInstallCommand: "stableclaw plugins install @stableclaw/matrix",
       repoInstallCommand: resolveBundledPluginInstallCommandHint({
         pluginId: "matrix",
         workspaceDir: process.cwd(),

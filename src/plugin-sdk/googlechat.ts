@@ -108,7 +108,7 @@ export function resolveGoogleChatGroupRequireMention(params: GoogleChatGroupCont
 const googlechatSetup = createOptionalChannelSetupSurface({
   channel: "googlechat",
   label: "Google Chat",
-  npmSpec: "@openclaw/googlechat",
+  npmSpec: "@stableclaw/googlechat",
   docsPath: "/channels/googlechat",
 });
 
