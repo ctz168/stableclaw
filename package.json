@@ -1,17 +1,17 @@
 {
-  "name": "openclaw",
+  "name": "stableclaw",
   "version": "2026.4.3",
   "description": "Multi-channel AI gateway with extensible messaging integrations",
   "keywords": [],
-  "homepage": "https://github.com/openclaw/openclaw#readme",
+  "homepage": "https://github.com/ctz168/stableclaw#readme",
   "bugs": {
-    "url": "https://github.com/openclaw/openclaw/issues"
+    "url": "https://github.com/ctz168/stableclaw/issues"
   },
   "license": "MIT",
   "author": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openclaw/openclaw.git"
+    "url": "git+https://github.com/ctz168/stableclaw.git"
   },
   "bin": {
     "stableclaw": "stableclaw.mjs"
@@ -23,7 +23,6 @@
   "files": [
     "CHANGELOG.md",
     "LICENSE",
-    "openclaw.mjs",
     "stableclaw.mjs",
     "README.md",
     "assets/",
@@ -1013,7 +1012,7 @@
       "default": "./dist/plugin-sdk/zod.js"
     },
     "./extension-api": "./dist/extensionAPI.js",
-    "./cli-entry": "./openclaw.mjs"
+    "./cli-entry": "./stableclaw.mjs"
   },
   "scripts": {
     "android:assemble": "cd apps/android && ./gradlew :app:assemblePlayDebug",

@@ -75,13 +75,13 @@ export function executeJobCoreWithTimeout(
 ): Promise<Awaited<ReturnType<typeof executeJobCore>>> {
   const jobTimeoutMs = resolveCronJobTimeoutMs(job);
   if (typeof jobTimeoutMs !== "number") {
-    return await executeJobCore(state, job);
+    return executeJobCore(state, job);
   }
 
   const runAbortController = new AbortController();
   let timeoutId: NodeJS.Timeout | undefined;
   try {
-    return await Promise.race([
+    return Promise.race([
       executeJobCore(state, job, runAbortController.signal),
       new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {

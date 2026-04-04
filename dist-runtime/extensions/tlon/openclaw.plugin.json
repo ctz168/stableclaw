@@ -3,7 +3,9 @@
   "channels": [
     "tlon"
   ],
-  "skills": [],
+  "skills": [
+    "./bundled-skills/@tloncorp/tlon-skill"
+  ],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

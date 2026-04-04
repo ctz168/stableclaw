@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
-import { MANIFEST_KEY } from "../compat/legacy-names.js";
+import { ALL_MANIFEST_KEYS, MANIFEST_KEY } from "../compat/legacy-names.js";
 import { matchBoundaryFileOpenFailure, openBoundaryFileSync } from "../infra/boundary-file-read.js";
 import { isRecord } from "../utils.js";
 import type { PluginConfigUiHint, PluginKind } from "./types.js";
@@ -419,7 +419,14 @@ export function getPackageManifestMetadata(
   if (!manifest) {
     return undefined;
   }
-  return manifest[MANIFEST_KEY];
+  // Check current key first, then legacy keys for backward compatibility.
+  for (const key of ALL_MANIFEST_KEYS) {
+    const entry = manifest[key as keyof PackageManifest] as OpenClawPackageManifest | undefined;
+    if (entry) {
+      return entry;
+    }
+  }
+  return undefined;
 }
 
 export function resolvePackageExtensionEntries(

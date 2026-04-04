@@ -53,14 +53,14 @@ export function parseTimeoutMsOrExit(timeout?: string): number | undefined | nul
   return timeoutMs;
 }
 
-const OPENCLAW_REPO_URL = "https://github.com/openclaw/openclaw.git";
+const OPENCLAW_REPO_URL = "https://github.com/ctz168/stableclaw.git";
 const MAX_LOG_CHARS = 8000;
 
-export const DEFAULT_PACKAGE_NAME = "openclaw";
+export const DEFAULT_PACKAGE_NAME = "stableclaw";
 const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
 
 export function normalizeTag(value?: string | null): string | null {
-  return normalizePackageTagInput(value, ["openclaw", DEFAULT_PACKAGE_NAME]);
+  return normalizePackageTagInput(value, ["stableclaw", DEFAULT_PACKAGE_NAME]);
 }
 
 export function normalizeVersionTag(tag: string): string | null {
@@ -123,9 +123,9 @@ export function resolveGitInstallDir(): string {
 function resolveDefaultGitDir(): string {
   const home = os.homedir();
   if (home.startsWith("/")) {
-    return path.posix.join(home, "openclaw");
+    return path.posix.join(home, "stableclaw");
   }
-  return path.join(home, "openclaw");
+  return path.join(home, "stableclaw");
 }
 
 export function resolveNodeRunner(): string {
@@ -258,7 +258,7 @@ export async function resolveGlobalManager(params: {
 }
 
 export async function tryWriteCompletionCache(root: string, jsonMode: boolean): Promise<void> {
-  const binPath = path.join(root, "openclaw.mjs");
+  const binPath = path.join(root, "stableclaw.mjs");
   if (!(await pathExists(binPath))) {
     return;
   }

@@ -92,8 +92,8 @@ const DEFAULT_TIMEOUT_MS = 20 * 60_000;
 const MAX_LOG_CHARS = 8000;
 const PREFLIGHT_MAX_COMMITS = 10;
 const START_DIRS = ["cwd", "argv1", "process"];
-const DEFAULT_PACKAGE_NAME = "openclaw";
-const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
+const DEFAULT_PACKAGE_NAME = "stableclaw";
+const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME, "openclaw"]);
 
 function normalizeDir(value?: string | null) {
   if (!value) {
@@ -880,14 +880,14 @@ export async function runGatewayUpdate(opts: UpdateRunnerOptions = {}): Promise<
       };
     }
 
-    const doctorEntry = path.join(gitRoot, "openclaw.mjs");
+    const doctorEntry = path.join(gitRoot, "stableclaw.mjs");
     const doctorEntryExists = await fs
       .stat(doctorEntry)
       .then(() => true)
       .catch(() => false);
     if (!doctorEntryExists) {
       steps.push({
-        name: "openclaw doctor entry",
+        name: "stableclaw doctor entry",
         command: `verify ${doctorEntry}`,
         cwd: gitRoot,
         durationMs: 0,
