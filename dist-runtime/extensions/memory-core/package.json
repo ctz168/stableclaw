@@ -1,12 +1,23 @@
 {
-  "name": "@openclaw/memory-core",
+  "name": "@stableclaw/memory-core",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw core memory search plugin",
   "type": "module",
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

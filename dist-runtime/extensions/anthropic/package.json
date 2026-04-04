@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/anthropic-provider",
+  "name": "@stableclaw/anthropic-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Anthropic provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

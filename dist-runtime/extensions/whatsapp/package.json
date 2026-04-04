@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/whatsapp",
+  "name": "@stableclaw/whatsapp",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw WhatsApp channel plugin",
   "type": "module",
@@ -7,11 +7,22 @@
     "@whiskeysockets/baileys": "7.0.0-rc.9",
     "jimp": "^1.6.0"
   },
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "whatsapp",
       "label": "WhatsApp",
@@ -23,7 +34,7 @@
       "systemImage": "message"
     },
     "install": {
-      "npmSpec": "@openclaw/whatsapp",
+      "npmSpec": "@stableclaw/whatsapp",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

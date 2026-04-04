@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/feishu",
+  "name": "@stableclaw/feishu",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw Feishu/Lark channel plugin (community maintained by @m1heng)",
   "type": "module",
@@ -8,11 +8,22 @@
     "@sinclair/typebox": "0.34.49",
     "https-proxy-agent": "^8.0.0"
   },
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "feishu",
       "label": "Feishu",
@@ -27,7 +38,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/feishu",
+      "npmSpec": "@stableclaw/feishu",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

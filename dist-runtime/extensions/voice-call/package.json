@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/voice-call",
+  "name": "@stableclaw/voice-call",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw voice-call plugin",
   "type": "module",
@@ -8,9 +8,20 @@
     "commander": "^14.0.3",
     "ws": "^8.20.0"
   },
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
     "install": {
       "minHostVersion": ">=2026.4.1"

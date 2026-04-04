@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/google-plugin",
+  "name": "@stableclaw/google-plugin",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Google plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

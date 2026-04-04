@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/discord",
+  "name": "@stableclaw/discord",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw Discord channel plugin",
   "type": "module",
@@ -10,11 +10,22 @@
     "https-proxy-agent": "^8.0.0",
     "opusscript": "^0.0.8"
   },
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "discord",
       "label": "Discord",
@@ -27,7 +38,7 @@
       "markdownCapable": true
     },
     "install": {
-      "npmSpec": "@openclaw/discord",
+      "npmSpec": "@stableclaw/discord",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

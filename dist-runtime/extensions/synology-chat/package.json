@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/synology-chat",
+  "name": "@stableclaw/synology-chat",
   "version": "2026.4.1-beta.1",
   "description": "Synology Chat channel plugin for OpenClaw",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "synology-chat",
       "label": "Synology Chat",
@@ -18,7 +18,7 @@
       "order": 90
     },
     "install": {
-      "npmSpec": "@openclaw/synology-chat",
+      "npmSpec": "@stableclaw/synology-chat",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     }

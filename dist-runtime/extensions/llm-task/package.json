@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/llm-task",
+  "name": "@stableclaw/llm-task",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw JSON-only LLM task plugin",
@@ -8,9 +8,9 @@
     "@sinclair/typebox": "0.34.49",
     "ajv": "^8.18.0"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

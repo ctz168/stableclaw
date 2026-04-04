@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/twitch",
+  "name": "@stableclaw/twitch",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw Twitch channel plugin",
   "type": "module",
@@ -8,9 +8,9 @@
     "@twurple/auth": "^8.0.3",
     "@twurple/chat": "^8.0.3"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
     "install": {
       "minHostVersion": ">=2026.4.1"

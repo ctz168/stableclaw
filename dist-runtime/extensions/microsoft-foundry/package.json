@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/microsoft-foundry",
+  "name": "@stableclaw/microsoft-foundry",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Microsoft Foundry provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

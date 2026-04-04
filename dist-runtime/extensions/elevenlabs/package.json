@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/elevenlabs-speech",
+  "name": "@stableclaw/elevenlabs-speech",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw ElevenLabs speech plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

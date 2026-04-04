@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/volcengine-provider",
+  "name": "@stableclaw/volcengine-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Volcengine provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

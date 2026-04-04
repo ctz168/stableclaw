@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/minimax-provider",
+  "name": "@stableclaw/minimax-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw MiniMax provider and OAuth plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

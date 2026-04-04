@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/groq-provider",
+  "name": "@stableclaw/groq-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Groq media-understanding provider",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

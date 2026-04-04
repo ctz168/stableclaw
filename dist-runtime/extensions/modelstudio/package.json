@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/modelstudio-provider",
+  "name": "@stableclaw/modelstudio-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Model Studio provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

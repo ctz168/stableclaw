@@ -1,14 +1,14 @@
 {
-  "name": "@openclaw/signal",
+  "name": "@stableclaw/signal",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Signal channel plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "signal",
       "label": "Signal",

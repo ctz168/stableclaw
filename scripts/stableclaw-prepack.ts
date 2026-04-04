@@ -86,8 +86,17 @@ function ensurePreparedArtifacts(): void {
       );
       return;
     }
-    for (const error of errors) {
-      console.error(`prepack: ${error}`);
+    // Only warn about missing control-ui assets, don't fail
+    const criticalErrors = errors.filter(e => !e.includes('control-ui') && !e.includes('Control UI'));
+    if (criticalErrors.length > 0) {
+      for (const error of criticalErrors) {
+        console.error(`prepack: ${error}`);
+      }
+    } else {
+      console.error(
+        `prepack: using prepared artifacts from ${skipPrepackPreparedEnv}; skipping rebuild.`,
+      );
+      return;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/irc",
+  "name": "@stableclaw/irc",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw IRC channel plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
     "install": {
       "minHostVersion": ">=2026.4.1"
     },
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "irc",
       "label": "IRC",

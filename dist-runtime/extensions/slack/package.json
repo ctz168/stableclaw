@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/slack",
+  "name": "@stableclaw/slack",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Slack channel plugin",
@@ -8,11 +8,11 @@
     "@slack/bolt": "^4.6.0",
     "@slack/web-api": "^7.15.0"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "slack",
       "label": "Slack",

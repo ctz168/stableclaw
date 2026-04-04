@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/browser-plugin",
+  "name": "@stableclaw/browser-plugin",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw browser tool plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

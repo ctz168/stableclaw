@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/diagnostics-otel",
+  "name": "@stableclaw/diagnostics-otel",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw diagnostics OpenTelemetry exporter",
   "type": "module",
@@ -16,9 +16,9 @@
     "@opentelemetry/sdk-trace-base": "^2.6.1",
     "@opentelemetry/semantic-conventions": "^1.40.0"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
     "release": {
       "publishToNpm": true

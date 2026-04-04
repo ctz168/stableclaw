@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/together-provider",
+  "name": "@stableclaw/together-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw Together provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

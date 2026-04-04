@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/memory-lancedb",
+  "name": "@stableclaw/memory-lancedb",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw LanceDB-backed long-term memory plugin with auto-recall/capture",
   "type": "module",
@@ -8,12 +8,12 @@
     "@sinclair/typebox": "0.34.49",
     "openai": "^6.33.0"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/memory-lancedb",
+      "npmSpec": "@stableclaw/memory-lancedb",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/byteplus-provider",
+  "name": "@stableclaw/byteplus-provider",
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw BytePlus provider plugin",
   "type": "module",
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }

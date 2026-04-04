@@ -1,13 +1,24 @@
 {
-  "name": "@openclaw/bluebubbles",
+  "name": "@stableclaw/bluebubbles",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw BlueBubbles channel plugin",
   "type": "module",
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "bluebubbles",
       "label": "BlueBubbles",
@@ -26,7 +37,7 @@
       "order": 75
     },
     "install": {
-      "npmSpec": "@openclaw/bluebubbles",
+      "npmSpec": "@stableclaw/bluebubbles",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     },

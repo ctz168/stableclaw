@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/tlon",
+  "name": "@stableclaw/tlon",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw Tlon/Urbit channel plugin",
   "type": "module",
@@ -9,11 +9,22 @@
     "@tloncorp/tlon-skill": "0.3.1",
     "@urbit/aura": "^3.0.0"
   },
-  "openclaw": {
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ],
-    "setupEntry": "./setup-entry.js",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "tlon",
       "label": "Tlon",
@@ -25,7 +36,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/tlon",
+      "npmSpec": "@stableclaw/tlon",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.1"
     }

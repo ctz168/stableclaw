@@ -1,14 +1,14 @@
 {
-  "name": "@openclaw/acpx",
+  "name": "@stableclaw/acpx",
   "version": "2026.4.1-beta.1",
   "description": "OpenClaw ACP runtime backend via acpx",
   "type": "module",
   "dependencies": {
     "acpx": "0.4.0"
   },
-  "openclaw": {
+  "stableclaw": {
     "extensions": [
-      "./index.js"
+      "./index.ts"
     ]
   }
 }
