@@ -225,6 +225,62 @@ function registerAicqPlugin(api: any) {
     log.warn("api.on not available - task plan bridge disabled");
   }
 
+  // ── Sub-Agent Progress Bridge ─────────────────────────────────
+  // Subscribe to sub-agent progress events and forward to AICQ web UI
+  try {
+    const { onSubagentProgress } = await import("../../agents/subagent-progress.js");
+
+    const httpUrl = serverUrl.replace(/^ws/, "http");
+
+    onSubagentProgress(async (event: any) => {
+      try {
+        const terminalPhases = new Set(["completed", "killed", "timeout"]);
+        const isTerminal = terminalPhases.has(event.phase);
+        const isError = event.phase === "error";
+
+        const payload = {
+          id: event.runId,
+          task: event.detail?.task || event.label || event.message,
+          status: isTerminal
+            ? (event.phase === "completed" ? "completed" : "error")
+            : "running",
+          output: event.phase === "text" || event.phase === "tool_result"
+            ? (event.detail?.outputPreview || event.message || "")
+            : "",
+          chunk: event.message,
+          phase: event.phase,
+          label: event.label,
+          detail: event.detail,
+          sessionKey: event.sessionKey,
+          parentSessionKey: event.parentSessionKey,
+          friendId: aicqAgentId,
+        };
+
+        const pushResp = await fetch(`${httpUrl}/api/v1/subagent-progress/push`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            senderId: aicqAgentId,
+            runId: event.runId,
+            phase: event.phase,
+            message: event.message,
+            payload,
+          }),
+        });
+
+        if (!pushResp.ok) {
+          log.debug(`Sub-agent push failed: ${pushResp.status}`);
+        }
+      } catch (err: any) {
+        log.debug(`Sub-agent bridge error: ${err?.message || String(err)}`);
+      }
+    });
+
+    log.info("Registered sub-agent progress bridge");
+  } catch (err: any) {
+    log.warn(`Failed to init sub-agent bridge: ${err?.message || String(err)}`);
+  }
+
   log.info("═══════════════════════════════════════════════");
   log.info("  AICQ Plugin activated successfully!");
   log.info("═══════════════════════════════════════════════");
