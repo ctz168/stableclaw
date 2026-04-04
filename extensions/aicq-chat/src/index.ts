@@ -162,10 +162,14 @@ function registerAicqPlugin(api: any) {
 
         log.debug(`Task plan hook fired: action=${action}`);
 
-        // Extract plan data from tool result or params
-        const planId = result?.planId || params?.planId || "";
-        const title = result?.title || params?.title || "任务计划";
-        const steps = result?.steps || params?.steps || [];
+        // Extract plan data from tool result.details (jsonResult wraps payload in { content, details })
+        // Fallback to params for delete action which may not have details
+        const details = (result && typeof result === "object" && "details" in result)
+          ? (result as any).details ?? {}
+          : (result && typeof result === "object" ? result : {});
+        const planId = details?.planId || params?.planId || "";
+        const title = details?.title || params?.title || "任务计划";
+        const steps = details?.steps || params?.steps || [];
 
         if (!planId) {
           log.warn("Task plan hook: no planId found, skipping push");

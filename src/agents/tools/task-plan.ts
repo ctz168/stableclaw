@@ -443,6 +443,8 @@ export function createTaskPlanTool(opts?: {
           const plan = createPlan({ sessionKey, title, goal, steps });
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             markdown: renderPlanMarkdown(plan),
           });
         }
@@ -455,6 +457,8 @@ export function createTaskPlanTool(opts?: {
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             markdown: renderPlanMarkdown(plan),
           });
         }
@@ -471,6 +475,8 @@ export function createTaskPlanTool(opts?: {
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             stepId: plan.steps[plan.steps.length - 1]?.id,
             markdown: renderPlanMarkdown(plan),
           });
@@ -490,6 +496,8 @@ export function createTaskPlanTool(opts?: {
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             markdown: renderPlanMarkdown(plan),
           });
         }
@@ -502,6 +510,8 @@ export function createTaskPlanTool(opts?: {
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             markdown: renderPlanMarkdown(plan),
           });
         }
@@ -517,6 +527,8 @@ export function createTaskPlanTool(opts?: {
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           return jsonResult({
             planId: plan.id,
+            title: plan.title,
+            steps: plan.steps,
             markdown: renderPlanMarkdown(plan),
           });
         }
@@ -535,6 +547,8 @@ export function createTaskPlanTool(opts?: {
             if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
             return jsonResult({
               planId: plan.id,
+              title: plan.title,
+              steps: plan.steps,
               markdown: renderPlanMarkdown(plan),
               summary: renderPlanSummary(plan),
             });
