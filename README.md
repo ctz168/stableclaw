@@ -1,11 +1,12 @@
 # 🦞 StableClaw — 企业级稳定版 AI 助手
 
 <p align="center">
-  <strong>EXFOLIATE! EXFOLIATE!</strong>
+  <img src="assets/stableclaw-icon.svg" alt="StableClaw Logo" width="120">
 </p>
 
 <p align="center">
   <a href="https://github.com/ctz168/stableclaw"><img src="https://img.shields.io/github/actions/workflow/status/ctz168/stableclaw/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
+  <a href="https://www.npmjs.com/package/stableclaw"><img src="https://img.shields.io/npm/v/stableclaw?style=for-the-badge&label=npm" alt="npm version"></a>
   <a href="https://github.com/ctz168/stableclaw/releases"><img src="https://img.shields.io/github/v/release/ctz168/stableclaw?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
 </p>
@@ -14,190 +15,566 @@
 
 **StableClaw** 是基于 [OpenClaw](https://github.com/openclaw/openclaw) **v2026.4.3** 版本的**企业级稳定增强版**，专注于生产环境的稳定性、可靠性和可维护性。
 
-StableClaw 在 OpenClaw 的基础上，增加了多项企业级增强功能，特别适合需要高可用性、零停机维护和自动化运维的生产环境。
+StableClaw 在 OpenClaw 的基础上，增加了多项企业级增强功能，特别适合需要高可用性、零停机维护和自动化运维的生产环境。支持 **20+ 消息渠道**（Telegram、Discord、Slack、微信、WhatsApp 等）、**多 AI 模型**（OpenAI、Anthropic、Google、Moonshot/Kimi、DeepSeek 等）以及 **85+ 扩展插件**。
 
 ---
 
-## 🚀 快速开始
+## 🚀 快速安装
+
+> ⚡ **推荐新手使用 npm 方式安装**，最简单快捷。需要自定义修改源码时再选择源码构建方式。
 
 ### 系统要求
 
-| 平台 | 要求 |
-|------|------|
-| **Node.js** | v24（推荐）或 v22.16+ |
-| **pnpm** | v9+ |
-| **Git** | 最新版 |
-| **操作系统** | Windows 10/11、macOS 12+、Ubuntu 20.04+ / Debian 11+ |
+| 项目 | 最低要求 | 推荐配置 |
+|------|----------|----------|
+| **Node.js** | v22.12+ | v24（LTS） |
+| **操作系统** | Windows 10 / macOS 12 / Ubuntu 20.04 | Windows 11 / macOS 14 / Ubuntu 24.04 |
+| **内存** | 512 MB | 2 GB+ |
+| **磁盘空间** | 200 MB（npm 安装） | 2 GB+（源码构建） |
+| **pnpm** | v9+（仅源码构建需要） | 最新版 |
+
+> 仅有 **Node.js** 一个前置依赖即可运行，npm 安装方式不需要 pnpm 和 Git。
 
 ---
 
-### 🪟 Windows 安装（PowerShell）
+## 📦 安装方式对比
 
-**第一步：安装前置依赖**
+| 方式 | 适用场景 | 难度 | 耗时 | 可自定义 |
+|------|----------|------|------|----------|
+| **npm 全局安装** ⭐ | 快速体验、生产部署 | ⭐ 简单 | ~1 分钟 | ❌ |
+| **源码构建** | 需要修改源码、二次开发 | ⭐⭐ 中等 | ~5-10 分钟 | ✅ |
+| **Docker 部署** | 服务器部署、容器化环境 | ⭐⭐ 中等 | ~2 分钟 | ✅ |
+| **GitHub 安装** | 想用最新开发版 | ⭐⭐ 中等 | ~3 分钟 | ✅ |
 
-打开 **PowerShell**（管理员），依次执行：
+---
+
+## ⭐ 方式一：npm 全局安装（推荐）
+
+最简单的安装方式，适合大多数用户。安装后即可在任意位置使用 `stableclaw` 命令。
+
+### 🪟 Windows
+
+打开 **PowerShell**，执行以下命令：
 
 ```powershell
-# 1. 安装 Node.js（如果没有）
-winget install OpenJS.NodeJS.LTS
-
-# 关闭当前 PowerShell，重新打开一个新的，验证安装
+# 1. 确认 Node.js 已安装（如未安装，见下方说明）
 node --version
-# 应显示 v24.x.x 或 v22.16+
+# 需要 v22.12 或更高版本
 
-# 2. 安装 pnpm
-npm install -g pnpm
+# 2. 一键安装 StableClaw
+npm install -g stableclaw
 
-# 3. 安装 Git（如果没有）
-winget install Git.Git
+# 3. 验证安装
+stableclaw --version
 
-# 关闭并重新打开 PowerShell
-git --version
+# 4. 运行配置向导（首次使用必须）
+stableclaw onboard
+
+# 5. 启动
+stableclaw gateway run
 ```
 
-> 如果 `winget` 不可用，也可以从 [https://nodejs.org](https://nodejs.org) 手动下载 Node.js，从 [https://git-scm.com](https://git-scm.com) 下载 Git。
+> **没有 Node.js？** 执行 `winget install OpenJS.NodeJS.LTS` 安装，或从 [https://nodejs.org](https://nodejs.org) 下载。安装后**关闭并重新打开 PowerShell**。
 
-**第二步：修复 PowerShell 执行策略**
+### 🍎 macOS
 
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-**第三步：克隆并构建**
-
-```powershell
-# 克隆仓库
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-
-# 安装依赖
-pnpm install
-
-# 构建项目（可能需要几分钟）
-pnpm build
-```
-
-**第四步：运行配置向导**
-
-```powershell
-# 首次运行配置向导（会引导你设置 AI 模型、API Key 等）
-pnpm stableclaw onboard --install-daemon
-```
-
-**第五步：启动**
-
-```powershell
-# 启动 gateway
-pnpm stableclaw gateway run
-
-# 或者后台启动（守护进程模式）
-pnpm stableclaw gateway start
-```
-
-**Windows 配置文件位置：**
-```
-C:\Users\<你的用户名>\.stableclaw\
-├── stableclaw.json     # 主配置文件
-├── credentials/        # API 密钥和凭证
-├── extensions/         # 已安装的插件
-├── agents/             # Agent 配置
-└── memory/             # 对话记忆
-```
-
-**常见问题：**
-
-| 问题 | 解决方案 |
-|------|----------|
-| `pnpm: 无法加载文件` | 执行 `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| `node: command not found` | 重新打开 PowerShell，或手动添加 Node.js 到 PATH |
-| `pnpm build` 报错 | 确认 Node.js 版本 >= 22.16，执行 `node --version` 检查 |
-| 端口 18789 被占用 | 修改 `stableclaw.json` 中的 `gateway.port`，或执行 `pnpm stableclaw gateway stop` |
-
----
-
-### 🍎 macOS 安装
+打开 **终端**，执行：
 
 ```bash
-# 安装 Homebrew（如果没有）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# 1. 确认 Node.js 已安装
+node --version
 
-# 安装 Node.js
-brew install node@24
+# 2. 一键安装
+npm install -g stableclaw
 
-# 安装 pnpm
-npm install -g pnpm
+# 3. 验证
+stableclaw --version
 
-# 克隆、构建、运行
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-pnpm install
-pnpm build
+# 4. 配置向导
+stableclaw onboard
 
-# 配置向导
-pnpm stableclaw onboard --install-daemon
-
-# 启动
-pnpm stableclaw gateway run
+# 5. 启动
+stableclaw gateway run
 ```
 
-**macOS 配置文件位置：**
-```
-~/.stableclaw/
-├── stableclaw.json
-├── credentials/
-└── extensions/
-```
+> **没有 Node.js？** 使用 Homebrew 安装：`brew install node@24`，然后执行 `brew link node@24 --force`。
 
----
-
-### 🐧 Linux 安装（Ubuntu / Debian）
+### 🐧 Linux（Ubuntu / Debian）
 
 ```bash
-# 安装 Node.js 24
+# 1. 安装 Node.js（如未安装）
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 安装 pnpm
+# 2. 一键安装
+npm install -g stableclaw
+
+# 3. 验证
+stableclaw --version
+
+# 4. 配置向导
+stableclaw onboard
+
+# 5. 启动
+stableclaw gateway run
+```
+
+> **其他 Linux 发行版：** 从 [https://nodejs.org](https://nodejs.org) 下载预编译包，或使用 [nvm](https://github.com/nvm-sh/nvm) 管理多版本 Node.js。
+
+### npm 安装常见问题
+
+| 问题 | 解决方案 |
+|------|----------|
+| `EACCES: permission denied` | Linux/macOS 使用 `sudo npm install -g stableclaw`；或配置 npm 全局目录（见下方） |
+| `stableclaw: command not found` | 检查 Node.js 全局 bin 目录是否在 PATH 中，执行 `npm config get prefix` 查看 |
+| Windows 提示脚本禁用 | 以管理员身份运行 PowerShell，执行 `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| npm 下载慢 | 使用国内镜像：`npm config set registry https://registry.npmmirror.com` |
+| 安装后版本不对 | 执行 `npm list -g stableclaw` 确认，或强制重装 `npm install -g stableclaw@latest` |
+
+**配置 npm 全局目录（免 sudo）：**
+
+```bash
+# Linux / macOS：将 npm 全局包安装到用户目录
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# 然后无需 sudo 即可安装
+npm install -g stableclaw
+```
+
+---
+
+## 🔧 方式二：源码构建安装
+
+适用于需要修改源码、参与开发或需要自定义功能的用户。
+
+### 🪟 Windows（PowerShell）
+
+```powershell
+# 1. 安装前置依赖
+winget install OpenJS.NodeJS.LTS    # Node.js
+winget install Git.Git              # Git
+
+# 关闭并重新打开 PowerShell，然后：
+npm install -g pnpm                 # 安装 pnpm
+
+# 修复执行策略（PowerShell）
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# 2. 克隆仓库
+git clone https://github.com/ctz168/stableclaw.git
+cd stableclaw
+
+# 3. 安装依赖并构建
+pnpm install          # 安装依赖（约 2-3 分钟）
+pnpm build            # 构建项目（约 3-5 分钟）
+
+# 4. 链接到全局（可选，让你可以在任意位置使用 stableclaw 命令）
+npm link
+
+# 5. 配置和启动
+stableclaw onboard    # 配置向导
+stableclaw gateway run # 启动
+```
+
+### 🍎 macOS
+
+```bash
+# 1. 安装前置依赖（使用 Homebrew）
+brew install node@24 git
+brew link node@24 --force
 npm install -g pnpm
 
-# 安装构建工具
-sudo apt-get install -y build-essential python3
-
-# 克隆、构建、运行
+# 2. 克隆、构建
 git clone https://github.com/ctz168/stableclaw.git
 cd stableclaw
 pnpm install
 pnpm build
 
-# 配置向导
-pnpm stableclaw onboard --install-daemon
-
-# 启动
-pnpm stableclaw gateway run
+# 3. 链接和启动（可选）
+npm link
+stableclaw onboard
+stableclaw gateway run
 ```
 
-**Linux 配置文件位置：**
+### 🐧 Linux（Ubuntu / Debian）
+
+```bash
+# 1. 安装前置依赖
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt-get install -y nodejs git build-essential python3
+npm install -g pnpm
+
+# 2. 克隆、构建
+git clone https://github.com/ctz168/stableclaw.git
+cd stableclaw
+pnpm install
+pnpm build
+
+# 3. 链接和启动（可选）
+npm link
+stableclaw onboard
+stableclaw gateway run
+```
+
+> **源码构建参数说明：** `pnpm build` 会编译 TypeScript 源码、打包插件 SDK、生成 CLI 入口。如果只需要主程序可以跳过 UI 构建，执行 `SKIP_UI=1 pnpm build`。
+
+---
+
+## 📥 方式三：从 GitHub 直接安装
+
+适用于想要使用最新开发版本的用户（可能包含未发布的更新）。
+
+```bash
+# 安装 main 分支最新代码
+npm install -g github:ctz168/stableclaw
+
+# 安装指定 commit 或 tag
+npm install -g github:ctz168/stableclaw#v2026.4.3
+
+# 验证
+stableclaw --version
+```
+
+> ⚠️ GitHub 安装方式会在安装时自动构建，需要确保网络能够访问 GitHub 和 npm registry。安装时间可能比 npm 预编译包长 2-5 分钟。
+
+---
+
+## 🐳 方式四：Docker 部署
+
+适用于服务器部署和容器化环境。Docker 方式可以确保运行环境一致，方便迁移和管理。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/ctz168/stableclaw.git
+cd stableclaw
+
+# 2. 使用 Docker Compose 启动
+cp docker-compose.yml.example docker-compose.yml
+# 编辑 docker-compose.yml，填入你的 API Key 和配置
+docker compose up -d
+
+# 3. 查看日志
+docker compose logs -f
+
+# 4. 停止
+docker compose down
+```
+
+> **环境变量配置：** Docker 部署时，通过 `docker-compose.yml` 中的 `environment` 字段或 `.env` 文件传入配置，包括 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY` 等敏感信息。不要将这些信息直接写在配置文件中或提交到版本控制系统。
+
+---
+
+## ⚙️ 安装后配置
+
+无论使用哪种安装方式，首次运行都需要进行配置。
+
+### 1. 运行配置向导（推荐）
+
+配置向导会交互式地引导你完成所有必要设置：
+
+```bash
+stableclaw onboard
+```
+
+向导会依次配置以下内容：
+
+- **AI 模型提供商** — 选择并配置 AI 模型（OpenAI、Anthropic、Google 等）
+- **API Key** — 输入对应服务商的 API 密钥
+- **默认模型** — 选择默认使用的模型（如 GPT-4o、Claude 3.5 Sonnet）
+- **消息渠道** — 配置连接的消息平台（Telegram、Discord、Slack 等）
+- **Agent** — 配置 AI 助手的行为和参数
+
+### 2. 安装守护进程（可选）
+
+守护进程可以让 StableClaw 在后台持续运行，即使关闭终端也不会停止：
+
+```bash
+# 安装并启动守护进程
+stableclaw onboard --install-daemon
+
+# 或者单独安装
+stableclaw daemon install
+```
+
+### 3. 手动配置
+
+如果你跳过了配置向导，可以手动编辑配置文件：
+
+```bash
+# 配置文件位置
+~/.stableclaw/stableclaw.json    # Linux / macOS
+%USERPROFILE%\.stableclaw\stableclaw.json   # Windows
+```
+
+**最小配置示例：**
+
+```json
+{
+  "gateway": {
+    "port": 18789
+  },
+  "providers": {
+    "openai": {
+      "apiKey": "sk-xxxxxxxxxxxxxxxx"
+    }
+  },
+  "defaults": {
+    "model": "gpt-4o"
+  }
+}
+```
+
+**配置文件目录结构：**
+
 ```
 ~/.stableclaw/
-├── stableclaw.json
-├── credentials/
-└── extensions/
+├── stableclaw.json          # 主配置文件
+├── credentials/             # API 密钥和安全凭证（加密存储）
+│   ├── openai.json
+│   ├── anthropic.json
+│   └── ...
+├── extensions/              # 已安装的第三方插件
+├── agents/                  # Agent 配置（自定义 AI 助手行为）
+│   └── default.json
+├── memory/                  # 对话记忆持久化存储
+│   └── conversations/
+├── sessions/                # 会话数据
+└── logs/                    # 运行日志
+    └── gateway.log
+```
+
+### 4. 配置 AI 模型提供商
+
+StableClaw 支持多种 AI 模型提供商，你可以同时配置多个并随时切换：
+
+```bash
+# 配置 OpenAI
+stableclaw models set openai --api-key sk-xxxxx
+
+# 配置 Anthropic（Claude）
+stableclaw models set anthropic --api-key sk-ant-xxxxx
+
+# 配置 Google Gemini
+stableclaw models set google --api-key xxxx
+
+# 配置 Moonshot / Kimi
+stableclaw models set moonshot --api-key xxxx
+
+# 配置 DeepSeek
+stableclaw models set deepseek --api-key xxxx
+
+# 查看已配置的模型
+stableclaw models list
+
+# 设置默认模型
+stableclaw models default gpt-4o
+```
+
+> **API Key 获取地址：**
+> - OpenAI：https://platform.openai.com/api-keys
+> - Anthropic：https://console.anthropic.com/settings/keys
+> - Google：https://aistudio.google.com/app/apikey
+> - Moonshot：https://platform.moonshot.cn/console/api-keys
+> - DeepSeek：https://platform.deepseek.com/api_keys
+
+### 5. 配置消息渠道
+
+连接消息平台，让 AI 助手可以通过各种渠道与用户交互：
+
+```bash
+# 添加 Telegram 渠道
+stableclaw channels add telegram
+
+# 添加 Discord 渠道
+stableclaw channels add discord
+
+# 添加 Slack 渠道
+stableclaw channels add slack
+
+# 查看所有已配置的渠道
+stableclaw channels
+
+# 测试渠道连接
+stableclaw doctor
+```
+
+每个渠道都需要对应平台的 Bot Token 或 API 凭证，配置过程中会有详细指引。
+
+---
+
+## 🏃 日常使用
+
+### 启动和停止
+
+```bash
+# 前台运行（适合开发调试，日志直接输出到终端）
+stableclaw gateway run
+
+# 后台运行（守护进程模式，适合生产部署）
+stableclaw gateway start
+
+# 查看运行状态
+stableclaw status
+
+# 停止 gateway
+stableclaw gateway stop
+
+# 重启 gateway
+stableclaw gateway restart
+```
+
+### 常用命令速查
+
+```bash
+# ── 基础操作 ──
+stableclaw --version              # 查看版本
+stableclaw --help                 # 查看帮助
+stableclaw status                 # 查看完整运行状态
+stableclaw doctor                 # 诊断问题和检查配置
+
+# ── 模型管理 ──
+stableclaw models list            # 列出所有可用模型
+stableclaw models default <name>  # 设置默认模型
+stableclaw models scan            # 扫描并发现可用模型
+
+# ── 渠道管理 ──
+stableclaw channels               # 查看已配置渠道
+stableclaw channels add <name>    # 添加渠道
+stableclaw channels remove <name> # 移除渠道
+
+# ── Agent 管理 ──
+stableclaw agents                 # 查看 Agent 列表
+stableclaw agents add <name>      # 添加 Agent
+stableclaw agents remove <name>   # 移除 Agent
+
+# ── 插件管理 ──
+stableclaw plugins list           # 查看已安装插件
+stableclaw plugin install <name>  # 安装插件
+stableclaw plugin remove <name>   # 卸载插件
+
+# ── 配置管理 ──
+stableclaw configure              # 交互式配置
+stableclaw config get <key>       # 查看配置项
+stableclaw config set <key> <val> # 修改配置项
+
+# ── Web 控制面板 ──
+# 启动后访问 http://localhost:18789 打开 Web UI
+```
+
+### Web 控制面板
+
+StableClaw 内置 Web 控制面板，启动 gateway 后自动可用：
+
+- **地址：** http://localhost:18789
+- **功能：** 实时查看消息、管理渠道、配置 Agent、查看日志、系统监控
+- **端口修改：** 在 `stableclaw.json` 中设置 `gateway.port` 值
+
+---
+
+## 🔄 更新升级
+
+### npm 安装方式
+
+```bash
+# 检查是否有新版本
+npm view stableclaw version
+
+# 升级到最新版本
+npm install -g stableclaw@latest
+
+# 升级到指定版本
+npm install -g stableclaw@2026.4.4
+
+# 查看当前已安装版本
+stableclaw --version
+```
+
+### 源码构建方式
+
+```bash
+cd stableclaw
+git pull origin main       # 拉取最新代码
+pnpm install               # 更新依赖
+pnpm build                 # 重新构建
+
+# 如果之前执行过 npm link，新代码会自动生效
+stableclaw --version
+```
+
+### GitHub 安装方式
+
+```bash
+# 重新安装最新代码
+npm install -g github:ctz168/stableclaw
 ```
 
 ---
 
-### 🐳 Docker 部署（可选）
+## 🗑️ 卸载
+
+### npm 安装方式
 
 ```bash
-# 克隆仓库
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
+# 卸载 StableClaw
+npm uninstall -g stableclaw
 
-# 使用 Docker Compose
-cp docker-compose.yml.example docker-compose.yml
-# 编辑 docker-compose.yml 配置你的 API Key
-docker compose up -d
+# 可选：删除配置和数据（谨慎操作！会清除所有对话记录和设置）
+rm -rf ~/.stableclaw           # Linux / macOS
+Remove-Item -Recurse "$env:USERPROFILE\.stableclaw"  # Windows PowerShell
 ```
+
+### 源码构建方式
+
+```bash
+# 取消全局链接
+npm unlink -g stableclaw
+
+# 删除源码目录
+rm -rf /path/to/stableclaw
+
+# 可选：删除配置和数据
+rm -rf ~/.stableclaw
+```
+
+### Docker 方式
+
+```bash
+docker compose down
+docker rmi stableclaw
+# 然后删除源码目录和配置目录
+```
+
+---
+
+## 🔁 从 OpenClaw 迁移
+
+如果你之前使用 OpenClaw，可以一键迁移到 StableClaw，所有配置、插件、凭证和对话记录都会保留：
+
+```bash
+# 预览迁移（安全模式，不修改任何文件）
+stableclaw migrate from-openclaw --dry-run
+
+# 执行迁移并自动创建备份
+stableclaw migrate from-openclaw --create-backup
+
+# 手动指定 OpenClaw 目录
+stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw
+```
+
+**迁移内容包括：** 配置文件、插件目录、API 凭证、身份认证、对话记忆、Agent 配置、渠道数据（Telegram/Discord/Slack 等）。
+
+| 选项 | 说明 |
+|------|------|
+| `--dry-run` | 仅预览，不修改任何文件 |
+| `--create-backup` | 迁移前创建完整备份 |
+| `--skip-plugins` | 跳过插件迁移 |
+| `--skip-credentials` | 跳过 API 凭证迁移 |
+| `--skip-logs` | 跳过日志迁移 |
+| `--force` | 强制覆盖已有数据 |
+| `--openclaw-dir <path>` | 指定 OpenClaw 配置目录路径 |
 
 ---
 
@@ -214,20 +591,15 @@ docker compose up -d
 - ✅ **详细错误诊断** — 提供智能修复建议和错误位置定位
 - ✅ **零停机配置更新** — 配置错误不影响 gateway 运行
 
-**使用示例：**
-
 ```bash
 # 修改配置文件（即使出错也不影响运行）
 $ vim ~/.stableclaw/stableclaw.json
 
-# Gateway 自动检测配置错误
+# Gateway 自动检测配置错误并回滚
 ⚠️  Last configuration change was invalid. Gateway will start with the last valid configuration.
    Error: Invalid type. Expected "string" but received "undefined" at "gateway.port"
    Suggestion: Add a string value for "gateway.port" in your configuration file.
-   Invalid config saved to: .invalid-config-2026-04-03T16-30-00.json
 ```
-
----
 
 ### 2. 🔒 严格单例模式
 
@@ -235,135 +607,121 @@ $ vim ~/.stableclaw/stableclaw.json
 
 **StableClaw 解决方案：**
 
-- ✅ **全局单例锁** — `gateway.global.lock` 强制严格单例
+- ✅ **全局单例锁** — 强制严格单例运行
 - ✅ **立即失败模式** — 已有实例时立即拒绝，不等待
-- ✅ **清晰错误提示** — 告知用户如何停止现有实例
-- ✅ **进程状态检查** — 自动检测和处理僵尸进程
-- ✅ **mDNS 缓存清理** — 停止时自动清理 Bonjour 缓存，避免重启时的名称冲突
-
-**使用示例：**
+- ✅ **僵尸进程处理** — 自动检测和处理残留进程
 
 ```bash
-# 第一次启动
-$ pnpm stableclaw gateway run
-✓ Gateway started on port 18789
-
-# 第二次启动（立即失败）
-$ pnpm stableclaw gateway run
+$ stableclaw gateway run      # 第一次启动 ✓
+$ stableclaw gateway run      # 第二次启动 ✗ 立即失败
 ✗ Error: gateway already running (pid 12345)
   Use 'stableclaw gateway stop' to stop it before starting a new instance.
-
-# 停止 gateway（自动清理 mDNS 缓存）
-$ pnpm stableclaw gateway stop
-✓ Gateway stopped
-✓ mDNS cache cleared
 ```
-
----
 
 ### 3. 🔌 插件热插拔机制
 
-**问题：** OpenClaw 原版安装/卸载插件需要重启 gateway，插件错误可能导致 gateway 崩溃。
+- ✅ 安装插件后自动热加载，无需重启 gateway
+- ✅ 插件错误自动隔离，不影响 gateway 运行
+- ✅ 定期健康检查，自动恢复临时性问题
 
-**StableClaw 解决方案：**
+### 4. 🛡️ 企业级稳定性
 
-- ✅ **插件安装热重载** — 安装插件后自动加载，无需重启 gateway
-- ✅ **插件卸载热卸载** — 卸载插件前自动清理，无需重启 gateway
-- ✅ **插件错误隔离** — 插件错误自动禁用，不影响 gateway 运行
-- ✅ **健康监控机制** — 定期检查插件健康状态，自动恢复临时性问题
-
-**使用示例：**
-
-```bash
-# 安装插件（立即生效）
-$ pnpm stableclaw plugin install my-plugin
-Downloading my-plugin…
-Installing to /path/to/extensions/my-plugin…
-Plugin my-plugin hot-reloaded successfully
-✓ Plugin installed and activated
-
-# 插件错误自动隔离
-[plugin-error] my-plugin (runtime/error): Hook execution failed
-[plugin-disable] my-plugin disabled: Hook execution failed
-[gateway] Gateway continues running (plugin "my-plugin" disabled)
-```
+- ✅ 全局错误捕获和自动隔离
+- ✅ 详细错误日志和诊断信息
+- ✅ 自动恢复机制
 
 ---
 
-### 4. 🛡️ 企业级错误处理
+## ❓ 常见问题 FAQ
 
-- ✅ **全局错误捕获** — 捕获未处理的异常和 Promise 拒绝
-- ✅ **自动错误隔离** — 将错误限制在最小范围内
-- ✅ **详细错误日志** — 记录完整的错误上下文和堆栈
-- ✅ **自动恢复机制** — 尝试自动恢复临时性问题
+<details>
+<summary><strong>安装相关</strong></summary>
 
----
+**Q: npm install -g stableclaw 报权限错误？**
 
-### 5. 📊 健康监控和自动化运维
+A: Linux/macOS 使用 `sudo npm install -g stableclaw`，或配置 npm 全局目录到用户空间（见上方「配置 npm 全局目录」部分）。Windows 以管理员身份运行 PowerShell。
 
-- ✅ **插件健康检查** — 定期检查插件状态（默认 1 分钟）
-- ✅ **自动恢复机制** — 尝试恢复降级的插件
-- ✅ **健康状态报告** — 提供插件健康状态查询接口
-- ✅ **连续错误检测** — 自动禁用持续失败的插件
+**Q: 安装后执行 stableclaw 提示 command not found？**
 
----
+A: Node.js 的全局 bin 目录可能不在系统 PATH 中。执行 `npm config get prefix` 查看全局安装路径，将该路径下的 `bin` 目录添加到 PATH。常见路径：`/usr/local/bin`（macOS）、`~/.npm-global/bin`（Linux 用户目录）。
 
-### 6. 🔄 一键迁移功能
+**Q: 支持 Node.js 20 吗？**
 
-**从 OpenClaw 迁移到 StableClaw：**
+A: 不支持。StableClaw 最低要求 Node.js v22.12。请升级到 [Node.js v24 LTS](https://nodejs.org)。
 
-```bash
-# 预览迁移（不修改文件）
-pnpm stableclaw migrate from-openclaw --dry-run
+**Q: npm 安装和源码构建有什么区别？**
 
-# 执行迁移并创建备份
-pnpm stableclaw migrate from-openclaw --create-backup
+A: npm 安装的是预编译好的包，开箱即用但不能修改源码。源码构建需要先 clone 代码再编译，可以自由修改，适合开发者。功能完全一致。
 
-# 手动指定 OpenClaw 目录
-pnpm stableclaw migrate from-openclaw --openclaw-dir ~/.openclaw
-```
+</details>
 
-**迁移内容包括：** 配置文件、插件目录、API 凭证、身份认证、对话记忆、Agent 配置、渠道数据（Telegram/Discord/Slack 等）。
+<details>
+<summary><strong>运行相关</strong></summary>
 
-| 选项                 | 说明                     |
-| -------------------- | ------------------------ |
-| `--dry-run`          | 预览迁移，不修改文件     |
-| `--skip-plugins`     | 跳过插件迁移             |
-| `--skip-credentials` | 跳过凭证迁移             |
-| `--skip-logs`        | 跳过日志迁移             |
-| `--force`            | 强制迁移（覆盖现有数据） |
-| `--create-backup`    | 创建备份                 |
-| `--openclaw-dir`     | 手动指定 OpenClaw 目录   |
+**Q: gateway 启动后怎么停止？**
+
+A: 前台运行按 `Ctrl+C`。后台守护进程模式执行 `stableclaw gateway stop`。
+
+**Q: 端口 18789 被占用怎么办？**
+
+A: 修改 `~/.stableclaw/stableclaw.json` 中的 `gateway.port` 为其他端口，或者停止占用该端口的程序。也可以执行 `lsof -i :18789`（macOS/Linux）或 `netstat -ano | findstr 18789`（Windows）查看占用进程。
+
+**Q: 如何让 StableClaw 开机自启动？**
+
+A: 执行 `stableclaw daemon install` 安装守护进程，它会在系统启动时自动运行 gateway。
+
+**Q: 支持哪些 AI 模型？**
+
+A: 支持 OpenAI（GPT-4o、GPT-4、GPT-3.5）、Anthropic（Claude 3.5 Sonnet、Claude 3 Opus）、Google（Gemini Pro/Flash）、Moonshot/Kimi、DeepSeek、Ollama（本地模型）等。执行 `stableclaw models list` 查看完整列表。
+
+</details>
+
+<details>
+<summary><strong>配置相关</strong></summary>
+
+**Q: 配置文件在哪里？**
+
+A: Linux/macOS：`~/.stableclaw/stableclaw.json`。Windows：`%USERPROFILE%\.stableclaw\stableclaw.json`。
+
+**Q: API Key 安全吗？**
+
+A: API Key 存储在 `credentials/` 目录下，使用加密存储。不要将 `~/.stableclaw/` 目录提交到 Git 或分享给他人。
+
+**Q: 如何同时使用多个 AI 模型？**
+
+A: 在配置文件中配置多个 provider，然后为不同的 Agent 设置不同的默认模型，或在对话中临时切换。
+
+</details>
 
 ---
 
 ## 🆚 与 OpenClaw 对比
 
-| 特性          | OpenClaw 原版   | StableClaw             |
-| ------------- | --------------- | ---------------------- |
-| 配置热重载    | ✅ 支持         | ✅ 支持 + 安全回滚     |
-| 配置错误处理  | ⚠️ 可能崩溃     | ✅ 自动回滚，零停机    |
-| 多实例防护    | ⚠️ 可能启动多个 | ✅ 严格单例，立即失败  |
-| 插件安装/卸载 | ⚠️ 需要重启     | ✅ 热插拔，零停机      |
-| 插件错误处理  | ⚠️ 可能崩溃     | ✅ 自动隔离和禁用      |
-| 健康监控      | ❌ 无           | ✅ 定期检查 + 自动恢复 |
-| 错误诊断      | ⚠️ 基础         | ✅ 详细建议和定位      |
-| 一键迁移      | ❌ 无           | ✅ 多种迁移方式        |
-| 企业级稳定性  | ⚠️ 个人使用     | ✅ 生产环境就绪        |
+| 特性 | OpenClaw 原版 | StableClaw |
+|------|---------------|------------|
+| 配置热重载 | ✅ 支持 | ✅ 支持 + 安全回滚 |
+| 配置错误处理 | ⚠️ 可能崩溃 | ✅ 自动回滚，零停机 |
+| 多实例防护 | ⚠️ 可能启动多个 | ✅ 严格单例，立即失败 |
+| 插件安装/卸载 | ⚠️ 需要重启 | ✅ 热插拔，零停机 |
+| 插件错误处理 | ⚠️ 可能崩溃 | ✅ 自动隔离和禁用 |
+| 健康监控 | ❌ 无 | ✅ 定期检查 + 自动恢复 |
+| 一键迁移 | ❌ 无 | ✅ OpenClaw 一键迁移 |
+| npm 安装 | ❌ 无 | ✅ `npm i -g stableclaw` |
+| 企业级稳定性 | ⚠️ 个人使用 | ✅ 生产环境就绪 |
 
 ---
 
-## 📖 文档
+## 📖 文档与资源
 
 - [StableClaw 官方文档](https://docs.stableclaw.ai)
-- [配置热重载与插件热插拔](./docs/plugin-hot-reload-plan.md)
+- [npm 包页面](https://www.npmjs.com/package/stableclaw)
 - [更新日志](./CHANGELOG.md)
-- [项目愿景](./VISION.md)
 - [贡献指南](./CONTRIBUTING.md)
+- [GitHub Issues](https://github.com/ctz168/stableclaw/issues)
 
 ---
 
-## 🛠️ 开发
+## 🛠️ 开发者指南
 
 ```bash
 # 安装依赖
@@ -403,21 +761,11 @@ stableclaw/
 │   └── security/                  # 安全审计
 ├── extensions/                    # 扩展插件（85+）
 ├── ui/                            # Web 控制面板
-├── scripts/                       # 构建、部署、安装脚本
+├── scripts/                       # 构建、部署、发布脚本
 ├── apps/                          # 桌面应用（macOS/iOS/Android）
 ├── docs/                          # 文档
 └── packages/                      # 内部共享包
 ```
-
----
-
-## 🤝 贡献
-
-我们欢迎所有形式的贡献！
-
-- **报告问题：** [GitHub Issues](https://github.com/ctz168/stableclaw/issues)
-- **功能建议：** [GitHub Discussions](https://github.com/ctz168/stableclaw/discussions)
-- **代码贡献：** 请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
