@@ -9,7 +9,7 @@ const STALE_SIGKILL_WAIT_MS = 400;
 /**
  * After SIGKILL, the kernel may not release the TCP port immediately.
  * Poll until the port is confirmed free (or until the budget expires) before
- * returning control to the caller (typically `triggerOpenClawRestart` →
+ * returning control to the caller (typically `triggerStableClawRestart` →
  * `systemctl restart`). Without this wait the new process races the dying
  * process for the port and systemd enters an EADDRINUSE restart loop.
  *
@@ -60,7 +60,7 @@ function parsePidsFromLsofOutput(stdout: string): number[] {
   let currentCmd: string | undefined;
   for (const line of stdout.split(/\r?\n/).filter(Boolean)) {
     if (line.startsWith("p")) {
-      if (currentPid != null && currentCmd && currentCmd.toLowerCase().includes("openclaw")) {
+      if (currentPid != null && currentCmd && currentCmd.toLowerCase().includes("stableclaw")) {
         pids.push(currentPid);
       }
       const parsed = Number.parseInt(line.slice(1), 10);

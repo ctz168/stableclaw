@@ -1,1 +1,0 @@
-../../../dist/extensions/acpx/mcp-proxy.mjs

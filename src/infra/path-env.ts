@@ -61,7 +61,7 @@ function candidateBinDirs(opts: EnsureOpenClawPathOpts): { prepend: string[]; ap
   // Bundled macOS app: `openclaw` lives next to the executable (process.execPath).
   try {
     const execDir = path.dirname(execPath);
-    const siblingCli = path.join(execDir, "openclaw");
+    const siblingCli = path.join(execDir, "stableclaw");
     if (isExecutable(siblingCli)) {
       prepend.push(execDir);
     }
@@ -76,7 +76,7 @@ function candidateBinDirs(opts: EnsureOpenClawPathOpts): { prepend: string[]; ap
     isTruthyEnvValue(process.env.OPENCLAW_ALLOW_PROJECT_LOCAL_BIN);
   if (allowProjectLocalBin) {
     const localBinDir = path.join(cwd, "node_modules", ".bin");
-    if (isExecutable(path.join(localBinDir, "openclaw"))) {
+    if (isExecutable(path.join(localBinDir, "stableclaw"))) {
       append.push(localBinDir);
     }
   }

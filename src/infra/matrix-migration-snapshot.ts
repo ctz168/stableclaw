@@ -10,7 +10,7 @@ import { detectLegacyMatrixCrypto } from "./matrix-legacy-crypto.js";
 import { detectLegacyMatrixState } from "./matrix-legacy-state.js";
 import { isMatrixLegacyCryptoInspectorAvailable } from "./matrix-plugin-helper.js";
 
-const MATRIX_MIGRATION_SNAPSHOT_DIRNAME = "openclaw-migrations";
+const MATRIX_MIGRATION_SNAPSHOT_DIRNAME = "stableclaw-migrations";
 
 type MatrixMigrationSnapshotMarker = {
   version: 1;

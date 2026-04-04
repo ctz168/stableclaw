@@ -38,6 +38,25 @@ const BLOCKED_WORKSPACE_DOTENV_KEYS = new Set([
   "OPENAI_API_KEY",
   "OPENAI_API_KEYS",
   "PI_CODING_AGENT_DIR",
+  "STABLECLAW_AGENT_DIR",
+  "STABLECLAW_BUNDLED_HOOKS_DIR",
+  "STABLECLAW_BUNDLED_PLUGINS_DIR",
+  "STABLECLAW_BUNDLED_SKILLS_DIR",
+  "STABLECLAW_CONFIG_PATH",
+  "STABLECLAW_GATEWAY_PASSWORD",
+  "STABLECLAW_GATEWAY_SECRET",
+  "STABLECLAW_GATEWAY_TOKEN",
+  "STABLECLAW_HOME",
+  "STABLECLAW_LIVE_ANTHROPIC_KEY",
+  "STABLECLAW_LIVE_ANTHROPIC_KEYS",
+  "STABLECLAW_LIVE_GEMINI_KEY",
+  "STABLECLAW_LIVE_OPENAI_KEY",
+  "STABLECLAW_OAUTH_DIR",
+  "STABLECLAW_PINNED_PYTHON",
+  "STABLECLAW_PINNED_WRITE_PYTHON",
+  "STABLECLAW_PROFILE",
+  "STABLECLAW_STATE_DIR",
+  "STABLECLAW_TEST_TAILSCALE_BINARY",
 ]);
 
 const BLOCKED_WORKSPACE_DOTENV_SUFFIXES = ["_BASE_URL"];
@@ -48,7 +67,7 @@ function shouldBlockWorkspaceRuntimeDotEnvKey(key: string): boolean {
 }
 
 function shouldBlockRuntimeDotEnvKey(key: string): boolean {
-  // The global ~/.openclaw/.env (or OPENCLAW_STATE_DIR/.env) is a trusted
+  // The global ~/.stableclaw/.env (or STABLECLAW_STATE_DIR/.env) is a trusted
   // operator-controlled runtime surface. Workspace .env is untrusted and gets
   // the strict blocklist, but the trusted global fallback is allowed to set
   // runtime vars like proxy/base-url/auth values.
@@ -127,7 +146,7 @@ export function loadDotEnv(opts?: { quiet?: boolean }) {
   const cwdEnvPath = path.join(process.cwd(), ".env");
   loadWorkspaceDotEnvFile(cwdEnvPath, { quiet });
 
-  // Then load global fallback: ~/.openclaw/.env (or OPENCLAW_STATE_DIR/.env),
+  // Then load global fallback: ~/.stableclaw/.env (or STABLECLAW_STATE_DIR/.env),
   // without overriding any env vars already present.
   const globalEnvPath = path.join(resolveConfigDir(process.env), ".env");
   loadRuntimeDotEnvFile(globalEnvPath, { quiet });

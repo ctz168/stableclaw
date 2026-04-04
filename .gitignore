@@ -44,3 +44,4 @@ coverage
 # Gateway lock files (runtime state)
 gateway.*.lock
 *.tgz
+.npmrc

@@ -148,7 +148,7 @@ export async function startGatewayBonjourAdvertiser(
     // mDNS service instance names are single DNS labels; dots in hostnames (like
     // `Mac.localdomain`) can confuse some resolvers/browsers and break discovery.
     // Keep only the first label and normalize away a trailing `.local`.
-    const hostnameRaw = process.env.OPENCLAW_MDNS_HOSTNAME?.trim() || "openclaw";
+    const hostnameRaw = process.env.OPENCLAW_MDNS_HOSTNAME?.trim() || "stableclaw";
     const hostname =
       hostnameRaw
         .replace(/\.local$/i, "")
@@ -200,7 +200,7 @@ export async function startGatewayBonjourAdvertiser(
 
       const gateway = responder.createService({
         name: safeServiceName(instanceName),
-        type: "openclaw-gw",
+        type: "stableclaw-gw",
         protocol: Protocol.TCP,
         port: opts.gatewayPort,
         domain: "local",
