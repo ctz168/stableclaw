@@ -227,7 +227,8 @@ function registerAicqPlugin(api: any) {
 
   // ── Sub-Agent Progress Bridge ─────────────────────────────────
   // Subscribe to sub-agent progress events and forward to AICQ web UI
-  try {
+  (async () => {
+    try {
     const { onSubagentProgress } = await import("../../agents/subagent-progress.js");
 
     const httpUrl = serverUrl.replace(/^ws/, "http");
@@ -277,9 +278,10 @@ function registerAicqPlugin(api: any) {
     });
 
     log.info("Registered sub-agent progress bridge");
-  } catch (err: any) {
-    log.warn(`Failed to init sub-agent bridge: ${err?.message || String(err)}`);
-  }
+    } catch (err: any) {
+      log.warn(`Failed to init sub-agent bridge: ${err?.message || String(err)}`);
+    }
+  })();
 
   log.info("═══════════════════════════════════════════════");
   log.info("  AICQ Plugin activated successfully!");

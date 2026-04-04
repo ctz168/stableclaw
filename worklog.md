@@ -27,7 +27,7 @@ Task: 超时必须明确报错，不能静默
 
 Work Log:
 - 修改 `src/agents/subagent-registry.ts`: timeout/error事件增加任务标签和描述
-- 修改 `src/agents/subagent-announce.ts`: statusLabel增加duration和task名称
+- 修改 `src/agents/subagent-announce.ts`: statusLabel增加duration和任务名称
 - 修改 `src/cron/service/timer.ts`: timeoutErrorMessage增加job name
 - 修改 `src/agents/subagent-registry-run-manager.ts`: RPC失败时发progress事件
 
@@ -112,3 +112,29 @@ Stage Summary:
 - Markdown checklist风格，类似Claude的任务规划
 - 进度条 + 百分比 + 完成计数
 - 所有30个测试通过
+
+---
+Task ID: 7
+Agent: Main
+Task: 废除手动TS补丁，还原到与官方一致
+
+Work Log:
+- 识别出47个被手动修改的文件（13个非plugin-sdk + 34个plugin-sdk）
+- 确认这些文件都不是ACP，全部是TS类型修复补丁（`: any`注解等）
+- 通过 `git checkout origin/main -- .` 还原所有文件到ctz168/stableclaw GitHub版本
+- 修复aicq-chat插件的async/await bug（用async IIFE包裹，非上游问题，是自定义插件）
+- 重新运行完整构建：
+  - tsdown主构建：✅ 成功（2816文件，53.26MB）
+  - runtime-postbuild：✅ 成功
+  - build-stamp：✅ 成功
+  - 其余脚本（canvas-a2ui-copy, copy-hook-metadata等）：✅ 全部成功
+  - build:plugin-sdk:dts（tsc类型声明）：❌ 失败（上游TS7019错误）
+- CLI验证：✅ `stableclaw --version` 输出 `StableClaw 2026.4.3 (cc9e24e)`
+- Doctor验证：✅ 正常运行，无编译错误
+
+Stage Summary:
+- 47个手动TS补丁已全部废除
+- 代码与ctz168/stableclaw GitHub版本一致
+- 唯一保留的修改：aicq-chat/src/index.ts的async IIFE修复（自定义插件，非上游代码）
+- tsdown编译成功，CLI可运行
+- tsc类型声明失败是上游OpenClaw固有问题，不影响运行时
