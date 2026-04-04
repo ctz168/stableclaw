@@ -64,249 +64,17 @@ curl -fsSL https://raw.githubusercontent.com/ctz168/stableclaw/main/install/inst
 
 | 项目 | 最低要求 | 推荐配置 |
 |------|----------|----------|
-| **Node.js** | v22.12+（脚本会自动安装） | v24（LTS） |
 | **操作系统** | Windows 10 / macOS 12 / Ubuntu 20.04 | Windows 11 / macOS 14 / Ubuntu 24.04 |
 | **内存** | 512 MB | 2 GB+ |
-| **磁盘空间** | 200 MB（npm 安装） | 2 GB+（源码构建） |
+| **磁盘空间** | 200 MB | 500 MB+ |
 
-> 一键安装脚本会自动检测并安装 Node.js，你不需要提前准备任何环境。
-
----
-
-## 📦 安装方式对比
-
-| 方式 | 适用场景 | 难度 | 耗时 | 可自定义 |
-|------|----------|------|------|----------|
-| **一键安装** ⭐ | 所有用户、快速上手 | ⭐ 最简单 | ~30 秒 | ❌ |
-| **npm 全局安装** | 已有 Node.js 环境 | ⭐ 简单 | ~1 分钟 | ❌ |
-| **源码构建** | 需要修改源码、二次开发 | ⭐⭐ 中等 | ~5-10 分钟 | ✅ |
-| **Docker 部署** | 服务器部署、容器化环境 | ⭐⭐ 中等 | ~2 分钟 | ✅ |
-| **GitHub 安装** | 想用最新开发版 | ⭐⭐ 中等 | ~3 分钟 | ✅ |
-
----
-
-## ⭐ 方式一：npm 全局安装
-
-如果你已有 Node.js v22+ 环境，可以直接通过 npm 安装。安装后即可在任意位置使用 `stableclaw` 命令。
-
-### 🪟 Windows
-
-打开 **PowerShell**，执行以下命令：
-
-```powershell
-# 1. 确认 Node.js 已安装（如未安装，见下方说明）
-node --version
-# 需要 v22.12 或更高版本
-
-# 2. 一键安装 StableClaw
-npm install -g stableclaw
-
-# 3. 验证安装
-stableclaw --version
-
-# 4. 运行配置向导（首次使用必须）
-stableclaw onboard
-
-# 5. 启动
-stableclaw gateway run
-```
-
-> **没有 Node.js？** 执行 `winget install OpenJS.NodeJS.LTS` 安装，或从 [https://nodejs.org](https://nodejs.org) 下载。安装后**关闭并重新打开 PowerShell**。也可以使用上方的**一键安装命令**，它会自动帮你装好 Node.js。
-
-### 🍎 macOS
-
-打开 **终端**，执行：
-
-```bash
-# 1. 确认 Node.js 已安装
-node --version
-
-# 2. 一键安装
-npm install -g stableclaw
-
-# 3. 验证
-stableclaw --version
-
-# 4. 配置向导
-stableclaw onboard
-
-# 5. 启动
-stableclaw gateway run
-```
-
-> **没有 Node.js？** 使用 Homebrew 安装：`brew install node@24`，然后执行 `brew link node@24 --force`。也可以使用上方的**一键安装命令**。
-
-### 🐧 Linux（Ubuntu / Debian）
-
-```bash
-# 1. 安装 Node.js（如未安装）
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# 2. 一键安装
-npm install -g stableclaw
-
-# 3. 验证
-stableclaw --version
-
-# 4. 配置向导
-stableclaw onboard
-
-# 5. 启动
-stableclaw gateway run
-```
-
-> **其他 Linux 发行版：** 从 [https://nodejs.org](https://nodejs.org) 下载预编译包，或使用 [nvm](https://github.com/nvm-sh/nvm) 管理多版本 Node.js。也可以使用上方的**一键安装命令**。
-
-### npm 安装常见问题
-
-| 问题 | 解决方案 |
-|------|----------|
-| `EACCES: permission denied` | Linux/macOS 使用 `sudo npm install -g stableclaw`；或配置 npm 全局目录（见下方） |
-| `stableclaw: command not found` | 检查 Node.js 全局 bin 目录是否在 PATH 中，执行 `npm config get prefix` 查看 |
-| Windows 提示脚本禁用 | 以管理员身份运行 PowerShell，执行 `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| npm 下载慢 | 使用国内镜像：`npm config set registry https://registry.npmmirror.com` |
-| 安装后版本不对 | 执行 `npm list -g stableclaw` 确认，或强制重装 `npm install -g stableclaw@latest` |
-
-**配置 npm 全局目录（免 sudo）：**
-
-```bash
-# Linux / macOS：将 npm 全局包安装到用户目录
-mkdir -p ~/.npm-global
-npm config set prefix '~/.npm-global'
-echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
-source ~/.bashrc
-
-# 然后无需 sudo 即可安装
-npm install -g stableclaw
-```
-
----
-
-## 🔧 方式二：源码构建安装
-
-适用于需要修改源码、参与开发或需要自定义功能的用户。
-
-### 🪟 Windows（PowerShell）
-
-```powershell
-# 1. 安装前置依赖
-winget install OpenJS.NodeJS.LTS    # Node.js
-winget install Git.Git              # Git
-
-# 关闭并重新打开 PowerShell，然后：
-npm install -g pnpm                 # 安装 pnpm
-
-# 修复执行策略（PowerShell）
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# 2. 克隆仓库
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-
-# 3. 安装依赖并构建
-pnpm install          # 安装依赖（约 2-3 分钟）
-pnpm build            # 构建项目（约 3-5 分钟）
-
-# 4. 链接到全局（可选，让你可以在任意位置使用 stableclaw 命令）
-npm link
-
-# 5. 配置和启动
-stableclaw onboard    # 配置向导
-stableclaw gateway run # 启动
-```
-
-### 🍎 macOS
-
-```bash
-# 1. 安装前置依赖（使用 Homebrew）
-brew install node@24 git
-brew link node@24 --force
-npm install -g pnpm
-
-# 2. 克隆、构建
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-pnpm install
-pnpm build
-
-# 3. 链接和启动（可选）
-npm link
-stableclaw onboard
-stableclaw gateway run
-```
-
-### 🐧 Linux（Ubuntu / Debian）
-
-```bash
-# 1. 安装前置依赖
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-sudo apt-get install -y nodejs git build-essential python3
-npm install -g pnpm
-
-# 2. 克隆、构建
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-pnpm install
-pnpm build
-
-# 3. 链接和启动（可选）
-npm link
-stableclaw onboard
-stableclaw gateway run
-```
-
-> **源码构建参数说明：** `pnpm build` 会编译 TypeScript 源码、打包插件 SDK、生成 CLI 入口。如果只需要主程序可以跳过 UI 构建，执行 `SKIP_UI=1 pnpm build`。
-
----
-
-## 📥 方式三：从 GitHub 直接安装
-
-适用于想要使用最新开发版本的用户（可能包含未发布的更新）。
-
-```bash
-# 安装 main 分支最新代码
-npm install -g github:ctz168/stableclaw
-
-# 安装指定 commit 或 tag
-npm install -g github:ctz168/stableclaw#v2026.4.3
-
-# 验证
-stableclaw --version
-```
-
-> ⚠️ GitHub 安装方式会在安装时自动构建，需要确保网络能够访问 GitHub 和 npm registry。安装时间可能比 npm 预编译包长 2-5 分钟。
-
----
-
-## 🐳 方式四：Docker 部署
-
-适用于服务器部署和容器化环境。Docker 方式可以确保运行环境一致，方便迁移和管理。
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/ctz168/stableclaw.git
-cd stableclaw
-
-# 2. 使用 Docker Compose 启动
-cp docker-compose.yml.example docker-compose.yml
-# 编辑 docker-compose.yml，填入你的 API Key 和配置
-docker compose up -d
-
-# 3. 查看日志
-docker compose logs -f
-
-# 4. 停止
-docker compose down
-```
-
-> **环境变量配置：** Docker 部署时，通过 `docker-compose.yml` 中的 `environment` 字段或 `.env` 文件传入配置，包括 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY` 等敏感信息。不要将这些信息直接写在配置文件中或提交到版本控制系统。
+> 安装脚本会自动检测并安装 Node.js 22+，你不需要提前准备任何环境。
 
 ---
 
 ## ⚙️ 安装后配置
 
-无论使用哪种安装方式，首次运行都需要进行配置。
+安装完成后，首次运行需要进行配置。如果安装时跳过了向导（`--no-onboard`），可以手动执行。
 
 ### 1. 运行配置向导（推荐）
 
@@ -513,46 +281,31 @@ StableClaw 内置 Web 控制面板，启动 gateway 后自动可用：
 
 ## 🔄 更新升级
 
-### npm 安装方式
+重新运行一键安装命令即可完成升级，脚本会自动检测已有安装并执行更新：
 
-```bash
-# 检查是否有新版本
-npm view stableclaw version
-
-# 升级到最新版本
-npm install -g stableclaw@latest
-
-# 升级到指定版本
-npm install -g stableclaw@2026.4.4
-
-# 查看当前已安装版本
-stableclaw --version
+```powershell
+# Windows
+powershell -c "irm https://raw.githubusercontent.com/ctz168/stableclaw/main/install/install.ps1 | iex"
 ```
 
-### 源码构建方式
-
 ```bash
-cd stableclaw
-git pull origin main       # 拉取最新代码
-pnpm install               # 更新依赖
-pnpm build                 # 重新构建
-
-# 如果之前执行过 npm link，新代码会自动生效
-stableclaw --version
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/ctz168/stableclaw/main/install/install.sh | bash
 ```
 
-### GitHub 安装方式
+也可以使用安装脚本的 `--tag` 参数升级到指定版本：
 
-```bash
-# 重新安装最新代码
-npm install -g github:ctz168/stableclaw
+```powershell
+# Windows — 升级到指定版本
+powershell -c "& ([scriptblock]::Create((irm https://raw.githubusercontent.com/ctz168/stableclaw/main/install/install.ps1))) -Tag 2026.4.6"
+
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/ctz168/stableclaw/main/install/install.sh | bash -s -- --tag 2026.4.6
 ```
 
 ---
 
 ## 🗑️ 卸载
-
-### npm 安装方式
 
 ```bash
 # 卸载 StableClaw
@@ -561,27 +314,6 @@ npm uninstall -g stableclaw
 # 可选：删除配置和数据（谨慎操作！会清除所有对话记录和设置）
 rm -rf ~/.stableclaw           # Linux / macOS
 Remove-Item -Recurse "$env:USERPROFILE\.stableclaw"  # Windows PowerShell
-```
-
-### 源码构建方式
-
-```bash
-# 取消全局链接
-npm unlink -g stableclaw
-
-# 删除源码目录
-rm -rf /path/to/stableclaw
-
-# 可选：删除配置和数据
-rm -rf ~/.stableclaw
-```
-
-### Docker 方式
-
-```bash
-docker compose down
-docker rmi stableclaw
-# 然后删除源码目录和配置目录
 ```
 
 ---
@@ -674,21 +406,21 @@ $ stableclaw gateway run      # 第二次启动 ✗ 立即失败
 <details>
 <summary><strong>安装相关</strong></summary>
 
-**Q: npm install -g stableclaw 报权限错误？**
+**Q: 一键安装报错怎么办？**
 
-A: Linux/macOS 使用 `sudo npm install -g stableclaw`，或配置 npm 全局目录到用户空间（见上方「配置 npm 全局目录」部分）。Windows 以管理员身份运行 PowerShell。
+A: 确保网络可以访问 GitHub 和 npm registry。如果 PowerShell 提示执行策略限制，先执行 `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`。Linux/macOS 如果 npm 权限不足，脚本会自动提示处理方式。
 
 **Q: 安装后执行 stableclaw 提示 command not found？**
 
-A: Node.js 的全局 bin 目录可能不在系统 PATH 中。执行 `npm config get prefix` 查看全局安装路径，将该路径下的 `bin` 目录添加到 PATH。常见路径：`/usr/local/bin`（macOS）、`~/.npm-global/bin`（Linux 用户目录）。
+A: 关闭当前终端，重新打开一个新终端再试。脚本会自动将 npm 全局 bin 目录添加到 PATH，但需要新终端才能生效。
 
 **Q: 支持 Node.js 20 吗？**
 
-A: 不支持。StableClaw 最低要求 Node.js v22.12。请升级到 [Node.js v24 LTS](https://nodejs.org)。
+A: 不支持。StableClaw 最低要求 Node.js v22.12，安装脚本会自动安装满足要求的版本。
 
-**Q: npm 安装和源码构建有什么区别？**
+**Q: 想从源码构建怎么办？**
 
-A: npm 安装的是预编译好的包，开箱即用但不能修改源码。源码构建需要先 clone 代码再编译，可以自由修改，适合开发者。功能完全一致。
+A: 一键安装脚本支持 `--install-method=git` 参数，会自动完成克隆、安装依赖、构建、创建全局命令的全部流程。
 
 </details>
 
