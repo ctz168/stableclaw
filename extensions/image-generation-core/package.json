@@ -3,5 +3,10 @@
   "version": "2026.4.1-beta.1",
   "private": true,
   "description": "OpenClaw image generation runtime package",
-  "type": "module"
+  "type": "module",
+  "stableclaw": {
+    "extensions": [
+      "./runtime-api.ts"
+    ]
+  }
 }

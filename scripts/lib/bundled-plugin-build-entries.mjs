@@ -23,23 +23,34 @@ function readBundledPluginPackageJson(packageJsonPath) {
 
 function isManifestlessBundledRuntimeSupportPackage(params) {
   const packageName = typeof params.packageJson?.name === "string" ? params.packageJson.name : "";
-  if (packageName !== `@openclaw/${params.dirName}`) {
+  if (
+    packageName !== `@openclaw/${params.dirName}` &&
+    packageName !== `@stableclaw/${params.dirName}`
+  ) {
     return false;
   }
   return params.topLevelPublicSurfaceEntries.length > 0;
 }
 
 function collectPluginSourceEntries(packageJson) {
-  let packageEntries = Array.isArray(packageJson?.openclaw?.extensions)
-    ? packageJson.openclaw.extensions.filter(
-        (entry) => typeof entry === "string" && entry.trim().length > 0,
-      )
-    : [];
+  let packageEntries =
+    Array.isArray(packageJson?.stableclaw?.extensions)
+      ? packageJson.stableclaw.extensions.filter(
+          (entry) => typeof entry === "string" && entry.trim().length > 0,
+        )
+      : Array.isArray(packageJson?.openclaw?.extensions)
+        ? packageJson.openclaw.extensions.filter(
+            (entry) => typeof entry === "string" && entry.trim().length > 0,
+          )
+        : [];
   const setupEntry =
-    typeof packageJson?.openclaw?.setupEntry === "string" &&
-    packageJson.openclaw.setupEntry.trim().length > 0
-      ? packageJson.openclaw.setupEntry
-      : undefined;
+    typeof packageJson?.stableclaw?.setupEntry === "string" &&
+    packageJson.stableclaw.setupEntry.trim().length > 0
+      ? packageJson.stableclaw.setupEntry
+      : typeof packageJson?.openclaw?.setupEntry === "string" &&
+          packageJson.openclaw.setupEntry.trim().length > 0
+        ? packageJson.openclaw.setupEntry
+        : undefined;
   if (setupEntry) {
     packageEntries = Array.from(new Set([...packageEntries, setupEntry]));
   }
@@ -47,7 +58,10 @@ function collectPluginSourceEntries(packageJson) {
 }
 
 function shouldStageBundledPluginRuntimeDependencies(packageJson) {
-  return packageJson?.openclaw?.bundle?.stageRuntimeDependencies === true;
+  return (
+    packageJson?.stableclaw?.bundle?.stageRuntimeDependencies === true ||
+    packageJson?.openclaw?.bundle?.stageRuntimeDependencies === true
+  );
 }
 
 function collectTopLevelPublicSurfaceEntries(pluginDir) {
