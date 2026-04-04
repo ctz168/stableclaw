@@ -1,5 +1,5 @@
 import { expect, it, vi, type Mock } from "vitest";
-import { slackOutbound } from "../../../../test/channel-outbounds.js";
+import { slackOutbound } from "../../../../extensions/slack/test-api.js";
 import type { MsgContext } from "../../../auto-reply/templating.js";
 import type { ReplyPayload } from "../../../auto-reply/types.js";
 import type { OpenClawConfig } from "../../../config/config.js";
