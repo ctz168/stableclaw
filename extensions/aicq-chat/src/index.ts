@@ -147,6 +147,80 @@ function registerAicqPlugin(api: any) {
     log.warn("api.registerTool not available - plugin running in limited mode");
   }
 
+  // ── Task Plan Bridge (after_tool_call hook) ──────────────────
+  // When the agent uses the "task_plan" tool, forward the update
+  // to the AICQ web UI via the aicq-server's push endpoint.
+  if (typeof api.on === "function") {
+    api.on("after_tool_call", async (event: any) => {
+      try {
+        const toolName = event?.toolName;
+        if (toolName !== "task_plan") return;
+
+        const params = event?.params || {};
+        const action = params.action;
+        const result = event?.result;
+
+        log.debug(`Task plan hook fired: action=${action}`);
+
+        // Extract plan data from tool result or params
+        const planId = result?.planId || params?.planId || "";
+        const title = result?.title || params?.title || "任务计划";
+        const steps = result?.steps || params?.steps || [];
+
+        if (!planId) {
+          log.warn("Task plan hook: no planId found, skipping push");
+          return;
+        }
+
+        // Build the AICQ-compatible payload
+        const payload = {
+          planId,
+          title,
+          steps: Array.isArray(steps) ? steps.map((step: any) => ({
+            id: step.id || step.stepId || "",
+            description: step.description || step.title || "",
+            status: step.status || "pending",
+            priority: step.priority || step.order || 0,
+            createdAt: step.createdAt || Date.now(),
+            updatedAt: step.updatedAt || Date.now(),
+          })) : [],
+          friendId: aicqAgentId,
+        };
+
+        // Determine message type
+        const messageType = action === "delete"
+          ? "task_plan_delete"
+          : "task_plan_update";
+
+        const pushBody = messageType === "task_plan_delete"
+          ? { senderId: aicqAgentId, messageType, payload: { planId } }
+          : { senderId: aicqAgentId, messageType, payload };
+
+        // Push to AICQ server via HTTP
+        const httpUrl = serverUrl.replace(/^ws/, "http");
+        const pushResp = await fetch(`${httpUrl}/api/v1/task-plan/push`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pushBody),
+        });
+
+        if (!pushResp.ok) {
+          const errText = await pushResp.text().catch(() => "");
+          log.warn(`Task plan push failed: ${pushResp.status} ${errText}`);
+        } else {
+          const pushResult = await pushResp.json().catch(() => ({}));
+          log.debug(`Task plan pushed: ${messageType} planId=${planId} sent=${pushResult.sent}`);
+        }
+      } catch (err: any) {
+        log.warn(`Task plan hook error: ${err?.message || String(err)}`);
+      }
+    });
+
+    log.info("Registered after_tool_call hook for task_plan bridge");
+  } else {
+    log.warn("api.on not available - task plan bridge disabled");
+  }
+
   log.info("═══════════════════════════════════════════════");
   log.info("  AICQ Plugin activated successfully!");
   log.info("═══════════════════════════════════════════════");
