@@ -4,7 +4,11 @@ packages:
   - packages/*
   - extensions/*
 
-minimumReleaseAge: 2880
+ignoredBuiltDependencies:
+  - "@discordjs/opus"
+  - koffi
+
+minimumReleaseAge: 0
 
 minimumReleaseAgeExclude:
   - "stableclaw"
@@ -26,7 +30,3 @@ onlyBuiltDependencies:
   - node-llama-cpp
   - protobufjs
   - sharp
-
-ignoredBuiltDependencies:
-  - "@discordjs/opus"
-  - koffi
