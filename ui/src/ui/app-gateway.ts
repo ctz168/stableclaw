@@ -6,6 +6,7 @@ import {
   CHAT_SESSIONS_ACTIVE_MINUTES,
   clearPendingQueueItemsForRun,
   flushChatQueueForEvent,
+  refreshChatModels,
 } from "./app-chat.ts";
 import type { EventLogEntry } from "./app-events.ts";
 import {
@@ -467,6 +468,26 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
   if (evt.event === GATEWAY_EVENT_UPDATE_AVAILABLE) {
     const payload = evt.payload as GatewayUpdateAvailableEventPayload | undefined;
     host.updateAvailable = payload?.updateAvailable ?? null;
+  }
+
+  // When config changes on the server (models, channels, plugins), refresh
+  // the model list so the chat page stays in sync without a page reload.
+  if (evt.event === "config.changed") {
+    const payload = evt.payload as
+      | {
+          modelsInvalidated?: boolean;
+          channelsInvalidated?: boolean;
+          pluginsReloaded?: boolean;
+          changedPaths?: string[];
+        }
+      | undefined;
+    if (payload?.modelsInvalidated) {
+      // Refresh the model catalog in the chat page dropdown.
+      void refreshChatModels(host as unknown as Parameters<typeof refreshChatModels>[0]);
+    }
+    // Reload the active tab data (e.g. config page, channels page) so
+    // edits that affect the current view are reflected immediately.
+    void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);
   }
 }
 

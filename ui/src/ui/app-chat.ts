@@ -409,7 +409,7 @@ export async function refreshChat(host: ChatHost, opts?: { scheduleScroll?: bool
   }
 }
 
-async function refreshChatModels(host: ChatHost) {
+export async function refreshChatModels(host: ChatHost) {
   if (!host.client || !host.connected) {
     host.chatModelsLoading = false;
     host.chatModelCatalog = [];

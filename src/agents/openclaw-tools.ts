@@ -252,6 +252,7 @@ export function createOpenClawTools(
     }),
     createTaskPlanTool({
       sessionKey: options?.agentSessionKey,
+      workspaceDir,
     }),
     createSessionStatusTool({
       agentSessionKey: options?.agentSessionKey,

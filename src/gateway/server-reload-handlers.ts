@@ -1,4 +1,5 @@
 import { getActiveEmbeddedRunCount } from "../agents/pi-embedded-runner/runs.js";
+import { invalidateModelCatalogCache } from "../agents/model-catalog.js";
 import { getTotalPendingReplies } from "../auto-reply/reply/dispatcher-registry.js";
 import type { CliDeps } from "../cli/deps.js";
 import { resolveAgentMaxConcurrent, resolveSubagentMaxConcurrent } from "../config/agent-limits.js";
@@ -138,6 +139,12 @@ export function createGatewayReloadHandlers(params: {
     setCommandLaneConcurrency(CommandLane.Cron, nextConfig.cron?.maxConcurrentRuns ?? 1);
     setCommandLaneConcurrency(CommandLane.Main, resolveAgentMaxConcurrent(nextConfig));
     setCommandLaneConcurrency(CommandLane.Subagent, resolveSubagentMaxConcurrent(nextConfig));
+
+    // Invalidate the model catalog cache so the next request picks up new models.
+    if (plan.invalidateModelCatalog) {
+      invalidateModelCatalogCache();
+      params.logReload.info("model catalog cache invalidated; will reload on next request");
+    }
 
     // Broadcast config.changed event to all connected dashboard clients so
     // they can refresh model lists, channel status, and other dynamic data.

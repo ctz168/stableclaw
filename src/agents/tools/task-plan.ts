@@ -460,7 +460,13 @@ export async function loadTaskMdContent(sessionKey: string): Promise<{ content?:
  */
 export function createTaskPlanTool(opts?: {
   sessionKey?: string;
+  /** Workspace directory for task.md persistence. */
+  workspaceDir?: string;
 }): AnyAgentTool {
+  // Wire up workspace dir so task.md persistence works.
+  if (opts?.sessionKey && opts?.workspaceDir) {
+    setSessionWorkspaceDir(opts.sessionKey, opts.workspaceDir);
+  }
   return {
     label: "Task Planning",
     name: "task_plan",
@@ -543,6 +549,8 @@ export function createTaskPlanTool(opts?: {
           const goal = readStringParam(params, "goal");
           const plan = updatePlan({ sessionKey, planId, title, goal });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
+          // Auto-sync to task.md after plan update
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -561,6 +569,8 @@ export function createTaskPlanTool(opts?: {
           const insertAfter = readStringParam(params, "insertAfter");
           const plan = addStep({ sessionKey, planId, description, priority, detail, insertBefore, insertAfter });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
+          // Auto-sync to task.md after step addition
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -598,6 +608,8 @@ export function createTaskPlanTool(opts?: {
           if (!stepId) throw new ToolInputError("stepId is required for remove_step action");
           const plan = removeStep({ sessionKey, planId, stepId });
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
+          // Auto-sync to task.md after step removal
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -615,6 +627,8 @@ export function createTaskPlanTool(opts?: {
             stepIds: params.stepIds as string[],
           });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
+          // Auto-sync to task.md after reorder
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,

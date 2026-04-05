@@ -144,6 +144,15 @@ export function resetModelCatalogCacheForTest() {
   importPiSdk = defaultImportPiSdk;
 }
 
+/**
+ * Invalidate the model catalog cache so the next `loadModelCatalog()` call
+ * re-reads config and re-discovers models.  Safe to call from hot-reload.
+ */
+export function invalidateModelCatalogCache() {
+  modelCatalogPromise = null;
+  hasLoggedModelCatalogError = false;
+}
+
 // Test-only escape hatch: allow mocking the dynamic import to simulate transient failures.
 export function __setModelCatalogImportForTest(loader?: () => Promise<PiSdkModule>) {
   importPiSdk = loader ?? defaultImportPiSdk;
