@@ -173,27 +173,6 @@
 - Use `$stableclaw-ghsa-maintainer` at `.agents/skills/stableclaw-ghsa-maintainer/SKILL.md` for GHSA advisory inspection, patch/publish flow, private-fork checks, and GHSA API validation.
 - Release and publish remain explicit-approval actions even when using the skill.
 
-### Manual npm Publish Checklist
-
-Use `./scripts/publish-npm.sh <npm-token>` for the recommended one-shot workflow. If publishing manually, follow this checklist in order:
-
-1. **Bump version** in `package.json` (calver: `YYYY.M.MINOR` or `YYYY.M.MINOR.PATCH`).
-2. **Run full build**: `pnpm build`. This calls tsdown which generates `dist/entry.js`, `dist/index.js`, all plugin-sdk artifacts, and bundled extension `runtime-api.js` files. **Never skip this step.** Publishing without `dist/entry.js` causes a fatal `"missing dist/entry.(m)js (build output)"` error at runtime.
-3. **Verify critical build artifacts exist**:
-   - `dist/entry.js` or `dist/entry.mjs` — CLI entry point (required, checked by `stableclaw.mjs` at startup)
-   - `dist/index.js` or `dist/index.mjs` — main module (required)
-   - `dist/extensions/*/runtime-api.js` — bundled extension runtime surfaces
-   - `dist/plugin-sdk/*.js` — plugin SDK exports
-4. **Run release-check**: `node --import tsx scripts/release-check.ts`. This validates pack contents, appcast sparkle versions, plugin-sdk exports, and extension manifest metadata.
-5. **Dry-run pack**: `npm pack --dry-run` to verify the tarball can be assembled without errors.
-6. **Publish**: `npm publish --access public`.
-7. **Verify**: `npm view stableclaw version` and `npm install -g stableclaw@<version> && stableclaw --version`.
-
-Common pitfalls:
-- **Never `npm publish` without running `pnpm build` first.** The `dist/` directory is not in git; it only exists after a successful build. A published package without `dist/entry.js` is broken.
-- If pnpm is not in PATH (e.g. corepack-only environments), the build script `scripts/tsdown-build.mjs` will silently fail because it shells out to `pnpm exec tsdown`. Ensure `pnpm` is resolvable before building.
-- The `--skip-build` flag on `publish-npm.sh` requires pre-existing `dist/` output; it still checks for `dist/entry.js` before publishing.
-
 ## Testing Guidelines
 
 - Framework: Vitest with V8 coverage thresholds (70% lines/branches/functions/statements).
