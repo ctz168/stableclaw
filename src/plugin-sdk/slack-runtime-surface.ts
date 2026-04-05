@@ -10,34 +10,28 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "runtime-api.js",
   });
 }
-export const handleSlackAction: FacadeModule["handleSlackAction"] = ((...args) =>
-  loadFacadeModule()["handleSlackAction"](...args)) as FacadeModule["handleSlackAction"];
+export const handleSlackAction: FacadeModule["handleSlackAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["handleSlackAction"] as any)(...args)) as FacadeModule["handleSlackAction"];
 export const listSlackDirectoryGroupsLive: FacadeModule["listSlackDirectoryGroupsLive"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["listSlackDirectoryGroupsLive"](
-    ...args,
-  )) as FacadeModule["listSlackDirectoryGroupsLive"];
+  (loadFacadeModule()["listSlackDirectoryGroupsLive"] as any)(...args)) as FacadeModule["listSlackDirectoryGroupsLive"];
 export const listSlackDirectoryPeersLive: FacadeModule["listSlackDirectoryPeersLive"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["listSlackDirectoryPeersLive"](
-    ...args,
-  )) as FacadeModule["listSlackDirectoryPeersLive"];
-export const monitorSlackProvider: FacadeModule["monitorSlackProvider"] = ((...args) =>
-  loadFacadeModule()["monitorSlackProvider"](...args)) as FacadeModule["monitorSlackProvider"];
-export const probeSlack: FacadeModule["probeSlack"] = ((...args) =>
-  loadFacadeModule()["probeSlack"](...args)) as FacadeModule["probeSlack"];
+  (loadFacadeModule()["listSlackDirectoryPeersLive"] as any)(...args)) as FacadeModule["listSlackDirectoryPeersLive"];
+export const monitorSlackProvider: FacadeModule["monitorSlackProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["monitorSlackProvider"] as any)(...args)) as FacadeModule["monitorSlackProvider"];
+export const probeSlack: FacadeModule["probeSlack"] = ((...args: any[]) =>
+  (loadFacadeModule()["probeSlack"] as any)(...args)) as FacadeModule["probeSlack"];
 export const resolveSlackChannelAllowlist: FacadeModule["resolveSlackChannelAllowlist"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveSlackChannelAllowlist"](
-    ...args,
-  )) as FacadeModule["resolveSlackChannelAllowlist"];
-export const resolveSlackUserAllowlist: FacadeModule["resolveSlackUserAllowlist"] = ((...args) =>
-  loadFacadeModule()["resolveSlackUserAllowlist"](
-    ...args,
-  )) as FacadeModule["resolveSlackUserAllowlist"];
-export const sendMessageSlack: FacadeModule["sendMessageSlack"] = ((...args) =>
-  loadFacadeModule()["sendMessageSlack"](...args)) as FacadeModule["sendMessageSlack"];
+  (loadFacadeModule()["resolveSlackChannelAllowlist"] as any)(...args)) as FacadeModule["resolveSlackChannelAllowlist"];
+export const resolveSlackUserAllowlist: FacadeModule["resolveSlackUserAllowlist"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveSlackUserAllowlist"] as any)(...args)) as FacadeModule["resolveSlackUserAllowlist"];
+export const sendMessageSlack: FacadeModule["sendMessageSlack"] = ((...args: any[]) =>
+  (loadFacadeModule()["sendMessageSlack"] as any)(...args)) as FacadeModule["sendMessageSlack"];
 export type SlackActionContext = FacadeEntry["types"]["SlackActionContext"];

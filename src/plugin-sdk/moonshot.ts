@@ -11,16 +11,12 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const applyMoonshotNativeStreamingUsageCompat: FacadeModule["applyMoonshotNativeStreamingUsageCompat"] =
-  ((...args) =>
-    loadFacadeModule()["applyMoonshotNativeStreamingUsageCompat"](
-      ...args,
-    )) as FacadeModule["applyMoonshotNativeStreamingUsageCompat"];
-export const buildMoonshotProvider: FacadeModule["buildMoonshotProvider"] = ((...args) =>
-  loadFacadeModule()["buildMoonshotProvider"](...args)) as FacadeModule["buildMoonshotProvider"];
-export const isNativeMoonshotBaseUrl: FacadeModule["isNativeMoonshotBaseUrl"] = ((...args) =>
-  loadFacadeModule()["isNativeMoonshotBaseUrl"](
-    ...args,
-  )) as FacadeModule["isNativeMoonshotBaseUrl"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["applyMoonshotNativeStreamingUsageCompat"] as any)(...args)) as FacadeModule["applyMoonshotNativeStreamingUsageCompat"];
+export const buildMoonshotProvider: FacadeModule["buildMoonshotProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildMoonshotProvider"] as any)(...args)) as FacadeModule["buildMoonshotProvider"];
+export const isNativeMoonshotBaseUrl: FacadeModule["isNativeMoonshotBaseUrl"] = ((...args: any[]) =>
+  (loadFacadeModule()["isNativeMoonshotBaseUrl"] as any)(...args)) as FacadeModule["isNativeMoonshotBaseUrl"];
 export const MOONSHOT_BASE_URL: FacadeModule["MOONSHOT_BASE_URL"] =
   loadFacadeModule()["MOONSHOT_BASE_URL"];
 export const MOONSHOT_CN_BASE_URL: FacadeModule["MOONSHOT_CN_BASE_URL"] =

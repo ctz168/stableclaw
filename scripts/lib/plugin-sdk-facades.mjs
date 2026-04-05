@@ -1603,10 +1603,10 @@ export function buildPluginSdkFacadeModule(entry, params = {}) {
       const moduleTypeName = sourceIndex === 0 ? "FacadeModule" : `FacadeModule${sourceIndex + 1}`;
       if (isExplicitFunctionExport || kind?.functionLike || kind?.callable) {
         lines.push(
-          `export const ${exportName}: ${moduleTypeName}[${JSON.stringify(exportName)}] = ((...args) =>`,
+          `export const ${exportName}: ${moduleTypeName}[${JSON.stringify(exportName)}] = ((...args: any[]) =>`,
         );
         lines.push(
-          `  loadFacadeModule${loaderSuffix}()[${JSON.stringify(exportName)}](...args)) as ${moduleTypeName}[${JSON.stringify(exportName)}];`,
+          `  (loadFacadeModule${loaderSuffix}()[${JSON.stringify(exportName)}] as any)(...args)) as ${moduleTypeName}[${JSON.stringify(exportName)}];`,
         );
         continue;
       }

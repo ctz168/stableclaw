@@ -11,127 +11,113 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildTemplateMessageFromPayload: FacadeModule["buildTemplateMessageFromPayload"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildTemplateMessageFromPayload"](
-    ...args,
-  )) as FacadeModule["buildTemplateMessageFromPayload"];
-export const cancelDefaultRichMenu: FacadeModule["cancelDefaultRichMenu"] = ((...args) =>
-  loadFacadeModule()["cancelDefaultRichMenu"](...args)) as FacadeModule["cancelDefaultRichMenu"];
-export const createActionCard: FacadeModule["createActionCard"] = ((...args) =>
-  loadFacadeModule()["createActionCard"](...args)) as FacadeModule["createActionCard"];
-export const createAgendaCard: FacadeModule["createAgendaCard"] = ((...args) =>
-  loadFacadeModule()["createAgendaCard"](...args)) as FacadeModule["createAgendaCard"];
-export const createAppleTvRemoteCard: FacadeModule["createAppleTvRemoteCard"] = ((...args) =>
-  loadFacadeModule()["createAppleTvRemoteCard"](
-    ...args,
-  )) as FacadeModule["createAppleTvRemoteCard"];
-export const createCarousel: FacadeModule["createCarousel"] = ((...args) =>
-  loadFacadeModule()["createCarousel"](...args)) as FacadeModule["createCarousel"];
-export const createDefaultMenuConfig: FacadeModule["createDefaultMenuConfig"] = ((...args) =>
-  loadFacadeModule()["createDefaultMenuConfig"](
-    ...args,
-  )) as FacadeModule["createDefaultMenuConfig"];
-export const createDeviceControlCard: FacadeModule["createDeviceControlCard"] = ((...args) =>
-  loadFacadeModule()["createDeviceControlCard"](
-    ...args,
-  )) as FacadeModule["createDeviceControlCard"];
-export const createEventCard: FacadeModule["createEventCard"] = ((...args) =>
-  loadFacadeModule()["createEventCard"](...args)) as FacadeModule["createEventCard"];
-export const createGridLayout: FacadeModule["createGridLayout"] = ((...args) =>
-  loadFacadeModule()["createGridLayout"](...args)) as FacadeModule["createGridLayout"];
-export const createImageCard: FacadeModule["createImageCard"] = ((...args) =>
-  loadFacadeModule()["createImageCard"](...args)) as FacadeModule["createImageCard"];
-export const createInfoCard: FacadeModule["createInfoCard"] = ((...args) =>
-  loadFacadeModule()["createInfoCard"](...args)) as FacadeModule["createInfoCard"];
-export const createListCard: FacadeModule["createListCard"] = ((...args) =>
-  loadFacadeModule()["createListCard"](...args)) as FacadeModule["createListCard"];
-export const createMediaPlayerCard: FacadeModule["createMediaPlayerCard"] = ((...args) =>
-  loadFacadeModule()["createMediaPlayerCard"](...args)) as FacadeModule["createMediaPlayerCard"];
-export const createNotificationBubble: FacadeModule["createNotificationBubble"] = ((...args) =>
-  loadFacadeModule()["createNotificationBubble"](
-    ...args,
-  )) as FacadeModule["createNotificationBubble"];
-export const createQuickReplyItems: FacadeModule["createQuickReplyItems"] = ((...args) =>
-  loadFacadeModule()["createQuickReplyItems"](...args)) as FacadeModule["createQuickReplyItems"];
-export const createReceiptCard: FacadeModule["createReceiptCard"] = ((...args) =>
-  loadFacadeModule()["createReceiptCard"](...args)) as FacadeModule["createReceiptCard"];
-export const createRichMenu: FacadeModule["createRichMenu"] = ((...args) =>
-  loadFacadeModule()["createRichMenu"](...args)) as FacadeModule["createRichMenu"];
-export const createRichMenuAlias: FacadeModule["createRichMenuAlias"] = ((...args) =>
-  loadFacadeModule()["createRichMenuAlias"](...args)) as FacadeModule["createRichMenuAlias"];
-export const datetimePickerAction: FacadeModule["datetimePickerAction"] = ((...args) =>
-  loadFacadeModule()["datetimePickerAction"](...args)) as FacadeModule["datetimePickerAction"];
-export const deleteRichMenu: FacadeModule["deleteRichMenu"] = ((...args) =>
-  loadFacadeModule()["deleteRichMenu"](...args)) as FacadeModule["deleteRichMenu"];
-export const deleteRichMenuAlias: FacadeModule["deleteRichMenuAlias"] = ((...args) =>
-  loadFacadeModule()["deleteRichMenuAlias"](...args)) as FacadeModule["deleteRichMenuAlias"];
-export const downloadLineMedia: FacadeModule["downloadLineMedia"] = ((...args) =>
-  loadFacadeModule()["downloadLineMedia"](...args)) as FacadeModule["downloadLineMedia"];
-export const firstDefined: FacadeModule["firstDefined"] = ((...args) =>
-  loadFacadeModule()["firstDefined"](...args)) as FacadeModule["firstDefined"];
-export const getDefaultRichMenuId: FacadeModule["getDefaultRichMenuId"] = ((...args) =>
-  loadFacadeModule()["getDefaultRichMenuId"](...args)) as FacadeModule["getDefaultRichMenuId"];
-export const getRichMenu: FacadeModule["getRichMenu"] = ((...args) =>
-  loadFacadeModule()["getRichMenu"](...args)) as FacadeModule["getRichMenu"];
-export const getRichMenuIdOfUser: FacadeModule["getRichMenuIdOfUser"] = ((...args) =>
-  loadFacadeModule()["getRichMenuIdOfUser"](...args)) as FacadeModule["getRichMenuIdOfUser"];
-export const getRichMenuList: FacadeModule["getRichMenuList"] = ((...args) =>
-  loadFacadeModule()["getRichMenuList"](...args)) as FacadeModule["getRichMenuList"];
-export const isSenderAllowed: FacadeModule["isSenderAllowed"] = ((...args) =>
-  loadFacadeModule()["isSenderAllowed"](...args)) as FacadeModule["isSenderAllowed"];
-export const linkRichMenuToUser: FacadeModule["linkRichMenuToUser"] = ((...args) =>
-  loadFacadeModule()["linkRichMenuToUser"](...args)) as FacadeModule["linkRichMenuToUser"];
-export const linkRichMenuToUsers: FacadeModule["linkRichMenuToUsers"] = ((...args) =>
-  loadFacadeModule()["linkRichMenuToUsers"](...args)) as FacadeModule["linkRichMenuToUsers"];
-export const messageAction: FacadeModule["messageAction"] = ((...args) =>
-  loadFacadeModule()["messageAction"](...args)) as FacadeModule["messageAction"];
-export const monitorLineProvider: FacadeModule["monitorLineProvider"] = ((...args) =>
-  loadFacadeModule()["monitorLineProvider"](...args)) as FacadeModule["monitorLineProvider"];
-export const normalizeAllowFrom: FacadeModule["normalizeAllowFrom"] = ((...args) =>
-  loadFacadeModule()["normalizeAllowFrom"](...args)) as FacadeModule["normalizeAllowFrom"];
+  (loadFacadeModule()["buildTemplateMessageFromPayload"] as any)(...args)) as FacadeModule["buildTemplateMessageFromPayload"];
+export const cancelDefaultRichMenu: FacadeModule["cancelDefaultRichMenu"] = ((...args: any[]) =>
+  (loadFacadeModule()["cancelDefaultRichMenu"] as any)(...args)) as FacadeModule["cancelDefaultRichMenu"];
+export const createActionCard: FacadeModule["createActionCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createActionCard"] as any)(...args)) as FacadeModule["createActionCard"];
+export const createAgendaCard: FacadeModule["createAgendaCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createAgendaCard"] as any)(...args)) as FacadeModule["createAgendaCard"];
+export const createAppleTvRemoteCard: FacadeModule["createAppleTvRemoteCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createAppleTvRemoteCard"] as any)(...args)) as FacadeModule["createAppleTvRemoteCard"];
+export const createCarousel: FacadeModule["createCarousel"] = ((...args: any[]) =>
+  (loadFacadeModule()["createCarousel"] as any)(...args)) as FacadeModule["createCarousel"];
+export const createDefaultMenuConfig: FacadeModule["createDefaultMenuConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["createDefaultMenuConfig"] as any)(...args)) as FacadeModule["createDefaultMenuConfig"];
+export const createDeviceControlCard: FacadeModule["createDeviceControlCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createDeviceControlCard"] as any)(...args)) as FacadeModule["createDeviceControlCard"];
+export const createEventCard: FacadeModule["createEventCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createEventCard"] as any)(...args)) as FacadeModule["createEventCard"];
+export const createGridLayout: FacadeModule["createGridLayout"] = ((...args: any[]) =>
+  (loadFacadeModule()["createGridLayout"] as any)(...args)) as FacadeModule["createGridLayout"];
+export const createImageCard: FacadeModule["createImageCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createImageCard"] as any)(...args)) as FacadeModule["createImageCard"];
+export const createInfoCard: FacadeModule["createInfoCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createInfoCard"] as any)(...args)) as FacadeModule["createInfoCard"];
+export const createListCard: FacadeModule["createListCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createListCard"] as any)(...args)) as FacadeModule["createListCard"];
+export const createMediaPlayerCard: FacadeModule["createMediaPlayerCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createMediaPlayerCard"] as any)(...args)) as FacadeModule["createMediaPlayerCard"];
+export const createNotificationBubble: FacadeModule["createNotificationBubble"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createNotificationBubble"] as any)(...args)) as FacadeModule["createNotificationBubble"];
+export const createQuickReplyItems: FacadeModule["createQuickReplyItems"] = ((...args: any[]) =>
+  (loadFacadeModule()["createQuickReplyItems"] as any)(...args)) as FacadeModule["createQuickReplyItems"];
+export const createReceiptCard: FacadeModule["createReceiptCard"] = ((...args: any[]) =>
+  (loadFacadeModule()["createReceiptCard"] as any)(...args)) as FacadeModule["createReceiptCard"];
+export const createRichMenu: FacadeModule["createRichMenu"] = ((...args: any[]) =>
+  (loadFacadeModule()["createRichMenu"] as any)(...args)) as FacadeModule["createRichMenu"];
+export const createRichMenuAlias: FacadeModule["createRichMenuAlias"] = ((...args: any[]) =>
+  (loadFacadeModule()["createRichMenuAlias"] as any)(...args)) as FacadeModule["createRichMenuAlias"];
+export const datetimePickerAction: FacadeModule["datetimePickerAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["datetimePickerAction"] as any)(...args)) as FacadeModule["datetimePickerAction"];
+export const deleteRichMenu: FacadeModule["deleteRichMenu"] = ((...args: any[]) =>
+  (loadFacadeModule()["deleteRichMenu"] as any)(...args)) as FacadeModule["deleteRichMenu"];
+export const deleteRichMenuAlias: FacadeModule["deleteRichMenuAlias"] = ((...args: any[]) =>
+  (loadFacadeModule()["deleteRichMenuAlias"] as any)(...args)) as FacadeModule["deleteRichMenuAlias"];
+export const downloadLineMedia: FacadeModule["downloadLineMedia"] = ((...args: any[]) =>
+  (loadFacadeModule()["downloadLineMedia"] as any)(...args)) as FacadeModule["downloadLineMedia"];
+export const firstDefined: FacadeModule["firstDefined"] = ((...args: any[]) =>
+  (loadFacadeModule()["firstDefined"] as any)(...args)) as FacadeModule["firstDefined"];
+export const getDefaultRichMenuId: FacadeModule["getDefaultRichMenuId"] = ((...args: any[]) =>
+  (loadFacadeModule()["getDefaultRichMenuId"] as any)(...args)) as FacadeModule["getDefaultRichMenuId"];
+export const getRichMenu: FacadeModule["getRichMenu"] = ((...args: any[]) =>
+  (loadFacadeModule()["getRichMenu"] as any)(...args)) as FacadeModule["getRichMenu"];
+export const getRichMenuIdOfUser: FacadeModule["getRichMenuIdOfUser"] = ((...args: any[]) =>
+  (loadFacadeModule()["getRichMenuIdOfUser"] as any)(...args)) as FacadeModule["getRichMenuIdOfUser"];
+export const getRichMenuList: FacadeModule["getRichMenuList"] = ((...args: any[]) =>
+  (loadFacadeModule()["getRichMenuList"] as any)(...args)) as FacadeModule["getRichMenuList"];
+export const isSenderAllowed: FacadeModule["isSenderAllowed"] = ((...args: any[]) =>
+  (loadFacadeModule()["isSenderAllowed"] as any)(...args)) as FacadeModule["isSenderAllowed"];
+export const linkRichMenuToUser: FacadeModule["linkRichMenuToUser"] = ((...args: any[]) =>
+  (loadFacadeModule()["linkRichMenuToUser"] as any)(...args)) as FacadeModule["linkRichMenuToUser"];
+export const linkRichMenuToUsers: FacadeModule["linkRichMenuToUsers"] = ((...args: any[]) =>
+  (loadFacadeModule()["linkRichMenuToUsers"] as any)(...args)) as FacadeModule["linkRichMenuToUsers"];
+export const messageAction: FacadeModule["messageAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["messageAction"] as any)(...args)) as FacadeModule["messageAction"];
+export const monitorLineProvider: FacadeModule["monitorLineProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["monitorLineProvider"] as any)(...args)) as FacadeModule["monitorLineProvider"];
+export const normalizeAllowFrom: FacadeModule["normalizeAllowFrom"] = ((...args: any[]) =>
+  (loadFacadeModule()["normalizeAllowFrom"] as any)(...args)) as FacadeModule["normalizeAllowFrom"];
 export const normalizeDmAllowFromWithStore: FacadeModule["normalizeDmAllowFromWithStore"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeDmAllowFromWithStore"](
-    ...args,
-  )) as FacadeModule["normalizeDmAllowFromWithStore"];
-export const postbackAction: FacadeModule["postbackAction"] = ((...args) =>
-  loadFacadeModule()["postbackAction"](...args)) as FacadeModule["postbackAction"];
-export const probeLineBot: FacadeModule["probeLineBot"] = ((...args) =>
-  loadFacadeModule()["probeLineBot"](...args)) as FacadeModule["probeLineBot"];
-export const pushFlexMessage: FacadeModule["pushFlexMessage"] = ((...args) =>
-  loadFacadeModule()["pushFlexMessage"](...args)) as FacadeModule["pushFlexMessage"];
-export const pushLocationMessage: FacadeModule["pushLocationMessage"] = ((...args) =>
-  loadFacadeModule()["pushLocationMessage"](...args)) as FacadeModule["pushLocationMessage"];
-export const pushMessageLine: FacadeModule["pushMessageLine"] = ((...args) =>
-  loadFacadeModule()["pushMessageLine"](...args)) as FacadeModule["pushMessageLine"];
-export const pushMessagesLine: FacadeModule["pushMessagesLine"] = ((...args) =>
-  loadFacadeModule()["pushMessagesLine"](...args)) as FacadeModule["pushMessagesLine"];
-export const pushTemplateMessage: FacadeModule["pushTemplateMessage"] = ((...args) =>
-  loadFacadeModule()["pushTemplateMessage"](...args)) as FacadeModule["pushTemplateMessage"];
+  (loadFacadeModule()["normalizeDmAllowFromWithStore"] as any)(...args)) as FacadeModule["normalizeDmAllowFromWithStore"];
+export const postbackAction: FacadeModule["postbackAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["postbackAction"] as any)(...args)) as FacadeModule["postbackAction"];
+export const probeLineBot: FacadeModule["probeLineBot"] = ((...args: any[]) =>
+  (loadFacadeModule()["probeLineBot"] as any)(...args)) as FacadeModule["probeLineBot"];
+export const pushFlexMessage: FacadeModule["pushFlexMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["pushFlexMessage"] as any)(...args)) as FacadeModule["pushFlexMessage"];
+export const pushLocationMessage: FacadeModule["pushLocationMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["pushLocationMessage"] as any)(...args)) as FacadeModule["pushLocationMessage"];
+export const pushMessageLine: FacadeModule["pushMessageLine"] = ((...args: any[]) =>
+  (loadFacadeModule()["pushMessageLine"] as any)(...args)) as FacadeModule["pushMessageLine"];
+export const pushMessagesLine: FacadeModule["pushMessagesLine"] = ((...args: any[]) =>
+  (loadFacadeModule()["pushMessagesLine"] as any)(...args)) as FacadeModule["pushMessagesLine"];
+export const pushTemplateMessage: FacadeModule["pushTemplateMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["pushTemplateMessage"] as any)(...args)) as FacadeModule["pushTemplateMessage"];
 export const pushTextMessageWithQuickReplies: FacadeModule["pushTextMessageWithQuickReplies"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["pushTextMessageWithQuickReplies"](
-    ...args,
-  )) as FacadeModule["pushTextMessageWithQuickReplies"];
-export const sendMessageLine: FacadeModule["sendMessageLine"] = ((...args) =>
-  loadFacadeModule()["sendMessageLine"](...args)) as FacadeModule["sendMessageLine"];
-export const setDefaultRichMenu: FacadeModule["setDefaultRichMenu"] = ((...args) =>
-  loadFacadeModule()["setDefaultRichMenu"](...args)) as FacadeModule["setDefaultRichMenu"];
-export const toFlexMessage: FacadeModule["toFlexMessage"] = ((...args) =>
-  loadFacadeModule()["toFlexMessage"](...args)) as FacadeModule["toFlexMessage"];
-export const unlinkRichMenuFromUser: FacadeModule["unlinkRichMenuFromUser"] = ((...args) =>
-  loadFacadeModule()["unlinkRichMenuFromUser"](...args)) as FacadeModule["unlinkRichMenuFromUser"];
-export const unlinkRichMenuFromUsers: FacadeModule["unlinkRichMenuFromUsers"] = ((...args) =>
-  loadFacadeModule()["unlinkRichMenuFromUsers"](
-    ...args,
-  )) as FacadeModule["unlinkRichMenuFromUsers"];
-export const uploadRichMenuImage: FacadeModule["uploadRichMenuImage"] = ((...args) =>
-  loadFacadeModule()["uploadRichMenuImage"](...args)) as FacadeModule["uploadRichMenuImage"];
-export const uriAction: FacadeModule["uriAction"] = ((...args) =>
-  loadFacadeModule()["uriAction"](...args)) as FacadeModule["uriAction"];
+  (loadFacadeModule()["pushTextMessageWithQuickReplies"] as any)(...args)) as FacadeModule["pushTextMessageWithQuickReplies"];
+export const sendMessageLine: FacadeModule["sendMessageLine"] = ((...args: any[]) =>
+  (loadFacadeModule()["sendMessageLine"] as any)(...args)) as FacadeModule["sendMessageLine"];
+export const setDefaultRichMenu: FacadeModule["setDefaultRichMenu"] = ((...args: any[]) =>
+  (loadFacadeModule()["setDefaultRichMenu"] as any)(...args)) as FacadeModule["setDefaultRichMenu"];
+export const toFlexMessage: FacadeModule["toFlexMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["toFlexMessage"] as any)(...args)) as FacadeModule["toFlexMessage"];
+export const unlinkRichMenuFromUser: FacadeModule["unlinkRichMenuFromUser"] = ((...args: any[]) =>
+  (loadFacadeModule()["unlinkRichMenuFromUser"] as any)(...args)) as FacadeModule["unlinkRichMenuFromUser"];
+export const unlinkRichMenuFromUsers: FacadeModule["unlinkRichMenuFromUsers"] = ((...args: any[]) =>
+  (loadFacadeModule()["unlinkRichMenuFromUsers"] as any)(...args)) as FacadeModule["unlinkRichMenuFromUsers"];
+export const uploadRichMenuImage: FacadeModule["uploadRichMenuImage"] = ((...args: any[]) =>
+  (loadFacadeModule()["uploadRichMenuImage"] as any)(...args)) as FacadeModule["uploadRichMenuImage"];
+export const uriAction: FacadeModule["uriAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["uriAction"] as any)(...args)) as FacadeModule["uriAction"];
 export type Action = FacadeEntry["types"]["Action"];
 export type CardAction = FacadeEntry["types"]["CardAction"];
 export type CreateRichMenuParams = FacadeEntry["types"]["CreateRichMenuParams"];

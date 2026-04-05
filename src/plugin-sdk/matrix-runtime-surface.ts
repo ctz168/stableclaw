@@ -11,10 +11,8 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const resolveMatrixAccountStringValues: FacadeModule["resolveMatrixAccountStringValues"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveMatrixAccountStringValues"](
-    ...args,
-  )) as FacadeModule["resolveMatrixAccountStringValues"];
-export const setMatrixRuntime: FacadeModule["setMatrixRuntime"] = ((...args) =>
-  loadFacadeModule()["setMatrixRuntime"](...args)) as FacadeModule["setMatrixRuntime"];
+  (loadFacadeModule()["resolveMatrixAccountStringValues"] as any)(...args)) as FacadeModule["resolveMatrixAccountStringValues"];
+export const setMatrixRuntime: FacadeModule["setMatrixRuntime"] = ((...args: any[]) =>
+  (loadFacadeModule()["setMatrixRuntime"] as any)(...args)) as FacadeModule["setMatrixRuntime"];

@@ -4,7 +4,7 @@ import { tryLoadActivatedBundledPluginPublicSurfaceModuleSync } from "./facade-r
 type DiscordThreadBindingsModule = PluginSdkFacadeTypeMap["discord-thread-bindings"]["module"];
 
 export const unbindThreadBindingsBySessionKey: DiscordThreadBindingsModule["unbindThreadBindingsBySessionKey"] =
-  ((...args) => {
+  ((...args: any[]) => {
     // Session cleanup always attempts Discord thread unbinds, even when Discord is disabled.
     // Keep that path a no-op unless the Discord runtime is actually active.
     const unbindThreadBindings = tryLoadActivatedBundledPluginPublicSurfaceModuleSync<
@@ -13,5 +13,5 @@ export const unbindThreadBindingsBySessionKey: DiscordThreadBindingsModule["unbi
       dirName: "discord",
       artifactBasename: "runtime-api.js",
     })?.unbindThreadBindingsBySessionKey;
-    return typeof unbindThreadBindings === "function" ? unbindThreadBindings(...args) : [];
+    return typeof unbindThreadBindings === "function" ? (unbindThreadBindings as any)(...args) : [];
   }) as DiscordThreadBindingsModule["unbindThreadBindingsBySessionKey"];

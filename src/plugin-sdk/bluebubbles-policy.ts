@@ -10,17 +10,13 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isAllowedBlueBubblesSender: FacadeModule["isAllowedBlueBubblesSender"] = ((...args) =>
-  loadFacadeModule()["isAllowedBlueBubblesSender"](
-    ...args,
-  )) as FacadeModule["isAllowedBlueBubblesSender"];
+export const isAllowedBlueBubblesSender: FacadeModule["isAllowedBlueBubblesSender"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["isAllowedBlueBubblesSender"] as any)(...args)) as FacadeModule["isAllowedBlueBubblesSender"];
 export const resolveBlueBubblesGroupRequireMention: FacadeModule["resolveBlueBubblesGroupRequireMention"] =
-  ((...args) =>
-    loadFacadeModule()["resolveBlueBubblesGroupRequireMention"](
-      ...args,
-    )) as FacadeModule["resolveBlueBubblesGroupRequireMention"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveBlueBubblesGroupRequireMention"] as any)(...args)) as FacadeModule["resolveBlueBubblesGroupRequireMention"];
 export const resolveBlueBubblesGroupToolPolicy: FacadeModule["resolveBlueBubblesGroupToolPolicy"] =
-  ((...args) =>
-    loadFacadeModule()["resolveBlueBubblesGroupToolPolicy"](
-      ...args,
-    )) as FacadeModule["resolveBlueBubblesGroupToolPolicy"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveBlueBubblesGroupToolPolicy"] as any)(...args)) as FacadeModule["resolveBlueBubblesGroupToolPolicy"];

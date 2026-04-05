@@ -11,7 +11,5 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const normalizeExplicitDiscordSessionKey: FacadeModule["normalizeExplicitDiscordSessionKey"] =
-  ((...args) =>
-    loadFacadeModule()["normalizeExplicitDiscordSessionKey"](
-      ...args,
-    )) as FacadeModule["normalizeExplicitDiscordSessionKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["normalizeExplicitDiscordSessionKey"] as any)(...args)) as FacadeModule["normalizeExplicitDiscordSessionKey"];

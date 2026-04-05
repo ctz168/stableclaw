@@ -16,64 +16,56 @@ function loadFacadeModule(): FacadeModule {
 export const _test: FacadeModule["_test"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["_test"] as object,
 ) as FacadeModule["_test"];
-export const buildTtsSystemPromptHint: FacadeModule["buildTtsSystemPromptHint"] = ((...args) =>
-  loadFacadeModule()["buildTtsSystemPromptHint"](
-    ...args,
-  )) as FacadeModule["buildTtsSystemPromptHint"];
-export const getLastTtsAttempt: FacadeModule["getLastTtsAttempt"] = ((...args) =>
-  loadFacadeModule()["getLastTtsAttempt"](...args)) as FacadeModule["getLastTtsAttempt"];
-export const getResolvedSpeechProviderConfig: FacadeModule["getResolvedSpeechProviderConfig"] = ((
-  ...args
+export const buildTtsSystemPromptHint: FacadeModule["buildTtsSystemPromptHint"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["getResolvedSpeechProviderConfig"](
-    ...args,
-  )) as FacadeModule["getResolvedSpeechProviderConfig"];
-export const getTtsMaxLength: FacadeModule["getTtsMaxLength"] = ((...args) =>
-  loadFacadeModule()["getTtsMaxLength"](...args)) as FacadeModule["getTtsMaxLength"];
-export const getTtsProvider: FacadeModule["getTtsProvider"] = ((...args) =>
-  loadFacadeModule()["getTtsProvider"](...args)) as FacadeModule["getTtsProvider"];
-export const isSummarizationEnabled: FacadeModule["isSummarizationEnabled"] = ((...args) =>
-  loadFacadeModule()["isSummarizationEnabled"](...args)) as FacadeModule["isSummarizationEnabled"];
-export const isTtsEnabled: FacadeModule["isTtsEnabled"] = ((...args) =>
-  loadFacadeModule()["isTtsEnabled"](...args)) as FacadeModule["isTtsEnabled"];
-export const isTtsProviderConfigured: FacadeModule["isTtsProviderConfigured"] = ((...args) =>
-  loadFacadeModule()["isTtsProviderConfigured"](
-    ...args,
-  )) as FacadeModule["isTtsProviderConfigured"];
-export const listSpeechVoices: FacadeModule["listSpeechVoices"] = ((...args) =>
-  loadFacadeModule()["listSpeechVoices"](...args)) as FacadeModule["listSpeechVoices"];
-export const maybeApplyTtsToPayload: FacadeModule["maybeApplyTtsToPayload"] = ((...args) =>
-  loadFacadeModule()["maybeApplyTtsToPayload"](...args)) as FacadeModule["maybeApplyTtsToPayload"];
-export const resolveTtsAutoMode: FacadeModule["resolveTtsAutoMode"] = ((...args) =>
-  loadFacadeModule()["resolveTtsAutoMode"](...args)) as FacadeModule["resolveTtsAutoMode"];
-export const resolveTtsConfig: FacadeModule["resolveTtsConfig"] = ((...args) =>
-  loadFacadeModule()["resolveTtsConfig"](...args)) as FacadeModule["resolveTtsConfig"];
-export const resolveTtsPrefsPath: FacadeModule["resolveTtsPrefsPath"] = ((...args) =>
-  loadFacadeModule()["resolveTtsPrefsPath"](...args)) as FacadeModule["resolveTtsPrefsPath"];
-export const resolveTtsProviderOrder: FacadeModule["resolveTtsProviderOrder"] = ((...args) =>
-  loadFacadeModule()["resolveTtsProviderOrder"](
-    ...args,
-  )) as FacadeModule["resolveTtsProviderOrder"];
-export const setLastTtsAttempt: FacadeModule["setLastTtsAttempt"] = ((...args) =>
-  loadFacadeModule()["setLastTtsAttempt"](...args)) as FacadeModule["setLastTtsAttempt"];
-export const setSummarizationEnabled: FacadeModule["setSummarizationEnabled"] = ((...args) =>
-  loadFacadeModule()["setSummarizationEnabled"](
-    ...args,
-  )) as FacadeModule["setSummarizationEnabled"];
-export const setTtsAutoMode: FacadeModule["setTtsAutoMode"] = ((...args) =>
-  loadFacadeModule()["setTtsAutoMode"](...args)) as FacadeModule["setTtsAutoMode"];
-export const setTtsEnabled: FacadeModule["setTtsEnabled"] = ((...args) =>
-  loadFacadeModule()["setTtsEnabled"](...args)) as FacadeModule["setTtsEnabled"];
-export const setTtsMaxLength: FacadeModule["setTtsMaxLength"] = ((...args) =>
-  loadFacadeModule()["setTtsMaxLength"](...args)) as FacadeModule["setTtsMaxLength"];
-export const setTtsProvider: FacadeModule["setTtsProvider"] = ((...args) =>
-  loadFacadeModule()["setTtsProvider"](...args)) as FacadeModule["setTtsProvider"];
-export const synthesizeSpeech: FacadeModule["synthesizeSpeech"] = ((...args) =>
-  loadFacadeModule()["synthesizeSpeech"](...args)) as FacadeModule["synthesizeSpeech"];
-export const textToSpeech: FacadeModule["textToSpeech"] = ((...args) =>
-  loadFacadeModule()["textToSpeech"](...args)) as FacadeModule["textToSpeech"];
-export const textToSpeechTelephony: FacadeModule["textToSpeechTelephony"] = ((...args) =>
-  loadFacadeModule()["textToSpeechTelephony"](...args)) as FacadeModule["textToSpeechTelephony"];
+  (loadFacadeModule()["buildTtsSystemPromptHint"] as any)(...args)) as FacadeModule["buildTtsSystemPromptHint"];
+export const getLastTtsAttempt: FacadeModule["getLastTtsAttempt"] = ((...args: any[]) =>
+  (loadFacadeModule()["getLastTtsAttempt"] as any)(...args)) as FacadeModule["getLastTtsAttempt"];
+export const getResolvedSpeechProviderConfig: FacadeModule["getResolvedSpeechProviderConfig"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["getResolvedSpeechProviderConfig"] as any)(...args)) as FacadeModule["getResolvedSpeechProviderConfig"];
+export const getTtsMaxLength: FacadeModule["getTtsMaxLength"] = ((...args: any[]) =>
+  (loadFacadeModule()["getTtsMaxLength"] as any)(...args)) as FacadeModule["getTtsMaxLength"];
+export const getTtsProvider: FacadeModule["getTtsProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["getTtsProvider"] as any)(...args)) as FacadeModule["getTtsProvider"];
+export const isSummarizationEnabled: FacadeModule["isSummarizationEnabled"] = ((...args: any[]) =>
+  (loadFacadeModule()["isSummarizationEnabled"] as any)(...args)) as FacadeModule["isSummarizationEnabled"];
+export const isTtsEnabled: FacadeModule["isTtsEnabled"] = ((...args: any[]) =>
+  (loadFacadeModule()["isTtsEnabled"] as any)(...args)) as FacadeModule["isTtsEnabled"];
+export const isTtsProviderConfigured: FacadeModule["isTtsProviderConfigured"] = ((...args: any[]) =>
+  (loadFacadeModule()["isTtsProviderConfigured"] as any)(...args)) as FacadeModule["isTtsProviderConfigured"];
+export const listSpeechVoices: FacadeModule["listSpeechVoices"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSpeechVoices"] as any)(...args)) as FacadeModule["listSpeechVoices"];
+export const maybeApplyTtsToPayload: FacadeModule["maybeApplyTtsToPayload"] = ((...args: any[]) =>
+  (loadFacadeModule()["maybeApplyTtsToPayload"] as any)(...args)) as FacadeModule["maybeApplyTtsToPayload"];
+export const resolveTtsAutoMode: FacadeModule["resolveTtsAutoMode"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveTtsAutoMode"] as any)(...args)) as FacadeModule["resolveTtsAutoMode"];
+export const resolveTtsConfig: FacadeModule["resolveTtsConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveTtsConfig"] as any)(...args)) as FacadeModule["resolveTtsConfig"];
+export const resolveTtsPrefsPath: FacadeModule["resolveTtsPrefsPath"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveTtsPrefsPath"] as any)(...args)) as FacadeModule["resolveTtsPrefsPath"];
+export const resolveTtsProviderOrder: FacadeModule["resolveTtsProviderOrder"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveTtsProviderOrder"] as any)(...args)) as FacadeModule["resolveTtsProviderOrder"];
+export const setLastTtsAttempt: FacadeModule["setLastTtsAttempt"] = ((...args: any[]) =>
+  (loadFacadeModule()["setLastTtsAttempt"] as any)(...args)) as FacadeModule["setLastTtsAttempt"];
+export const setSummarizationEnabled: FacadeModule["setSummarizationEnabled"] = ((...args: any[]) =>
+  (loadFacadeModule()["setSummarizationEnabled"] as any)(...args)) as FacadeModule["setSummarizationEnabled"];
+export const setTtsAutoMode: FacadeModule["setTtsAutoMode"] = ((...args: any[]) =>
+  (loadFacadeModule()["setTtsAutoMode"] as any)(...args)) as FacadeModule["setTtsAutoMode"];
+export const setTtsEnabled: FacadeModule["setTtsEnabled"] = ((...args: any[]) =>
+  (loadFacadeModule()["setTtsEnabled"] as any)(...args)) as FacadeModule["setTtsEnabled"];
+export const setTtsMaxLength: FacadeModule["setTtsMaxLength"] = ((...args: any[]) =>
+  (loadFacadeModule()["setTtsMaxLength"] as any)(...args)) as FacadeModule["setTtsMaxLength"];
+export const setTtsProvider: FacadeModule["setTtsProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["setTtsProvider"] as any)(...args)) as FacadeModule["setTtsProvider"];
+export const synthesizeSpeech: FacadeModule["synthesizeSpeech"] = ((...args: any[]) =>
+  (loadFacadeModule()["synthesizeSpeech"] as any)(...args)) as FacadeModule["synthesizeSpeech"];
+export const textToSpeech: FacadeModule["textToSpeech"] = ((...args: any[]) =>
+  (loadFacadeModule()["textToSpeech"] as any)(...args)) as FacadeModule["textToSpeech"];
+export const textToSpeechTelephony: FacadeModule["textToSpeechTelephony"] = ((...args: any[]) =>
+  (loadFacadeModule()["textToSpeechTelephony"] as any)(...args)) as FacadeModule["textToSpeechTelephony"];
 export type ResolvedTtsConfig = FacadeEntry["types"]["ResolvedTtsConfig"];
 export type ResolvedTtsModelOverrides = FacadeEntry["types"]["ResolvedTtsModelOverrides"];
 export type TtsDirectiveOverrides = FacadeEntry["types"]["TtsDirectiveOverrides"];

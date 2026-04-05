@@ -13,16 +13,12 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildDoubaoCodingProvider: FacadeModule["buildDoubaoCodingProvider"] = ((...args) =>
-  loadFacadeModule()["buildDoubaoCodingProvider"](
-    ...args,
-  )) as FacadeModule["buildDoubaoCodingProvider"];
-export const buildDoubaoModelDefinition: FacadeModule["buildDoubaoModelDefinition"] = ((...args) =>
-  loadFacadeModule()["buildDoubaoModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildDoubaoModelDefinition"];
-export const buildDoubaoProvider: FacadeModule["buildDoubaoProvider"] = ((...args) =>
-  loadFacadeModule()["buildDoubaoProvider"](...args)) as FacadeModule["buildDoubaoProvider"];
+export const buildDoubaoCodingProvider: FacadeModule["buildDoubaoCodingProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildDoubaoCodingProvider"] as any)(...args)) as FacadeModule["buildDoubaoCodingProvider"];
+export const buildDoubaoModelDefinition: FacadeModule["buildDoubaoModelDefinition"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildDoubaoModelDefinition"] as any)(...args)) as FacadeModule["buildDoubaoModelDefinition"];
+export const buildDoubaoProvider: FacadeModule["buildDoubaoProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildDoubaoProvider"] as any)(...args)) as FacadeModule["buildDoubaoProvider"];
 export const DOUBAO_BASE_URL: FacadeModule["DOUBAO_BASE_URL"] =
   loadFacadeModule()["DOUBAO_BASE_URL"];
 export const DOUBAO_CODING_BASE_URL: FacadeModule["DOUBAO_CODING_BASE_URL"] =

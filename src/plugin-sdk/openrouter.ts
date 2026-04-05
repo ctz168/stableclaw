@@ -10,17 +10,13 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyOpenrouterConfig: FacadeModule["applyOpenrouterConfig"] = ((...args) =>
-  loadFacadeModule()["applyOpenrouterConfig"](...args)) as FacadeModule["applyOpenrouterConfig"];
+export const applyOpenrouterConfig: FacadeModule["applyOpenrouterConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyOpenrouterConfig"] as any)(...args)) as FacadeModule["applyOpenrouterConfig"];
 export const applyOpenrouterProviderConfig: FacadeModule["applyOpenrouterProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyOpenrouterProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyOpenrouterProviderConfig"];
-export const buildOpenrouterProvider: FacadeModule["buildOpenrouterProvider"] = ((...args) =>
-  loadFacadeModule()["buildOpenrouterProvider"](
-    ...args,
-  )) as FacadeModule["buildOpenrouterProvider"];
+  (loadFacadeModule()["applyOpenrouterProviderConfig"] as any)(...args)) as FacadeModule["applyOpenrouterProviderConfig"];
+export const buildOpenrouterProvider: FacadeModule["buildOpenrouterProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildOpenrouterProvider"] as any)(...args)) as FacadeModule["buildOpenrouterProvider"];
 export const OPENROUTER_DEFAULT_MODEL_REF: FacadeModule["OPENROUTER_DEFAULT_MODEL_REF"] =
   loadFacadeModule()["OPENROUTER_DEFAULT_MODEL_REF"];

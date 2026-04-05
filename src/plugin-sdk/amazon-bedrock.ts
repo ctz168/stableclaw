@@ -10,26 +10,20 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const discoverBedrockModels: FacadeModule["discoverBedrockModels"] = ((...args) =>
-  loadFacadeModule()["discoverBedrockModels"](...args)) as FacadeModule["discoverBedrockModels"];
+export const discoverBedrockModels: FacadeModule["discoverBedrockModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["discoverBedrockModels"] as any)(...args)) as FacadeModule["discoverBedrockModels"];
 export const mergeImplicitBedrockProvider: FacadeModule["mergeImplicitBedrockProvider"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["mergeImplicitBedrockProvider"](
-    ...args,
-  )) as FacadeModule["mergeImplicitBedrockProvider"];
+  (loadFacadeModule()["mergeImplicitBedrockProvider"] as any)(...args)) as FacadeModule["mergeImplicitBedrockProvider"];
 export const resetBedrockDiscoveryCacheForTest: FacadeModule["resetBedrockDiscoveryCacheForTest"] =
-  ((...args) =>
-    loadFacadeModule()["resetBedrockDiscoveryCacheForTest"](
-      ...args,
-    )) as FacadeModule["resetBedrockDiscoveryCacheForTest"];
-export const resolveBedrockConfigApiKey: FacadeModule["resolveBedrockConfigApiKey"] = ((...args) =>
-  loadFacadeModule()["resolveBedrockConfigApiKey"](
-    ...args,
-  )) as FacadeModule["resolveBedrockConfigApiKey"];
-export const resolveImplicitBedrockProvider: FacadeModule["resolveImplicitBedrockProvider"] = ((
-  ...args
+  ((...args: any[]) =>
+    (loadFacadeModule()["resetBedrockDiscoveryCacheForTest"] as any)(...args)) as FacadeModule["resetBedrockDiscoveryCacheForTest"];
+export const resolveBedrockConfigApiKey: FacadeModule["resolveBedrockConfigApiKey"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveImplicitBedrockProvider"](
-    ...args,
-  )) as FacadeModule["resolveImplicitBedrockProvider"];
+  (loadFacadeModule()["resolveBedrockConfigApiKey"] as any)(...args)) as FacadeModule["resolveBedrockConfigApiKey"];
+export const resolveImplicitBedrockProvider: FacadeModule["resolveImplicitBedrockProvider"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveImplicitBedrockProvider"] as any)(...args)) as FacadeModule["resolveImplicitBedrockProvider"];

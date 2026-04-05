@@ -10,6 +10,6 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const resolveDiscordAccount: FacadeModule["resolveDiscordAccount"] = ((...args) =>
-  loadFacadeModule()["resolveDiscordAccount"](...args)) as FacadeModule["resolveDiscordAccount"];
+export const resolveDiscordAccount: FacadeModule["resolveDiscordAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveDiscordAccount"] as any)(...args)) as FacadeModule["resolveDiscordAccount"];
 export type ResolvedDiscordAccount = FacadeEntry["types"]["ResolvedDiscordAccount"];

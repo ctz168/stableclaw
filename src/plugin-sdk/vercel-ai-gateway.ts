@@ -16,20 +16,14 @@ function loadFacadeModule(): FacadeModule {
 export const buildVercelAiGatewayProvider: FacadeModule["buildVercelAiGatewayProvider"] = ((
   ...args
 ) =>
-  loadFacadeModule()["buildVercelAiGatewayProvider"](
-    ...args,
-  )) as FacadeModule["buildVercelAiGatewayProvider"];
+  (loadFacadeModule()["buildVercelAiGatewayProvider"] as any)(...args)) as FacadeModule["buildVercelAiGatewayProvider"];
 export const discoverVercelAiGatewayModels: FacadeModule["discoverVercelAiGatewayModels"] = ((
   ...args
 ) =>
-  loadFacadeModule()["discoverVercelAiGatewayModels"](
-    ...args,
-  )) as FacadeModule["discoverVercelAiGatewayModels"];
+  (loadFacadeModule()["discoverVercelAiGatewayModels"] as any)(...args)) as FacadeModule["discoverVercelAiGatewayModels"];
 export const getStaticVercelAiGatewayModelCatalog: FacadeModule["getStaticVercelAiGatewayModelCatalog"] =
-  ((...args) =>
-    loadFacadeModule()["getStaticVercelAiGatewayModelCatalog"](
-      ...args,
-    )) as FacadeModule["getStaticVercelAiGatewayModelCatalog"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["getStaticVercelAiGatewayModelCatalog"] as any)(...args)) as FacadeModule["getStaticVercelAiGatewayModelCatalog"];
 export const VERCEL_AI_GATEWAY_BASE_URL: FacadeModule["VERCEL_AI_GATEWAY_BASE_URL"] =
   loadFacadeModule()["VERCEL_AI_GATEWAY_BASE_URL"];
 export const VERCEL_AI_GATEWAY_DEFAULT_CONTEXT_WINDOW: FacadeModule["VERCEL_AI_GATEWAY_DEFAULT_CONTEXT_WINDOW"] =

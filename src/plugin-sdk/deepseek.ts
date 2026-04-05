@@ -14,13 +14,11 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildDeepSeekModelDefinition: FacadeModule["buildDeepSeekModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildDeepSeekModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildDeepSeekModelDefinition"];
-export const buildDeepSeekProvider: FacadeModule["buildDeepSeekProvider"] = ((...args) =>
-  loadFacadeModule()["buildDeepSeekProvider"](...args)) as FacadeModule["buildDeepSeekProvider"];
+  (loadFacadeModule()["buildDeepSeekModelDefinition"] as any)(...args)) as FacadeModule["buildDeepSeekModelDefinition"];
+export const buildDeepSeekProvider: FacadeModule["buildDeepSeekProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildDeepSeekProvider"] as any)(...args)) as FacadeModule["buildDeepSeekProvider"];
 export const DEEPSEEK_BASE_URL: FacadeModule["DEEPSEEK_BASE_URL"] =
   loadFacadeModule()["DEEPSEEK_BASE_URL"];
 export const DEEPSEEK_MODEL_CATALOG: FacadeModule["DEEPSEEK_MODEL_CATALOG"] =

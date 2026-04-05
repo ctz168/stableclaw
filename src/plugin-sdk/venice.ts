@@ -13,14 +13,12 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildVeniceModelDefinition: FacadeModule["buildVeniceModelDefinition"] = ((...args) =>
-  loadFacadeModule()["buildVeniceModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildVeniceModelDefinition"];
-export const buildVeniceProvider: FacadeModule["buildVeniceProvider"] = ((...args) =>
-  loadFacadeModule()["buildVeniceProvider"](...args)) as FacadeModule["buildVeniceProvider"];
-export const discoverVeniceModels: FacadeModule["discoverVeniceModels"] = ((...args) =>
-  loadFacadeModule()["discoverVeniceModels"](...args)) as FacadeModule["discoverVeniceModels"];
+export const buildVeniceModelDefinition: FacadeModule["buildVeniceModelDefinition"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildVeniceModelDefinition"] as any)(...args)) as FacadeModule["buildVeniceModelDefinition"];
+export const buildVeniceProvider: FacadeModule["buildVeniceProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildVeniceProvider"] as any)(...args)) as FacadeModule["buildVeniceProvider"];
+export const discoverVeniceModels: FacadeModule["discoverVeniceModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["discoverVeniceModels"] as any)(...args)) as FacadeModule["discoverVeniceModels"];
 export const VENICE_BASE_URL: FacadeModule["VENICE_BASE_URL"] =
   loadFacadeModule()["VENICE_BASE_URL"];
 export const VENICE_DEFAULT_MODEL_REF: FacadeModule["VENICE_DEFAULT_MODEL_REF"] =

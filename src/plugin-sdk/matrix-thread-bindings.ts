@@ -11,12 +11,8 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const setMatrixThreadBindingIdleTimeoutBySessionKey: FacadeModule["setMatrixThreadBindingIdleTimeoutBySessionKey"] =
-  ((...args) =>
-    loadFacadeModule()["setMatrixThreadBindingIdleTimeoutBySessionKey"](
-      ...args,
-    )) as FacadeModule["setMatrixThreadBindingIdleTimeoutBySessionKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["setMatrixThreadBindingIdleTimeoutBySessionKey"] as any)(...args)) as FacadeModule["setMatrixThreadBindingIdleTimeoutBySessionKey"];
 export const setMatrixThreadBindingMaxAgeBySessionKey: FacadeModule["setMatrixThreadBindingMaxAgeBySessionKey"] =
-  ((...args) =>
-    loadFacadeModule()["setMatrixThreadBindingMaxAgeBySessionKey"](
-      ...args,
-    )) as FacadeModule["setMatrixThreadBindingMaxAgeBySessionKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["setMatrixThreadBindingMaxAgeBySessionKey"] as any)(...args)) as FacadeModule["setMatrixThreadBindingMaxAgeBySessionKey"];

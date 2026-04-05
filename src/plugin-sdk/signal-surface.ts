@@ -13,34 +13,32 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isSignalSenderAllowed: FacadeModule["isSignalSenderAllowed"] = ((...args) =>
-  loadFacadeModule()["isSignalSenderAllowed"](...args)) as FacadeModule["isSignalSenderAllowed"];
-export const listEnabledSignalAccounts: FacadeModule["listEnabledSignalAccounts"] = ((...args) =>
-  loadFacadeModule()["listEnabledSignalAccounts"](
-    ...args,
-  )) as FacadeModule["listEnabledSignalAccounts"];
-export const listSignalAccountIds: FacadeModule["listSignalAccountIds"] = ((...args) =>
-  loadFacadeModule()["listSignalAccountIds"](...args)) as FacadeModule["listSignalAccountIds"];
-export const monitorSignalProvider: FacadeModule["monitorSignalProvider"] = ((...args) =>
-  loadFacadeModule()["monitorSignalProvider"](...args)) as FacadeModule["monitorSignalProvider"];
-export const probeSignal: FacadeModule["probeSignal"] = ((...args) =>
-  loadFacadeModule()["probeSignal"](...args)) as FacadeModule["probeSignal"];
-export const removeReactionSignal: FacadeModule["removeReactionSignal"] = ((...args) =>
-  loadFacadeModule()["removeReactionSignal"](...args)) as FacadeModule["removeReactionSignal"];
-export const resolveDefaultSignalAccountId: FacadeModule["resolveDefaultSignalAccountId"] = ((
-  ...args
+export const isSignalSenderAllowed: FacadeModule["isSignalSenderAllowed"] = ((...args: any[]) =>
+  (loadFacadeModule()["isSignalSenderAllowed"] as any)(...args)) as FacadeModule["isSignalSenderAllowed"];
+export const listEnabledSignalAccounts: FacadeModule["listEnabledSignalAccounts"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveDefaultSignalAccountId"](
-    ...args,
-  )) as FacadeModule["resolveDefaultSignalAccountId"];
-export const resolveSignalReactionLevel: FacadeModule["resolveSignalReactionLevel"] = ((...args) =>
-  loadFacadeModule()["resolveSignalReactionLevel"](
-    ...args,
-  )) as FacadeModule["resolveSignalReactionLevel"];
-export const sendMessageSignal: FacadeModule["sendMessageSignal"] = ((...args) =>
-  loadFacadeModule()["sendMessageSignal"](...args)) as FacadeModule["sendMessageSignal"];
-export const sendReactionSignal: FacadeModule["sendReactionSignal"] = ((...args) =>
-  loadFacadeModule()["sendReactionSignal"](...args)) as FacadeModule["sendReactionSignal"];
+  (loadFacadeModule()["listEnabledSignalAccounts"] as any)(...args)) as FacadeModule["listEnabledSignalAccounts"];
+export const listSignalAccountIds: FacadeModule["listSignalAccountIds"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSignalAccountIds"] as any)(...args)) as FacadeModule["listSignalAccountIds"];
+export const monitorSignalProvider: FacadeModule["monitorSignalProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["monitorSignalProvider"] as any)(...args)) as FacadeModule["monitorSignalProvider"];
+export const probeSignal: FacadeModule["probeSignal"] = ((...args: any[]) =>
+  (loadFacadeModule()["probeSignal"] as any)(...args)) as FacadeModule["probeSignal"];
+export const removeReactionSignal: FacadeModule["removeReactionSignal"] = ((...args: any[]) =>
+  (loadFacadeModule()["removeReactionSignal"] as any)(...args)) as FacadeModule["removeReactionSignal"];
+export const resolveDefaultSignalAccountId: FacadeModule["resolveDefaultSignalAccountId"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveDefaultSignalAccountId"] as any)(...args)) as FacadeModule["resolveDefaultSignalAccountId"];
+export const resolveSignalReactionLevel: FacadeModule["resolveSignalReactionLevel"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveSignalReactionLevel"] as any)(...args)) as FacadeModule["resolveSignalReactionLevel"];
+export const sendMessageSignal: FacadeModule["sendMessageSignal"] = ((...args: any[]) =>
+  (loadFacadeModule()["sendMessageSignal"] as any)(...args)) as FacadeModule["sendMessageSignal"];
+export const sendReactionSignal: FacadeModule["sendReactionSignal"] = ((...args: any[]) =>
+  (loadFacadeModule()["sendReactionSignal"] as any)(...args)) as FacadeModule["sendReactionSignal"];
 export const signalMessageActions: FacadeModule["signalMessageActions"] =
   createLazyFacadeObjectValue(
     () => loadFacadeModule()["signalMessageActions"] as object,

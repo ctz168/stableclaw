@@ -10,20 +10,16 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyOpencodeZenConfig: FacadeModule["applyOpencodeZenConfig"] = ((...args) =>
-  loadFacadeModule()["applyOpencodeZenConfig"](...args)) as FacadeModule["applyOpencodeZenConfig"];
+export const applyOpencodeZenConfig: FacadeModule["applyOpencodeZenConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyOpencodeZenConfig"] as any)(...args)) as FacadeModule["applyOpencodeZenConfig"];
 export const applyOpencodeZenModelDefault: FacadeModule["applyOpencodeZenModelDefault"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyOpencodeZenModelDefault"](
-    ...args,
-  )) as FacadeModule["applyOpencodeZenModelDefault"];
+  (loadFacadeModule()["applyOpencodeZenModelDefault"] as any)(...args)) as FacadeModule["applyOpencodeZenModelDefault"];
 export const applyOpencodeZenProviderConfig: FacadeModule["applyOpencodeZenProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyOpencodeZenProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyOpencodeZenProviderConfig"];
+  (loadFacadeModule()["applyOpencodeZenProviderConfig"] as any)(...args)) as FacadeModule["applyOpencodeZenProviderConfig"];
 export const OPENCODE_ZEN_DEFAULT_MODEL: FacadeModule["OPENCODE_ZEN_DEFAULT_MODEL"] =
   loadFacadeModule()["OPENCODE_ZEN_DEFAULT_MODEL"];
 export const OPENCODE_ZEN_DEFAULT_MODEL_REF: FacadeModule["OPENCODE_ZEN_DEFAULT_MODEL_REF"] =

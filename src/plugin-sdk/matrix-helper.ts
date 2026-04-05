@@ -10,51 +10,37 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const findMatrixAccountEntry: FacadeModule["findMatrixAccountEntry"] = ((...args) =>
-  loadFacadeModule()["findMatrixAccountEntry"](...args)) as FacadeModule["findMatrixAccountEntry"];
-export const getMatrixScopedEnvVarNames: FacadeModule["getMatrixScopedEnvVarNames"] = ((...args) =>
-  loadFacadeModule()["getMatrixScopedEnvVarNames"](
-    ...args,
-  )) as FacadeModule["getMatrixScopedEnvVarNames"];
+export const findMatrixAccountEntry: FacadeModule["findMatrixAccountEntry"] = ((...args: any[]) =>
+  (loadFacadeModule()["findMatrixAccountEntry"] as any)(...args)) as FacadeModule["findMatrixAccountEntry"];
+export const getMatrixScopedEnvVarNames: FacadeModule["getMatrixScopedEnvVarNames"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["getMatrixScopedEnvVarNames"] as any)(...args)) as FacadeModule["getMatrixScopedEnvVarNames"];
 export const requiresExplicitMatrixDefaultAccount: FacadeModule["requiresExplicitMatrixDefaultAccount"] =
-  ((...args) =>
-    loadFacadeModule()["requiresExplicitMatrixDefaultAccount"](
-      ...args,
-    )) as FacadeModule["requiresExplicitMatrixDefaultAccount"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["requiresExplicitMatrixDefaultAccount"] as any)(...args)) as FacadeModule["requiresExplicitMatrixDefaultAccount"];
 export const resolveConfiguredMatrixAccountIds: FacadeModule["resolveConfiguredMatrixAccountIds"] =
-  ((...args) =>
-    loadFacadeModule()["resolveConfiguredMatrixAccountIds"](
-      ...args,
-    )) as FacadeModule["resolveConfiguredMatrixAccountIds"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveConfiguredMatrixAccountIds"] as any)(...args)) as FacadeModule["resolveConfiguredMatrixAccountIds"];
 export const resolveMatrixAccountStorageRoot: FacadeModule["resolveMatrixAccountStorageRoot"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveMatrixAccountStorageRoot"](
-    ...args,
-  )) as FacadeModule["resolveMatrixAccountStorageRoot"];
-export const resolveMatrixChannelConfig: FacadeModule["resolveMatrixChannelConfig"] = ((...args) =>
-  loadFacadeModule()["resolveMatrixChannelConfig"](
-    ...args,
-  )) as FacadeModule["resolveMatrixChannelConfig"];
+  (loadFacadeModule()["resolveMatrixAccountStorageRoot"] as any)(...args)) as FacadeModule["resolveMatrixAccountStorageRoot"];
+export const resolveMatrixChannelConfig: FacadeModule["resolveMatrixChannelConfig"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveMatrixChannelConfig"] as any)(...args)) as FacadeModule["resolveMatrixChannelConfig"];
 export const resolveMatrixCredentialsDir: FacadeModule["resolveMatrixCredentialsDir"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveMatrixCredentialsDir"](
-    ...args,
-  )) as FacadeModule["resolveMatrixCredentialsDir"];
+  (loadFacadeModule()["resolveMatrixCredentialsDir"] as any)(...args)) as FacadeModule["resolveMatrixCredentialsDir"];
 export const resolveMatrixCredentialsPath: FacadeModule["resolveMatrixCredentialsPath"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveMatrixCredentialsPath"](
-    ...args,
-  )) as FacadeModule["resolveMatrixCredentialsPath"];
+  (loadFacadeModule()["resolveMatrixCredentialsPath"] as any)(...args)) as FacadeModule["resolveMatrixCredentialsPath"];
 export const resolveMatrixDefaultOrOnlyAccountId: FacadeModule["resolveMatrixDefaultOrOnlyAccountId"] =
-  ((...args) =>
-    loadFacadeModule()["resolveMatrixDefaultOrOnlyAccountId"](
-      ...args,
-    )) as FacadeModule["resolveMatrixDefaultOrOnlyAccountId"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveMatrixDefaultOrOnlyAccountId"] as any)(...args)) as FacadeModule["resolveMatrixDefaultOrOnlyAccountId"];
 export const resolveMatrixLegacyFlatStoragePaths: FacadeModule["resolveMatrixLegacyFlatStoragePaths"] =
-  ((...args) =>
-    loadFacadeModule()["resolveMatrixLegacyFlatStoragePaths"](
-      ...args,
-    )) as FacadeModule["resolveMatrixLegacyFlatStoragePaths"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveMatrixLegacyFlatStoragePaths"] as any)(...args)) as FacadeModule["resolveMatrixLegacyFlatStoragePaths"];

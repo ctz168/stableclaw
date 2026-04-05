@@ -157,7 +157,7 @@ function clearAllPendingLifecycleErrors() {
 function resolveLifecycleErrorGraceMs(): number {
   try {
     const cfg = subagentRegistryDeps.loadConfig();
-    const graceSeconds = cfg.agents?.defaults?.subagents?.lifecycleErrorGraceSeconds;
+    const graceSeconds = (cfg.agents?.defaults?.subagents as any)?.lifecycleErrorGraceSeconds;
     if (typeof graceSeconds === "number" && graceSeconds > 0) {
       return Math.min(graceSeconds * 1000, 300_000); // cap at 5 minutes
     }

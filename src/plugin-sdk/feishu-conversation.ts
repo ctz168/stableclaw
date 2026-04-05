@@ -14,16 +14,14 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildFeishuConversationId: FacadeModule["buildFeishuConversationId"] = ((...args) =>
-  loadFacadeModule()["buildFeishuConversationId"](
-    ...args,
-  )) as FacadeModule["buildFeishuConversationId"];
-export const createFeishuThreadBindingManager: FacadeModule["createFeishuThreadBindingManager"] = ((
-  ...args
+export const buildFeishuConversationId: FacadeModule["buildFeishuConversationId"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["createFeishuThreadBindingManager"](
-    ...args,
-  )) as FacadeModule["createFeishuThreadBindingManager"];
+  (loadFacadeModule()["buildFeishuConversationId"] as any)(...args)) as FacadeModule["buildFeishuConversationId"];
+export const createFeishuThreadBindingManager: FacadeModule["createFeishuThreadBindingManager"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createFeishuThreadBindingManager"] as any)(...args)) as FacadeModule["createFeishuThreadBindingManager"];
 export const feishuSessionBindingAdapterChannels: FacadeModule["feishuSessionBindingAdapterChannels"] =
   createLazyFacadeArrayValue(
     () =>
@@ -34,14 +32,12 @@ export const feishuThreadBindingTesting: FacadeModule["feishuThreadBindingTestin
     () => loadFacadeModule()["feishuThreadBindingTesting"] as object,
   ) as FacadeModule["feishuThreadBindingTesting"];
 export const parseFeishuDirectConversationId: FacadeModule["parseFeishuDirectConversationId"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["parseFeishuDirectConversationId"](
-    ...args,
-  )) as FacadeModule["parseFeishuDirectConversationId"];
-export const parseFeishuConversationId: FacadeModule["parseFeishuConversationId"] = ((...args) =>
-  loadFacadeModule()["parseFeishuConversationId"](
-    ...args,
-  )) as FacadeModule["parseFeishuConversationId"];
-export const parseFeishuTargetId: FacadeModule["parseFeishuTargetId"] = ((...args) =>
-  loadFacadeModule()["parseFeishuTargetId"](...args)) as FacadeModule["parseFeishuTargetId"];
+  (loadFacadeModule()["parseFeishuDirectConversationId"] as any)(...args)) as FacadeModule["parseFeishuDirectConversationId"];
+export const parseFeishuConversationId: FacadeModule["parseFeishuConversationId"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["parseFeishuConversationId"] as any)(...args)) as FacadeModule["parseFeishuConversationId"];
+export const parseFeishuTargetId: FacadeModule["parseFeishuTargetId"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseFeishuTargetId"] as any)(...args)) as FacadeModule["parseFeishuTargetId"];

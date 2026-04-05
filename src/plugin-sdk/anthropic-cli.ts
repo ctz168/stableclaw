@@ -12,5 +12,5 @@ function loadFacadeModule(): FacadeModule {
 }
 export const CLAUDE_CLI_BACKEND_ID: FacadeModule["CLAUDE_CLI_BACKEND_ID"] =
   loadFacadeModule()["CLAUDE_CLI_BACKEND_ID"];
-export const isClaudeCliProvider: FacadeModule["isClaudeCliProvider"] = ((...args) =>
-  loadFacadeModule()["isClaudeCliProvider"](...args)) as FacadeModule["isClaudeCliProvider"];
+export const isClaudeCliProvider: FacadeModule["isClaudeCliProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["isClaudeCliProvider"] as any)(...args)) as FacadeModule["isClaudeCliProvider"];

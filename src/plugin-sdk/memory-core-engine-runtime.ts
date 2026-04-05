@@ -14,17 +14,13 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const getBuiltinMemoryEmbeddingProviderDoctorMetadata: FacadeModule["getBuiltinMemoryEmbeddingProviderDoctorMetadata"] =
-  ((...args) =>
-    loadFacadeModule()["getBuiltinMemoryEmbeddingProviderDoctorMetadata"](
-      ...args,
-    )) as FacadeModule["getBuiltinMemoryEmbeddingProviderDoctorMetadata"];
-export const getMemorySearchManager: FacadeModule["getMemorySearchManager"] = ((...args) =>
-  loadFacadeModule()["getMemorySearchManager"](...args)) as FacadeModule["getMemorySearchManager"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["getBuiltinMemoryEmbeddingProviderDoctorMetadata"] as any)(...args)) as FacadeModule["getBuiltinMemoryEmbeddingProviderDoctorMetadata"];
+export const getMemorySearchManager: FacadeModule["getMemorySearchManager"] = ((...args: any[]) =>
+  (loadFacadeModule()["getMemorySearchManager"] as any)(...args)) as FacadeModule["getMemorySearchManager"];
 export const listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata: FacadeModule["listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata"] =
-  ((...args) =>
-    loadFacadeModule()["listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata"](
-      ...args,
-    )) as FacadeModule["listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata"] as any)(...args)) as FacadeModule["listBuiltinAutoSelectMemoryEmbeddingProviderDoctorMetadata"];
 export const MemoryIndexManager: FacadeModule["MemoryIndexManager"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["MemoryIndexManager"] as object,
 ) as FacadeModule["MemoryIndexManager"];

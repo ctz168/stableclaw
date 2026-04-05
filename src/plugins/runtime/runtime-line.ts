@@ -15,32 +15,29 @@ function loadRuntimeLineModule(): RuntimeLineModule {
   return cachedRuntimeLineModule;
 }
 
+// Use `as any` for the module reference to avoid TS2556 spread errors with
+// non-rest typed delegate methods across the module boundary.
+const rl = () => loadRuntimeLineModule().runtimeLine as any;
+
 export function createRuntimeLine(): PluginRuntimeChannel["line"] {
   return {
-    listLineAccountIds: (...args) =>
-      loadRuntimeLineModule().runtimeLine.listLineAccountIds(...args),
-    resolveDefaultLineAccountId: (...args) =>
-      loadRuntimeLineModule().runtimeLine.resolveDefaultLineAccountId(...args),
-    resolveLineAccount: (...args) =>
-      loadRuntimeLineModule().runtimeLine.resolveLineAccount(...args),
-    normalizeAccountId: (...args) =>
-      loadRuntimeLineModule().runtimeLine.normalizeAccountId(...args),
-    probeLineBot: (...args) => loadRuntimeLineModule().runtimeLine.probeLineBot(...args),
-    sendMessageLine: (...args) => loadRuntimeLineModule().runtimeLine.sendMessageLine(...args),
-    pushMessageLine: (...args) => loadRuntimeLineModule().runtimeLine.pushMessageLine(...args),
-    pushMessagesLine: (...args) => loadRuntimeLineModule().runtimeLine.pushMessagesLine(...args),
-    pushFlexMessage: (...args) => loadRuntimeLineModule().runtimeLine.pushFlexMessage(...args),
-    pushTemplateMessage: (...args) =>
-      loadRuntimeLineModule().runtimeLine.pushTemplateMessage(...args),
-    pushLocationMessage: (...args) =>
-      loadRuntimeLineModule().runtimeLine.pushLocationMessage(...args),
-    pushTextMessageWithQuickReplies: (...args) =>
-      loadRuntimeLineModule().runtimeLine.pushTextMessageWithQuickReplies(...args),
-    createQuickReplyItems: (...args) =>
-      loadRuntimeLineModule().runtimeLine.createQuickReplyItems(...args),
-    buildTemplateMessageFromPayload: (...args) =>
-      loadRuntimeLineModule().runtimeLine.buildTemplateMessageFromPayload(...args),
-    monitorLineProvider: (...args) =>
-      loadRuntimeLineModule().runtimeLine.monitorLineProvider(...args),
+    listLineAccountIds: (...args: any[]) => rl().listLineAccountIds(...args),
+    resolveDefaultLineAccountId: (...args: any[]) =>
+      rl().resolveDefaultLineAccountId(...args),
+    resolveLineAccount: (...args: any[]) => rl().resolveLineAccount(...args),
+    normalizeAccountId: (...args: any[]) => rl().normalizeAccountId(...args),
+    probeLineBot: (...args: any[]) => rl().probeLineBot(...args),
+    sendMessageLine: (...args: any[]) => rl().sendMessageLine(...args),
+    pushMessageLine: (...args: any[]) => rl().pushMessageLine(...args),
+    pushMessagesLine: (...args: any[]) => rl().pushMessagesLine(...args),
+    pushFlexMessage: (...args: any[]) => rl().pushFlexMessage(...args),
+    pushTemplateMessage: (...args: any[]) => rl().pushTemplateMessage(...args),
+    pushLocationMessage: (...args: any[]) => rl().pushLocationMessage(...args),
+    pushTextMessageWithQuickReplies: (...args: any[]) =>
+      rl().pushTextMessageWithQuickReplies(...args),
+    createQuickReplyItems: (...args: any[]) => rl().createQuickReplyItems(...args),
+    buildTemplateMessageFromPayload: (...args: any[]) =>
+      rl().buildTemplateMessageFromPayload(...args),
+    monitorLineProvider: (...args: any[]) => rl().monitorLineProvider(...args),
   };
 }

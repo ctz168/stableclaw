@@ -11,119 +11,93 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildSlackThreadingToolContext: FacadeModule["buildSlackThreadingToolContext"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildSlackThreadingToolContext"](
-    ...args,
-  )) as FacadeModule["buildSlackThreadingToolContext"];
-export const createSlackWebClient: FacadeModule["createSlackWebClient"] = ((...args) =>
-  loadFacadeModule()["createSlackWebClient"](...args)) as FacadeModule["createSlackWebClient"];
-export const deleteSlackMessage: FacadeModule["deleteSlackMessage"] = ((...args) =>
-  loadFacadeModule()["deleteSlackMessage"](...args)) as FacadeModule["deleteSlackMessage"];
-export const downloadSlackFile: FacadeModule["downloadSlackFile"] = ((...args) =>
-  loadFacadeModule()["downloadSlackFile"](...args)) as FacadeModule["downloadSlackFile"];
-export const editSlackMessage: FacadeModule["editSlackMessage"] = ((...args) =>
-  loadFacadeModule()["editSlackMessage"](...args)) as FacadeModule["editSlackMessage"];
-export const extractSlackToolSend: FacadeModule["extractSlackToolSend"] = ((...args) =>
-  loadFacadeModule()["extractSlackToolSend"](...args)) as FacadeModule["extractSlackToolSend"];
-export const getSlackMemberInfo: FacadeModule["getSlackMemberInfo"] = ((...args) =>
-  loadFacadeModule()["getSlackMemberInfo"](...args)) as FacadeModule["getSlackMemberInfo"];
-export const handleSlackHttpRequest: FacadeModule["handleSlackHttpRequest"] = ((...args) =>
-  loadFacadeModule()["handleSlackHttpRequest"](...args)) as FacadeModule["handleSlackHttpRequest"];
-export const inspectSlackAccount: FacadeModule["inspectSlackAccount"] = ((...args) =>
-  loadFacadeModule()["inspectSlackAccount"](...args)) as FacadeModule["inspectSlackAccount"];
+  (loadFacadeModule()["buildSlackThreadingToolContext"] as any)(...args)) as FacadeModule["buildSlackThreadingToolContext"];
+export const createSlackWebClient: FacadeModule["createSlackWebClient"] = ((...args: any[]) =>
+  (loadFacadeModule()["createSlackWebClient"] as any)(...args)) as FacadeModule["createSlackWebClient"];
+export const deleteSlackMessage: FacadeModule["deleteSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["deleteSlackMessage"] as any)(...args)) as FacadeModule["deleteSlackMessage"];
+export const downloadSlackFile: FacadeModule["downloadSlackFile"] = ((...args: any[]) =>
+  (loadFacadeModule()["downloadSlackFile"] as any)(...args)) as FacadeModule["downloadSlackFile"];
+export const editSlackMessage: FacadeModule["editSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["editSlackMessage"] as any)(...args)) as FacadeModule["editSlackMessage"];
+export const extractSlackToolSend: FacadeModule["extractSlackToolSend"] = ((...args: any[]) =>
+  (loadFacadeModule()["extractSlackToolSend"] as any)(...args)) as FacadeModule["extractSlackToolSend"];
+export const getSlackMemberInfo: FacadeModule["getSlackMemberInfo"] = ((...args: any[]) =>
+  (loadFacadeModule()["getSlackMemberInfo"] as any)(...args)) as FacadeModule["getSlackMemberInfo"];
+export const handleSlackHttpRequest: FacadeModule["handleSlackHttpRequest"] = ((...args: any[]) =>
+  (loadFacadeModule()["handleSlackHttpRequest"] as any)(...args)) as FacadeModule["handleSlackHttpRequest"];
+export const inspectSlackAccount: FacadeModule["inspectSlackAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["inspectSlackAccount"] as any)(...args)) as FacadeModule["inspectSlackAccount"];
 export const isSlackInteractiveRepliesEnabled: FacadeModule["isSlackInteractiveRepliesEnabled"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["isSlackInteractiveRepliesEnabled"](
-    ...args,
-  )) as FacadeModule["isSlackInteractiveRepliesEnabled"];
-export const listEnabledSlackAccounts: FacadeModule["listEnabledSlackAccounts"] = ((...args) =>
-  loadFacadeModule()["listEnabledSlackAccounts"](
-    ...args,
-  )) as FacadeModule["listEnabledSlackAccounts"];
-export const listSlackAccountIds: FacadeModule["listSlackAccountIds"] = ((...args) =>
-  loadFacadeModule()["listSlackAccountIds"](...args)) as FacadeModule["listSlackAccountIds"];
+  (loadFacadeModule()["isSlackInteractiveRepliesEnabled"] as any)(...args)) as FacadeModule["isSlackInteractiveRepliesEnabled"];
+export const listEnabledSlackAccounts: FacadeModule["listEnabledSlackAccounts"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["listEnabledSlackAccounts"] as any)(...args)) as FacadeModule["listEnabledSlackAccounts"];
+export const listSlackAccountIds: FacadeModule["listSlackAccountIds"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSlackAccountIds"] as any)(...args)) as FacadeModule["listSlackAccountIds"];
 export const listSlackDirectoryGroupsFromConfig: FacadeModule["listSlackDirectoryGroupsFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listSlackDirectoryGroupsFromConfig"](
-      ...args,
-    )) as FacadeModule["listSlackDirectoryGroupsFromConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listSlackDirectoryGroupsFromConfig"] as any)(...args)) as FacadeModule["listSlackDirectoryGroupsFromConfig"];
 export const listSlackDirectoryPeersFromConfig: FacadeModule["listSlackDirectoryPeersFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listSlackDirectoryPeersFromConfig"](
-      ...args,
-    )) as FacadeModule["listSlackDirectoryPeersFromConfig"];
-export const listSlackEmojis: FacadeModule["listSlackEmojis"] = ((...args) =>
-  loadFacadeModule()["listSlackEmojis"](...args)) as FacadeModule["listSlackEmojis"];
-export const listSlackMessageActions: FacadeModule["listSlackMessageActions"] = ((...args) =>
-  loadFacadeModule()["listSlackMessageActions"](
-    ...args,
-  )) as FacadeModule["listSlackMessageActions"];
-export const listSlackPins: FacadeModule["listSlackPins"] = ((...args) =>
-  loadFacadeModule()["listSlackPins"](...args)) as FacadeModule["listSlackPins"];
-export const listSlackReactions: FacadeModule["listSlackReactions"] = ((...args) =>
-  loadFacadeModule()["listSlackReactions"](...args)) as FacadeModule["listSlackReactions"];
-export const normalizeAllowListLower: FacadeModule["normalizeAllowListLower"] = ((...args) =>
-  loadFacadeModule()["normalizeAllowListLower"](
-    ...args,
-  )) as FacadeModule["normalizeAllowListLower"];
-export const parseSlackBlocksInput: FacadeModule["parseSlackBlocksInput"] = ((...args) =>
-  loadFacadeModule()["parseSlackBlocksInput"](...args)) as FacadeModule["parseSlackBlocksInput"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listSlackDirectoryPeersFromConfig"] as any)(...args)) as FacadeModule["listSlackDirectoryPeersFromConfig"];
+export const listSlackEmojis: FacadeModule["listSlackEmojis"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSlackEmojis"] as any)(...args)) as FacadeModule["listSlackEmojis"];
+export const listSlackMessageActions: FacadeModule["listSlackMessageActions"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSlackMessageActions"] as any)(...args)) as FacadeModule["listSlackMessageActions"];
+export const listSlackPins: FacadeModule["listSlackPins"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSlackPins"] as any)(...args)) as FacadeModule["listSlackPins"];
+export const listSlackReactions: FacadeModule["listSlackReactions"] = ((...args: any[]) =>
+  (loadFacadeModule()["listSlackReactions"] as any)(...args)) as FacadeModule["listSlackReactions"];
+export const normalizeAllowListLower: FacadeModule["normalizeAllowListLower"] = ((...args: any[]) =>
+  (loadFacadeModule()["normalizeAllowListLower"] as any)(...args)) as FacadeModule["normalizeAllowListLower"];
+export const parseSlackBlocksInput: FacadeModule["parseSlackBlocksInput"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseSlackBlocksInput"] as any)(...args)) as FacadeModule["parseSlackBlocksInput"];
 export const recordSlackThreadParticipation: FacadeModule["recordSlackThreadParticipation"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["recordSlackThreadParticipation"](
-    ...args,
-  )) as FacadeModule["recordSlackThreadParticipation"];
+  (loadFacadeModule()["recordSlackThreadParticipation"] as any)(...args)) as FacadeModule["recordSlackThreadParticipation"];
 export const resolveDefaultSlackAccountId: FacadeModule["resolveDefaultSlackAccountId"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveDefaultSlackAccountId"](
-    ...args,
-  )) as FacadeModule["resolveDefaultSlackAccountId"];
-export const resolveSlackAutoThreadId: FacadeModule["resolveSlackAutoThreadId"] = ((...args) =>
-  loadFacadeModule()["resolveSlackAutoThreadId"](
-    ...args,
-  )) as FacadeModule["resolveSlackAutoThreadId"];
+  (loadFacadeModule()["resolveDefaultSlackAccountId"] as any)(...args)) as FacadeModule["resolveDefaultSlackAccountId"];
+export const resolveSlackAutoThreadId: FacadeModule["resolveSlackAutoThreadId"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveSlackAutoThreadId"] as any)(...args)) as FacadeModule["resolveSlackAutoThreadId"];
 export const resolveSlackGroupRequireMention: FacadeModule["resolveSlackGroupRequireMention"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveSlackGroupRequireMention"](
-    ...args,
-  )) as FacadeModule["resolveSlackGroupRequireMention"];
+  (loadFacadeModule()["resolveSlackGroupRequireMention"] as any)(...args)) as FacadeModule["resolveSlackGroupRequireMention"];
 export const resolveSlackRuntimeGroupPolicy: FacadeModule["resolveSlackRuntimeGroupPolicy"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveSlackRuntimeGroupPolicy"](
-    ...args,
-  )) as FacadeModule["resolveSlackRuntimeGroupPolicy"];
+  (loadFacadeModule()["resolveSlackRuntimeGroupPolicy"] as any)(...args)) as FacadeModule["resolveSlackRuntimeGroupPolicy"];
 export const resolveSlackGroupToolPolicy: FacadeModule["resolveSlackGroupToolPolicy"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveSlackGroupToolPolicy"](
-    ...args,
-  )) as FacadeModule["resolveSlackGroupToolPolicy"];
-export const resolveSlackReplyToMode: FacadeModule["resolveSlackReplyToMode"] = ((...args) =>
-  loadFacadeModule()["resolveSlackReplyToMode"](
-    ...args,
-  )) as FacadeModule["resolveSlackReplyToMode"];
-export const sendSlackMessage: FacadeModule["sendSlackMessage"] = ((...args) =>
-  loadFacadeModule()["sendSlackMessage"](...args)) as FacadeModule["sendSlackMessage"];
-export const pinSlackMessage: FacadeModule["pinSlackMessage"] = ((...args) =>
-  loadFacadeModule()["pinSlackMessage"](...args)) as FacadeModule["pinSlackMessage"];
-export const reactSlackMessage: FacadeModule["reactSlackMessage"] = ((...args) =>
-  loadFacadeModule()["reactSlackMessage"](...args)) as FacadeModule["reactSlackMessage"];
-export const readSlackMessages: FacadeModule["readSlackMessages"] = ((...args) =>
-  loadFacadeModule()["readSlackMessages"](...args)) as FacadeModule["readSlackMessages"];
-export const removeOwnSlackReactions: FacadeModule["removeOwnSlackReactions"] = ((...args) =>
-  loadFacadeModule()["removeOwnSlackReactions"](
-    ...args,
-  )) as FacadeModule["removeOwnSlackReactions"];
-export const removeSlackReaction: FacadeModule["removeSlackReaction"] = ((...args) =>
-  loadFacadeModule()["removeSlackReaction"](...args)) as FacadeModule["removeSlackReaction"];
-export const unpinSlackMessage: FacadeModule["unpinSlackMessage"] = ((...args) =>
-  loadFacadeModule()["unpinSlackMessage"](...args)) as FacadeModule["unpinSlackMessage"];
+  (loadFacadeModule()["resolveSlackGroupToolPolicy"] as any)(...args)) as FacadeModule["resolveSlackGroupToolPolicy"];
+export const resolveSlackReplyToMode: FacadeModule["resolveSlackReplyToMode"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveSlackReplyToMode"] as any)(...args)) as FacadeModule["resolveSlackReplyToMode"];
+export const sendSlackMessage: FacadeModule["sendSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["sendSlackMessage"] as any)(...args)) as FacadeModule["sendSlackMessage"];
+export const pinSlackMessage: FacadeModule["pinSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["pinSlackMessage"] as any)(...args)) as FacadeModule["pinSlackMessage"];
+export const reactSlackMessage: FacadeModule["reactSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["reactSlackMessage"] as any)(...args)) as FacadeModule["reactSlackMessage"];
+export const readSlackMessages: FacadeModule["readSlackMessages"] = ((...args: any[]) =>
+  (loadFacadeModule()["readSlackMessages"] as any)(...args)) as FacadeModule["readSlackMessages"];
+export const removeOwnSlackReactions: FacadeModule["removeOwnSlackReactions"] = ((...args: any[]) =>
+  (loadFacadeModule()["removeOwnSlackReactions"] as any)(...args)) as FacadeModule["removeOwnSlackReactions"];
+export const removeSlackReaction: FacadeModule["removeSlackReaction"] = ((...args: any[]) =>
+  (loadFacadeModule()["removeSlackReaction"] as any)(...args)) as FacadeModule["removeSlackReaction"];
+export const unpinSlackMessage: FacadeModule["unpinSlackMessage"] = ((...args: any[]) =>
+  (loadFacadeModule()["unpinSlackMessage"] as any)(...args)) as FacadeModule["unpinSlackMessage"];
 export type InspectedSlackAccount = FacadeEntry["types"]["InspectedSlackAccount"];
 export type ResolvedSlackAccount = FacadeEntry["types"]["ResolvedSlackAccount"];
 export type SlackProbe = FacadeEntry["types"]["SlackProbe"];

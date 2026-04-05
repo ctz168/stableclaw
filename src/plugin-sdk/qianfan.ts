@@ -14,5 +14,5 @@ export const QIANFAN_BASE_URL: FacadeModule["QIANFAN_BASE_URL"] =
   loadFacadeModule()["QIANFAN_BASE_URL"];
 export const QIANFAN_DEFAULT_MODEL_ID: FacadeModule["QIANFAN_DEFAULT_MODEL_ID"] =
   loadFacadeModule()["QIANFAN_DEFAULT_MODEL_ID"];
-export const buildQianfanProvider: FacadeModule["buildQianfanProvider"] = ((...args) =>
-  loadFacadeModule()["buildQianfanProvider"](...args)) as FacadeModule["buildQianfanProvider"];
+export const buildQianfanProvider: FacadeModule["buildQianfanProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildQianfanProvider"] as any)(...args)) as FacadeModule["buildQianfanProvider"];

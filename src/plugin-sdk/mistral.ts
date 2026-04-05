@@ -10,20 +10,18 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyMistralConfig: FacadeModule["applyMistralConfig"] = ((...args) =>
-  loadFacadeModule()["applyMistralConfig"](...args)) as FacadeModule["applyMistralConfig"];
-export const applyMistralProviderConfig: FacadeModule["applyMistralProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyMistralProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyMistralProviderConfig"];
-export const buildMistralModelDefinition: FacadeModule["buildMistralModelDefinition"] = ((
-  ...args
+export const applyMistralConfig: FacadeModule["applyMistralConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyMistralConfig"] as any)(...args)) as FacadeModule["applyMistralConfig"];
+export const applyMistralProviderConfig: FacadeModule["applyMistralProviderConfig"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildMistralModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildMistralModelDefinition"];
-export const buildMistralProvider: FacadeModule["buildMistralProvider"] = ((...args) =>
-  loadFacadeModule()["buildMistralProvider"](...args)) as FacadeModule["buildMistralProvider"];
+  (loadFacadeModule()["applyMistralProviderConfig"] as any)(...args)) as FacadeModule["applyMistralProviderConfig"];
+export const buildMistralModelDefinition: FacadeModule["buildMistralModelDefinition"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildMistralModelDefinition"] as any)(...args)) as FacadeModule["buildMistralModelDefinition"];
+export const buildMistralProvider: FacadeModule["buildMistralProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildMistralProvider"] as any)(...args)) as FacadeModule["buildMistralProvider"];
 export const MISTRAL_BASE_URL: FacadeModule["MISTRAL_BASE_URL"] =
   loadFacadeModule()["MISTRAL_BASE_URL"];
 export const MISTRAL_DEFAULT_MODEL_ID: FacadeModule["MISTRAL_DEFAULT_MODEL_ID"] =

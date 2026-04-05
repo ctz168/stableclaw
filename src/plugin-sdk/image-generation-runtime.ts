@@ -10,12 +10,10 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "runtime-api.js",
   });
 }
-export const generateImage: FacadeModule["generateImage"] = ((...args) =>
-  loadFacadeModule()["generateImage"](...args)) as FacadeModule["generateImage"];
+export const generateImage: FacadeModule["generateImage"] = ((...args: any[]) =>
+  (loadFacadeModule()["generateImage"] as any)(...args)) as FacadeModule["generateImage"];
 export const listRuntimeImageGenerationProviders: FacadeModule["listRuntimeImageGenerationProviders"] =
-  ((...args) =>
-    loadFacadeModule()["listRuntimeImageGenerationProviders"](
-      ...args,
-    )) as FacadeModule["listRuntimeImageGenerationProviders"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listRuntimeImageGenerationProviders"] as any)(...args)) as FacadeModule["listRuntimeImageGenerationProviders"];
 export type GenerateImageParams = FacadeEntry["types"]["GenerateImageParams"];
 export type GenerateImageRuntimeResult = FacadeEntry["types"]["GenerateImageRuntimeResult"];

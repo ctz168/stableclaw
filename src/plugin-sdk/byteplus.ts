@@ -14,19 +14,15 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildBytePlusCodingProvider: FacadeModule["buildBytePlusCodingProvider"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildBytePlusCodingProvider"](
-    ...args,
-  )) as FacadeModule["buildBytePlusCodingProvider"];
+  (loadFacadeModule()["buildBytePlusCodingProvider"] as any)(...args)) as FacadeModule["buildBytePlusCodingProvider"];
 export const buildBytePlusModelDefinition: FacadeModule["buildBytePlusModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildBytePlusModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildBytePlusModelDefinition"];
-export const buildBytePlusProvider: FacadeModule["buildBytePlusProvider"] = ((...args) =>
-  loadFacadeModule()["buildBytePlusProvider"](...args)) as FacadeModule["buildBytePlusProvider"];
+  (loadFacadeModule()["buildBytePlusModelDefinition"] as any)(...args)) as FacadeModule["buildBytePlusModelDefinition"];
+export const buildBytePlusProvider: FacadeModule["buildBytePlusProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildBytePlusProvider"] as any)(...args)) as FacadeModule["buildBytePlusProvider"];
 export const BYTEPLUS_BASE_URL: FacadeModule["BYTEPLUS_BASE_URL"] =
   loadFacadeModule()["BYTEPLUS_BASE_URL"];
 export const BYTEPLUS_CODING_BASE_URL: FacadeModule["BYTEPLUS_CODING_BASE_URL"] =

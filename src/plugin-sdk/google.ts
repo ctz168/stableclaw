@@ -11,61 +11,43 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const applyGoogleGeminiModelDefault: FacadeModule["applyGoogleGeminiModelDefault"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyGoogleGeminiModelDefault"](
-    ...args,
-  )) as FacadeModule["applyGoogleGeminiModelDefault"];
+  (loadFacadeModule()["applyGoogleGeminiModelDefault"] as any)(...args)) as FacadeModule["applyGoogleGeminiModelDefault"];
 export const DEFAULT_GOOGLE_API_BASE_URL: FacadeModule["DEFAULT_GOOGLE_API_BASE_URL"] =
   loadFacadeModule()["DEFAULT_GOOGLE_API_BASE_URL"];
 export const GOOGLE_GEMINI_DEFAULT_MODEL: FacadeModule["GOOGLE_GEMINI_DEFAULT_MODEL"] =
   loadFacadeModule()["GOOGLE_GEMINI_DEFAULT_MODEL"];
-export const isGoogleGenerativeAiApi: FacadeModule["isGoogleGenerativeAiApi"] = ((...args) =>
-  loadFacadeModule()["isGoogleGenerativeAiApi"](
-    ...args,
-  )) as FacadeModule["isGoogleGenerativeAiApi"];
+export const isGoogleGenerativeAiApi: FacadeModule["isGoogleGenerativeAiApi"] = ((...args: any[]) =>
+  (loadFacadeModule()["isGoogleGenerativeAiApi"] as any)(...args)) as FacadeModule["isGoogleGenerativeAiApi"];
 export const normalizeAntigravityModelId: FacadeModule["normalizeAntigravityModelId"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeAntigravityModelId"](
-    ...args,
-  )) as FacadeModule["normalizeAntigravityModelId"];
-export const normalizeGoogleApiBaseUrl: FacadeModule["normalizeGoogleApiBaseUrl"] = ((...args) =>
-  loadFacadeModule()["normalizeGoogleApiBaseUrl"](
-    ...args,
-  )) as FacadeModule["normalizeGoogleApiBaseUrl"];
+  (loadFacadeModule()["normalizeAntigravityModelId"] as any)(...args)) as FacadeModule["normalizeAntigravityModelId"];
+export const normalizeGoogleApiBaseUrl: FacadeModule["normalizeGoogleApiBaseUrl"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["normalizeGoogleApiBaseUrl"] as any)(...args)) as FacadeModule["normalizeGoogleApiBaseUrl"];
 export const normalizeGoogleGenerativeAiBaseUrl: FacadeModule["normalizeGoogleGenerativeAiBaseUrl"] =
-  ((...args) =>
-    loadFacadeModule()["normalizeGoogleGenerativeAiBaseUrl"](
-      ...args,
-    )) as FacadeModule["normalizeGoogleGenerativeAiBaseUrl"];
-export const normalizeGoogleModelId: FacadeModule["normalizeGoogleModelId"] = ((...args) =>
-  loadFacadeModule()["normalizeGoogleModelId"](...args)) as FacadeModule["normalizeGoogleModelId"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["normalizeGoogleGenerativeAiBaseUrl"] as any)(...args)) as FacadeModule["normalizeGoogleGenerativeAiBaseUrl"];
+export const normalizeGoogleModelId: FacadeModule["normalizeGoogleModelId"] = ((...args: any[]) =>
+  (loadFacadeModule()["normalizeGoogleModelId"] as any)(...args)) as FacadeModule["normalizeGoogleModelId"];
 export const normalizeGoogleProviderConfig: FacadeModule["normalizeGoogleProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeGoogleProviderConfig"](
-    ...args,
-  )) as FacadeModule["normalizeGoogleProviderConfig"];
-export const parseGeminiAuth: FacadeModule["parseGeminiAuth"] = ((...args) =>
-  loadFacadeModule()["parseGeminiAuth"](...args)) as FacadeModule["parseGeminiAuth"];
+  (loadFacadeModule()["normalizeGoogleProviderConfig"] as any)(...args)) as FacadeModule["normalizeGoogleProviderConfig"];
+export const parseGeminiAuth: FacadeModule["parseGeminiAuth"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseGeminiAuth"] as any)(...args)) as FacadeModule["parseGeminiAuth"];
 export const resolveGoogleGenerativeAiApiOrigin: FacadeModule["resolveGoogleGenerativeAiApiOrigin"] =
-  ((...args) =>
-    loadFacadeModule()["resolveGoogleGenerativeAiApiOrigin"](
-      ...args,
-    )) as FacadeModule["resolveGoogleGenerativeAiApiOrigin"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveGoogleGenerativeAiApiOrigin"] as any)(...args)) as FacadeModule["resolveGoogleGenerativeAiApiOrigin"];
 export const resolveGoogleGenerativeAiTransport: FacadeModule["resolveGoogleGenerativeAiTransport"] =
-  ((...args) =>
-    loadFacadeModule()["resolveGoogleGenerativeAiTransport"](
-      ...args,
-    )) as FacadeModule["resolveGoogleGenerativeAiTransport"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveGoogleGenerativeAiTransport"] as any)(...args)) as FacadeModule["resolveGoogleGenerativeAiTransport"];
 export const shouldNormalizeGoogleProviderConfig: FacadeModule["shouldNormalizeGoogleProviderConfig"] =
-  ((...args) =>
-    loadFacadeModule()["shouldNormalizeGoogleProviderConfig"](
-      ...args,
-    )) as FacadeModule["shouldNormalizeGoogleProviderConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["shouldNormalizeGoogleProviderConfig"] as any)(...args)) as FacadeModule["shouldNormalizeGoogleProviderConfig"];
 export const shouldNormalizeGoogleGenerativeAiProviderConfig: FacadeModule["shouldNormalizeGoogleGenerativeAiProviderConfig"] =
-  ((...args) =>
-    loadFacadeModule()["shouldNormalizeGoogleGenerativeAiProviderConfig"](
-      ...args,
-    )) as FacadeModule["shouldNormalizeGoogleGenerativeAiProviderConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["shouldNormalizeGoogleGenerativeAiProviderConfig"] as any)(...args)) as FacadeModule["shouldNormalizeGoogleGenerativeAiProviderConfig"];

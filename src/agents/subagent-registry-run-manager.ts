@@ -70,6 +70,11 @@ export function createSubagentRunManager(params: {
     accountId?: string;
     triggerCleanup: boolean;
   }): Promise<void>;
+  markSubagentRunTerminated?(params: {
+    runId?: string;
+    childSessionKey?: string;
+    reason?: string;
+  }): number;
 }) {
   const waitForSubagentCompletion = async (runId: string, waitTimeoutMs: number) => {
     try {
@@ -167,7 +172,7 @@ export function createSubagentRunManager(params: {
           parentSessionKey: entry.requesterSessionKey,
           label: entry.label,
         });
-        params.markSubagentRunTerminated({
+        params.markSubagentRunTerminated?.({
           runId,
           reason: `wait-rpc-failed: ${errorMessage}`,
         });

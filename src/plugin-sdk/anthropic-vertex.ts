@@ -13,57 +13,37 @@ function loadFacadeModule(): FacadeModule {
 export const ANTHROPIC_VERTEX_DEFAULT_MODEL_ID: FacadeModule["ANTHROPIC_VERTEX_DEFAULT_MODEL_ID"] =
   loadFacadeModule()["ANTHROPIC_VERTEX_DEFAULT_MODEL_ID"];
 export const buildAnthropicVertexProvider: FacadeModule["buildAnthropicVertexProvider"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildAnthropicVertexProvider"](
-    ...args,
-  )) as FacadeModule["buildAnthropicVertexProvider"];
+  (loadFacadeModule()["buildAnthropicVertexProvider"] as any)(...args)) as FacadeModule["buildAnthropicVertexProvider"];
 export const hasAnthropicVertexAvailableAuth: FacadeModule["hasAnthropicVertexAvailableAuth"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["hasAnthropicVertexAvailableAuth"](
-    ...args,
-  )) as FacadeModule["hasAnthropicVertexAvailableAuth"];
+  (loadFacadeModule()["hasAnthropicVertexAvailableAuth"] as any)(...args)) as FacadeModule["hasAnthropicVertexAvailableAuth"];
 export const hasAnthropicVertexCredentials: FacadeModule["hasAnthropicVertexCredentials"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["hasAnthropicVertexCredentials"](
-    ...args,
-  )) as FacadeModule["hasAnthropicVertexCredentials"];
+  (loadFacadeModule()["hasAnthropicVertexCredentials"] as any)(...args)) as FacadeModule["hasAnthropicVertexCredentials"];
 export const mergeImplicitAnthropicVertexProvider: FacadeModule["mergeImplicitAnthropicVertexProvider"] =
-  ((...args) =>
-    loadFacadeModule()["mergeImplicitAnthropicVertexProvider"](
-      ...args,
-    )) as FacadeModule["mergeImplicitAnthropicVertexProvider"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["mergeImplicitAnthropicVertexProvider"] as any)(...args)) as FacadeModule["mergeImplicitAnthropicVertexProvider"];
 export const resolveAnthropicVertexClientRegion: FacadeModule["resolveAnthropicVertexClientRegion"] =
-  ((...args) =>
-    loadFacadeModule()["resolveAnthropicVertexClientRegion"](
-      ...args,
-    )) as FacadeModule["resolveAnthropicVertexClientRegion"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveAnthropicVertexClientRegion"] as any)(...args)) as FacadeModule["resolveAnthropicVertexClientRegion"];
 export const resolveAnthropicVertexConfigApiKey: FacadeModule["resolveAnthropicVertexConfigApiKey"] =
-  ((...args) =>
-    loadFacadeModule()["resolveAnthropicVertexConfigApiKey"](
-      ...args,
-    )) as FacadeModule["resolveAnthropicVertexConfigApiKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveAnthropicVertexConfigApiKey"] as any)(...args)) as FacadeModule["resolveAnthropicVertexConfigApiKey"];
 export const resolveImplicitAnthropicVertexProvider: FacadeModule["resolveImplicitAnthropicVertexProvider"] =
-  ((...args) =>
-    loadFacadeModule()["resolveImplicitAnthropicVertexProvider"](
-      ...args,
-    )) as FacadeModule["resolveImplicitAnthropicVertexProvider"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveImplicitAnthropicVertexProvider"] as any)(...args)) as FacadeModule["resolveImplicitAnthropicVertexProvider"];
 export const resolveAnthropicVertexProjectId: FacadeModule["resolveAnthropicVertexProjectId"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveAnthropicVertexProjectId"](
-    ...args,
-  )) as FacadeModule["resolveAnthropicVertexProjectId"];
+  (loadFacadeModule()["resolveAnthropicVertexProjectId"] as any)(...args)) as FacadeModule["resolveAnthropicVertexProjectId"];
 export const resolveAnthropicVertexRegion: FacadeModule["resolveAnthropicVertexRegion"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveAnthropicVertexRegion"](
-    ...args,
-  )) as FacadeModule["resolveAnthropicVertexRegion"];
+  (loadFacadeModule()["resolveAnthropicVertexRegion"] as any)(...args)) as FacadeModule["resolveAnthropicVertexRegion"];
 export const resolveAnthropicVertexRegionFromBaseUrl: FacadeModule["resolveAnthropicVertexRegionFromBaseUrl"] =
-  ((...args) =>
-    loadFacadeModule()["resolveAnthropicVertexRegionFromBaseUrl"](
-      ...args,
-    )) as FacadeModule["resolveAnthropicVertexRegionFromBaseUrl"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveAnthropicVertexRegionFromBaseUrl"] as any)(...args)) as FacadeModule["resolveAnthropicVertexRegionFromBaseUrl"];

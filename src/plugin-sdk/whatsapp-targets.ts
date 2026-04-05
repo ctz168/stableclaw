@@ -10,11 +10,9 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isWhatsAppGroupJid: FacadeModule["isWhatsAppGroupJid"] = ((...args) =>
-  loadFacadeModule()["isWhatsAppGroupJid"](...args)) as FacadeModule["isWhatsAppGroupJid"];
-export const isWhatsAppUserTarget: FacadeModule["isWhatsAppUserTarget"] = ((...args) =>
-  loadFacadeModule()["isWhatsAppUserTarget"](...args)) as FacadeModule["isWhatsAppUserTarget"];
-export const normalizeWhatsAppTarget: FacadeModule["normalizeWhatsAppTarget"] = ((...args) =>
-  loadFacadeModule()["normalizeWhatsAppTarget"](
-    ...args,
-  )) as FacadeModule["normalizeWhatsAppTarget"];
+export const isWhatsAppGroupJid: FacadeModule["isWhatsAppGroupJid"] = ((...args: any[]) =>
+  (loadFacadeModule()["isWhatsAppGroupJid"] as any)(...args)) as FacadeModule["isWhatsAppGroupJid"];
+export const isWhatsAppUserTarget: FacadeModule["isWhatsAppUserTarget"] = ((...args: any[]) =>
+  (loadFacadeModule()["isWhatsAppUserTarget"] as any)(...args)) as FacadeModule["isWhatsAppUserTarget"];
+export const normalizeWhatsAppTarget: FacadeModule["normalizeWhatsAppTarget"] = ((...args: any[]) =>
+  (loadFacadeModule()["normalizeWhatsAppTarget"] as any)(...args)) as FacadeModule["normalizeWhatsAppTarget"];

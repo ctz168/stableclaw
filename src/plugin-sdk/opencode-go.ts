@@ -10,19 +10,15 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyOpencodeGoConfig: FacadeModule["applyOpencodeGoConfig"] = ((...args) =>
-  loadFacadeModule()["applyOpencodeGoConfig"](...args)) as FacadeModule["applyOpencodeGoConfig"];
+export const applyOpencodeGoConfig: FacadeModule["applyOpencodeGoConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyOpencodeGoConfig"] as any)(...args)) as FacadeModule["applyOpencodeGoConfig"];
 export const applyOpencodeGoModelDefault: FacadeModule["applyOpencodeGoModelDefault"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyOpencodeGoModelDefault"](
-    ...args,
-  )) as FacadeModule["applyOpencodeGoModelDefault"];
+  (loadFacadeModule()["applyOpencodeGoModelDefault"] as any)(...args)) as FacadeModule["applyOpencodeGoModelDefault"];
 export const applyOpencodeGoProviderConfig: FacadeModule["applyOpencodeGoProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyOpencodeGoProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyOpencodeGoProviderConfig"];
+  (loadFacadeModule()["applyOpencodeGoProviderConfig"] as any)(...args)) as FacadeModule["applyOpencodeGoProviderConfig"];
 export const OPENCODE_GO_DEFAULT_MODEL_REF: FacadeModule["OPENCODE_GO_DEFAULT_MODEL_REF"] =
   loadFacadeModule()["OPENCODE_GO_DEFAULT_MODEL_REF"];

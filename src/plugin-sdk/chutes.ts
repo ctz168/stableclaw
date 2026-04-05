@@ -13,22 +13,20 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyChutesApiKeyConfig: FacadeModule["applyChutesApiKeyConfig"] = ((...args) =>
-  loadFacadeModule()["applyChutesApiKeyConfig"](
-    ...args,
-  )) as FacadeModule["applyChutesApiKeyConfig"];
-export const applyChutesConfig: FacadeModule["applyChutesConfig"] = ((...args) =>
-  loadFacadeModule()["applyChutesConfig"](...args)) as FacadeModule["applyChutesConfig"];
-export const applyChutesProviderConfig: FacadeModule["applyChutesProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyChutesProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyChutesProviderConfig"];
-export const buildChutesModelDefinition: FacadeModule["buildChutesModelDefinition"] = ((...args) =>
-  loadFacadeModule()["buildChutesModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildChutesModelDefinition"];
-export const buildChutesProvider: FacadeModule["buildChutesProvider"] = ((...args) =>
-  loadFacadeModule()["buildChutesProvider"](...args)) as FacadeModule["buildChutesProvider"];
+export const applyChutesApiKeyConfig: FacadeModule["applyChutesApiKeyConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyChutesApiKeyConfig"] as any)(...args)) as FacadeModule["applyChutesApiKeyConfig"];
+export const applyChutesConfig: FacadeModule["applyChutesConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyChutesConfig"] as any)(...args)) as FacadeModule["applyChutesConfig"];
+export const applyChutesProviderConfig: FacadeModule["applyChutesProviderConfig"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["applyChutesProviderConfig"] as any)(...args)) as FacadeModule["applyChutesProviderConfig"];
+export const buildChutesModelDefinition: FacadeModule["buildChutesModelDefinition"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildChutesModelDefinition"] as any)(...args)) as FacadeModule["buildChutesModelDefinition"];
+export const buildChutesProvider: FacadeModule["buildChutesProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildChutesProvider"] as any)(...args)) as FacadeModule["buildChutesProvider"];
 export const CHUTES_BASE_URL: FacadeModule["CHUTES_BASE_URL"] =
   loadFacadeModule()["CHUTES_BASE_URL"];
 export const CHUTES_DEFAULT_MODEL_ID: FacadeModule["CHUTES_DEFAULT_MODEL_ID"] =
@@ -39,5 +37,5 @@ export const CHUTES_MODEL_CATALOG: FacadeModule["CHUTES_MODEL_CATALOG"] =
   createLazyFacadeArrayValue(
     () => loadFacadeModule()["CHUTES_MODEL_CATALOG"] as unknown as readonly unknown[],
   ) as FacadeModule["CHUTES_MODEL_CATALOG"];
-export const discoverChutesModels: FacadeModule["discoverChutesModels"] = ((...args) =>
-  loadFacadeModule()["discoverChutesModels"](...args)) as FacadeModule["discoverChutesModels"];
+export const discoverChutesModels: FacadeModule["discoverChutesModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["discoverChutesModels"] as any)(...args)) as FacadeModule["discoverChutesModels"];

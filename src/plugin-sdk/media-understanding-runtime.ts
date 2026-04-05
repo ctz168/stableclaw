@@ -10,20 +10,20 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "runtime-api.js",
   });
 }
-export const describeImageFile: FacadeModule["describeImageFile"] = ((...args) =>
-  loadFacadeModule()["describeImageFile"](...args)) as FacadeModule["describeImageFile"];
-export const describeImageFileWithModel: FacadeModule["describeImageFileWithModel"] = ((...args) =>
-  loadFacadeModule()["describeImageFileWithModel"](
-    ...args,
-  )) as FacadeModule["describeImageFileWithModel"];
-export const describeVideoFile: FacadeModule["describeVideoFile"] = ((...args) =>
-  loadFacadeModule()["describeVideoFile"](...args)) as FacadeModule["describeVideoFile"];
-export const runMediaUnderstandingFile: FacadeModule["runMediaUnderstandingFile"] = ((...args) =>
-  loadFacadeModule()["runMediaUnderstandingFile"](
-    ...args,
-  )) as FacadeModule["runMediaUnderstandingFile"];
-export const transcribeAudioFile: FacadeModule["transcribeAudioFile"] = ((...args) =>
-  loadFacadeModule()["transcribeAudioFile"](...args)) as FacadeModule["transcribeAudioFile"];
+export const describeImageFile: FacadeModule["describeImageFile"] = ((...args: any[]) =>
+  (loadFacadeModule()["describeImageFile"] as any)(...args)) as FacadeModule["describeImageFile"];
+export const describeImageFileWithModel: FacadeModule["describeImageFileWithModel"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["describeImageFileWithModel"] as any)(...args)) as FacadeModule["describeImageFileWithModel"];
+export const describeVideoFile: FacadeModule["describeVideoFile"] = ((...args: any[]) =>
+  (loadFacadeModule()["describeVideoFile"] as any)(...args)) as FacadeModule["describeVideoFile"];
+export const runMediaUnderstandingFile: FacadeModule["runMediaUnderstandingFile"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["runMediaUnderstandingFile"] as any)(...args)) as FacadeModule["runMediaUnderstandingFile"];
+export const transcribeAudioFile: FacadeModule["transcribeAudioFile"] = ((...args: any[]) =>
+  (loadFacadeModule()["transcribeAudioFile"] as any)(...args)) as FacadeModule["transcribeAudioFile"];
 export type RunMediaUnderstandingFileParams =
   FacadeEntry["types"]["RunMediaUnderstandingFileParams"];
 export type RunMediaUnderstandingFileResult =

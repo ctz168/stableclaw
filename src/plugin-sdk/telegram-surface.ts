@@ -10,134 +10,94 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildBrowseProvidersButton: FacadeModule["buildBrowseProvidersButton"] = ((...args) =>
-  loadFacadeModule()["buildBrowseProvidersButton"](
-    ...args,
-  )) as FacadeModule["buildBrowseProvidersButton"];
-export const buildModelsKeyboard: FacadeModule["buildModelsKeyboard"] = ((...args) =>
-  loadFacadeModule()["buildModelsKeyboard"](...args)) as FacadeModule["buildModelsKeyboard"];
-export const buildProviderKeyboard: FacadeModule["buildProviderKeyboard"] = ((...args) =>
-  loadFacadeModule()["buildProviderKeyboard"](...args)) as FacadeModule["buildProviderKeyboard"];
-export const buildTelegramGroupPeerId: FacadeModule["buildTelegramGroupPeerId"] = ((...args) =>
-  loadFacadeModule()["buildTelegramGroupPeerId"](
-    ...args,
-  )) as FacadeModule["buildTelegramGroupPeerId"];
-export const calculateTotalPages: FacadeModule["calculateTotalPages"] = ((...args) =>
-  loadFacadeModule()["calculateTotalPages"](...args)) as FacadeModule["calculateTotalPages"];
-export const createTelegramActionGate: FacadeModule["createTelegramActionGate"] = ((...args) =>
-  loadFacadeModule()["createTelegramActionGate"](
-    ...args,
-  )) as FacadeModule["createTelegramActionGate"];
-export const fetchTelegramChatId: FacadeModule["fetchTelegramChatId"] = ((...args) =>
-  loadFacadeModule()["fetchTelegramChatId"](...args)) as FacadeModule["fetchTelegramChatId"];
-export const getCacheStats: FacadeModule["getCacheStats"] = ((...args) =>
-  loadFacadeModule()["getCacheStats"](...args)) as FacadeModule["getCacheStats"];
-export const getModelsPageSize: FacadeModule["getModelsPageSize"] = ((...args) =>
-  loadFacadeModule()["getModelsPageSize"](...args)) as FacadeModule["getModelsPageSize"];
-export const inspectTelegramAccount: FacadeModule["inspectTelegramAccount"] = ((...args) =>
-  loadFacadeModule()["inspectTelegramAccount"](...args)) as FacadeModule["inspectTelegramAccount"];
+export const buildBrowseProvidersButton: FacadeModule["buildBrowseProvidersButton"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildBrowseProvidersButton"] as any)(...args)) as FacadeModule["buildBrowseProvidersButton"];
+export const buildModelsKeyboard: FacadeModule["buildModelsKeyboard"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildModelsKeyboard"] as any)(...args)) as FacadeModule["buildModelsKeyboard"];
+export const buildProviderKeyboard: FacadeModule["buildProviderKeyboard"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildProviderKeyboard"] as any)(...args)) as FacadeModule["buildProviderKeyboard"];
+export const buildTelegramGroupPeerId: FacadeModule["buildTelegramGroupPeerId"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildTelegramGroupPeerId"] as any)(...args)) as FacadeModule["buildTelegramGroupPeerId"];
+export const calculateTotalPages: FacadeModule["calculateTotalPages"] = ((...args: any[]) =>
+  (loadFacadeModule()["calculateTotalPages"] as any)(...args)) as FacadeModule["calculateTotalPages"];
+export const createTelegramActionGate: FacadeModule["createTelegramActionGate"] = ((...args: any[]) =>
+  (loadFacadeModule()["createTelegramActionGate"] as any)(...args)) as FacadeModule["createTelegramActionGate"];
+export const fetchTelegramChatId: FacadeModule["fetchTelegramChatId"] = ((...args: any[]) =>
+  (loadFacadeModule()["fetchTelegramChatId"] as any)(...args)) as FacadeModule["fetchTelegramChatId"];
+export const getCacheStats: FacadeModule["getCacheStats"] = ((...args: any[]) =>
+  (loadFacadeModule()["getCacheStats"] as any)(...args)) as FacadeModule["getCacheStats"];
+export const getModelsPageSize: FacadeModule["getModelsPageSize"] = ((...args: any[]) =>
+  (loadFacadeModule()["getModelsPageSize"] as any)(...args)) as FacadeModule["getModelsPageSize"];
+export const inspectTelegramAccount: FacadeModule["inspectTelegramAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["inspectTelegramAccount"] as any)(...args)) as FacadeModule["inspectTelegramAccount"];
 export const isTelegramExecApprovalApprover: FacadeModule["isTelegramExecApprovalApprover"] = ((
   ...args
 ) =>
-  loadFacadeModule()["isTelegramExecApprovalApprover"](
-    ...args,
-  )) as FacadeModule["isTelegramExecApprovalApprover"];
+  (loadFacadeModule()["isTelegramExecApprovalApprover"] as any)(...args)) as FacadeModule["isTelegramExecApprovalApprover"];
 export const isTelegramExecApprovalAuthorizedSender: FacadeModule["isTelegramExecApprovalAuthorizedSender"] =
-  ((...args) =>
-    loadFacadeModule()["isTelegramExecApprovalAuthorizedSender"](
-      ...args,
-    )) as FacadeModule["isTelegramExecApprovalAuthorizedSender"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["isTelegramExecApprovalAuthorizedSender"] as any)(...args)) as FacadeModule["isTelegramExecApprovalAuthorizedSender"];
 export const isTelegramExecApprovalClientEnabled: FacadeModule["isTelegramExecApprovalClientEnabled"] =
-  ((...args) =>
-    loadFacadeModule()["isTelegramExecApprovalClientEnabled"](
-      ...args,
-    )) as FacadeModule["isTelegramExecApprovalClientEnabled"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["isTelegramExecApprovalClientEnabled"] as any)(...args)) as FacadeModule["isTelegramExecApprovalClientEnabled"];
 export const isTelegramExecApprovalTargetRecipient: FacadeModule["isTelegramExecApprovalTargetRecipient"] =
-  ((...args) =>
-    loadFacadeModule()["isTelegramExecApprovalTargetRecipient"](
-      ...args,
-    )) as FacadeModule["isTelegramExecApprovalTargetRecipient"];
-export const listTelegramAccountIds: FacadeModule["listTelegramAccountIds"] = ((...args) =>
-  loadFacadeModule()["listTelegramAccountIds"](...args)) as FacadeModule["listTelegramAccountIds"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["isTelegramExecApprovalTargetRecipient"] as any)(...args)) as FacadeModule["isTelegramExecApprovalTargetRecipient"];
+export const listTelegramAccountIds: FacadeModule["listTelegramAccountIds"] = ((...args: any[]) =>
+  (loadFacadeModule()["listTelegramAccountIds"] as any)(...args)) as FacadeModule["listTelegramAccountIds"];
 export const listTelegramDirectoryGroupsFromConfig: FacadeModule["listTelegramDirectoryGroupsFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listTelegramDirectoryGroupsFromConfig"](
-      ...args,
-    )) as FacadeModule["listTelegramDirectoryGroupsFromConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listTelegramDirectoryGroupsFromConfig"] as any)(...args)) as FacadeModule["listTelegramDirectoryGroupsFromConfig"];
 export const listTelegramDirectoryPeersFromConfig: FacadeModule["listTelegramDirectoryPeersFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listTelegramDirectoryPeersFromConfig"](
-      ...args,
-    )) as FacadeModule["listTelegramDirectoryPeersFromConfig"];
-export const looksLikeTelegramTargetId: FacadeModule["looksLikeTelegramTargetId"] = ((...args) =>
-  loadFacadeModule()["looksLikeTelegramTargetId"](
-    ...args,
-  )) as FacadeModule["looksLikeTelegramTargetId"];
-export const lookupTelegramChatId: FacadeModule["lookupTelegramChatId"] = ((...args) =>
-  loadFacadeModule()["lookupTelegramChatId"](...args)) as FacadeModule["lookupTelegramChatId"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listTelegramDirectoryPeersFromConfig"] as any)(...args)) as FacadeModule["listTelegramDirectoryPeersFromConfig"];
+export const looksLikeTelegramTargetId: FacadeModule["looksLikeTelegramTargetId"] = ((...args: any[]) =>
+  (loadFacadeModule()["looksLikeTelegramTargetId"] as any)(...args)) as FacadeModule["looksLikeTelegramTargetId"];
+export const lookupTelegramChatId: FacadeModule["lookupTelegramChatId"] = ((...args: any[]) =>
+  (loadFacadeModule()["lookupTelegramChatId"] as any)(...args)) as FacadeModule["lookupTelegramChatId"];
 export const normalizeTelegramMessagingTarget: FacadeModule["normalizeTelegramMessagingTarget"] = ((
   ...args
 ) =>
-  loadFacadeModule()["normalizeTelegramMessagingTarget"](
-    ...args,
-  )) as FacadeModule["normalizeTelegramMessagingTarget"];
+  (loadFacadeModule()["normalizeTelegramMessagingTarget"] as any)(...args)) as FacadeModule["normalizeTelegramMessagingTarget"];
 export const parseTelegramReplyToMessageId: FacadeModule["parseTelegramReplyToMessageId"] = ((
   ...args
 ) =>
-  loadFacadeModule()["parseTelegramReplyToMessageId"](
-    ...args,
-  )) as FacadeModule["parseTelegramReplyToMessageId"];
-export const parseTelegramTarget: FacadeModule["parseTelegramTarget"] = ((...args) =>
-  loadFacadeModule()["parseTelegramTarget"](...args)) as FacadeModule["parseTelegramTarget"];
-export const parseTelegramThreadId: FacadeModule["parseTelegramThreadId"] = ((...args) =>
-  loadFacadeModule()["parseTelegramThreadId"](...args)) as FacadeModule["parseTelegramThreadId"];
+  (loadFacadeModule()["parseTelegramReplyToMessageId"] as any)(...args)) as FacadeModule["parseTelegramReplyToMessageId"];
+export const parseTelegramTarget: FacadeModule["parseTelegramTarget"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseTelegramTarget"] as any)(...args)) as FacadeModule["parseTelegramTarget"];
+export const parseTelegramThreadId: FacadeModule["parseTelegramThreadId"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseTelegramThreadId"] as any)(...args)) as FacadeModule["parseTelegramThreadId"];
 export const resolveTelegramAutoThreadId: FacadeModule["resolveTelegramAutoThreadId"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveTelegramAutoThreadId"](
-    ...args,
-  )) as FacadeModule["resolveTelegramAutoThreadId"];
+  (loadFacadeModule()["resolveTelegramAutoThreadId"] as any)(...args)) as FacadeModule["resolveTelegramAutoThreadId"];
 export const resolveTelegramGroupRequireMention: FacadeModule["resolveTelegramGroupRequireMention"] =
-  ((...args) =>
-    loadFacadeModule()["resolveTelegramGroupRequireMention"](
-      ...args,
-    )) as FacadeModule["resolveTelegramGroupRequireMention"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveTelegramGroupRequireMention"] as any)(...args)) as FacadeModule["resolveTelegramGroupRequireMention"];
 export const resolveTelegramGroupToolPolicy: FacadeModule["resolveTelegramGroupToolPolicy"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveTelegramGroupToolPolicy"](
-    ...args,
-  )) as FacadeModule["resolveTelegramGroupToolPolicy"];
+  (loadFacadeModule()["resolveTelegramGroupToolPolicy"] as any)(...args)) as FacadeModule["resolveTelegramGroupToolPolicy"];
 export const resolveTelegramInlineButtonsScope: FacadeModule["resolveTelegramInlineButtonsScope"] =
-  ((...args) =>
-    loadFacadeModule()["resolveTelegramInlineButtonsScope"](
-      ...args,
-    )) as FacadeModule["resolveTelegramInlineButtonsScope"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveTelegramInlineButtonsScope"] as any)(...args)) as FacadeModule["resolveTelegramInlineButtonsScope"];
 export const resolveTelegramPollActionGateState: FacadeModule["resolveTelegramPollActionGateState"] =
-  ((...args) =>
-    loadFacadeModule()["resolveTelegramPollActionGateState"](
-      ...args,
-    )) as FacadeModule["resolveTelegramPollActionGateState"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveTelegramPollActionGateState"] as any)(...args)) as FacadeModule["resolveTelegramPollActionGateState"];
 export const resolveTelegramReactionLevel: FacadeModule["resolveTelegramReactionLevel"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveTelegramReactionLevel"](
-    ...args,
-  )) as FacadeModule["resolveTelegramReactionLevel"];
+  (loadFacadeModule()["resolveTelegramReactionLevel"] as any)(...args)) as FacadeModule["resolveTelegramReactionLevel"];
 export const resolveTelegramTargetChatType: FacadeModule["resolveTelegramTargetChatType"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveTelegramTargetChatType"](
-    ...args,
-  )) as FacadeModule["resolveTelegramTargetChatType"];
-export const searchStickers: FacadeModule["searchStickers"] = ((...args) =>
-  loadFacadeModule()["searchStickers"](...args)) as FacadeModule["searchStickers"];
+  (loadFacadeModule()["resolveTelegramTargetChatType"] as any)(...args)) as FacadeModule["resolveTelegramTargetChatType"];
+export const searchStickers: FacadeModule["searchStickers"] = ((...args: any[]) =>
+  (loadFacadeModule()["searchStickers"] as any)(...args)) as FacadeModule["searchStickers"];
 export const sendTelegramPayloadMessages: FacadeModule["sendTelegramPayloadMessages"] = ((
   ...args
 ) =>
-  loadFacadeModule()["sendTelegramPayloadMessages"](
-    ...args,
-  )) as FacadeModule["sendTelegramPayloadMessages"];
+  (loadFacadeModule()["sendTelegramPayloadMessages"] as any)(...args)) as FacadeModule["sendTelegramPayloadMessages"];
 export type InspectedTelegramAccount = FacadeEntry["types"]["InspectedTelegramAccount"];
 export type ProviderInfo = FacadeEntry["types"]["ProviderInfo"];
 export type ResolvedTelegramAccount = FacadeEntry["types"]["ResolvedTelegramAccount"];

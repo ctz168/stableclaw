@@ -15,21 +15,15 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const applyModelStudioNativeStreamingUsageCompat: FacadeModule["applyModelStudioNativeStreamingUsageCompat"] =
-  ((...args) =>
-    loadFacadeModule()["applyModelStudioNativeStreamingUsageCompat"](
-      ...args,
-    )) as FacadeModule["applyModelStudioNativeStreamingUsageCompat"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["applyModelStudioNativeStreamingUsageCompat"] as any)(...args)) as FacadeModule["applyModelStudioNativeStreamingUsageCompat"];
 export const buildModelStudioDefaultModelDefinition: FacadeModule["buildModelStudioDefaultModelDefinition"] =
-  ((...args) =>
-    loadFacadeModule()["buildModelStudioDefaultModelDefinition"](
-      ...args,
-    )) as FacadeModule["buildModelStudioDefaultModelDefinition"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["buildModelStudioDefaultModelDefinition"] as any)(...args)) as FacadeModule["buildModelStudioDefaultModelDefinition"];
 export const buildModelStudioModelDefinition: FacadeModule["buildModelStudioModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildModelStudioModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildModelStudioModelDefinition"];
+  (loadFacadeModule()["buildModelStudioModelDefinition"] as any)(...args)) as FacadeModule["buildModelStudioModelDefinition"];
 export const MODELSTUDIO_BASE_URL: FacadeModule["MODELSTUDIO_BASE_URL"] =
   loadFacadeModule()["MODELSTUDIO_BASE_URL"];
 export const MODELSTUDIO_CN_BASE_URL: FacadeModule["MODELSTUDIO_CN_BASE_URL"] =
@@ -52,11 +46,11 @@ export const MODELSTUDIO_MODEL_CATALOG: FacadeModule["MODELSTUDIO_MODEL_CATALOG"
   createLazyFacadeArrayValue(
     () => loadFacadeModule()["MODELSTUDIO_MODEL_CATALOG"] as unknown as readonly unknown[],
   ) as FacadeModule["MODELSTUDIO_MODEL_CATALOG"];
-export const isNativeModelStudioBaseUrl: FacadeModule["isNativeModelStudioBaseUrl"] = ((...args) =>
-  loadFacadeModule()["isNativeModelStudioBaseUrl"](
-    ...args,
-  )) as FacadeModule["isNativeModelStudioBaseUrl"];
-export const buildModelStudioProvider: FacadeModule["buildModelStudioProvider"] = ((...args) =>
-  loadFacadeModule()["buildModelStudioProvider"](
-    ...args,
-  )) as FacadeModule["buildModelStudioProvider"];
+export const isNativeModelStudioBaseUrl: FacadeModule["isNativeModelStudioBaseUrl"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["isNativeModelStudioBaseUrl"] as any)(...args)) as FacadeModule["isNativeModelStudioBaseUrl"];
+export const buildModelStudioProvider: FacadeModule["buildModelStudioProvider"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildModelStudioProvider"] as any)(...args)) as FacadeModule["buildModelStudioProvider"];

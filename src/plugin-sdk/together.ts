@@ -13,16 +13,14 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyTogetherConfig: FacadeModule["applyTogetherConfig"] = ((...args) =>
-  loadFacadeModule()["applyTogetherConfig"](...args)) as FacadeModule["applyTogetherConfig"];
+export const applyTogetherConfig: FacadeModule["applyTogetherConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyTogetherConfig"] as any)(...args)) as FacadeModule["applyTogetherConfig"];
 export const buildTogetherModelDefinition: FacadeModule["buildTogetherModelDefinition"] = ((
   ...args
 ) =>
-  loadFacadeModule()["buildTogetherModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildTogetherModelDefinition"];
-export const buildTogetherProvider: FacadeModule["buildTogetherProvider"] = ((...args) =>
-  loadFacadeModule()["buildTogetherProvider"](...args)) as FacadeModule["buildTogetherProvider"];
+  (loadFacadeModule()["buildTogetherModelDefinition"] as any)(...args)) as FacadeModule["buildTogetherModelDefinition"];
+export const buildTogetherProvider: FacadeModule["buildTogetherProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildTogetherProvider"] as any)(...args)) as FacadeModule["buildTogetherProvider"];
 export const TOGETHER_BASE_URL: FacadeModule["TOGETHER_BASE_URL"] =
   loadFacadeModule()["TOGETHER_BASE_URL"];
 export const TOGETHER_DEFAULT_MODEL_REF: FacadeModule["TOGETHER_DEFAULT_MODEL_REF"] =

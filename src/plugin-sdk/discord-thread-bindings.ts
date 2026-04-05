@@ -12,56 +12,38 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const autoBindSpawnedDiscordSubagent: FacadeModule["autoBindSpawnedDiscordSubagent"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["autoBindSpawnedDiscordSubagent"](
-    ...args,
-  )) as FacadeModule["autoBindSpawnedDiscordSubagent"];
-export const createThreadBindingManager: FacadeModule["createThreadBindingManager"] = ((...args) =>
-  loadFacadeModule()["createThreadBindingManager"](
-    ...args,
-  )) as FacadeModule["createThreadBindingManager"];
-export const getThreadBindingManager: FacadeModule["getThreadBindingManager"] = ((...args) =>
-  loadFacadeModule()["getThreadBindingManager"](
-    ...args,
-  )) as FacadeModule["getThreadBindingManager"];
+  (loadFacadeModule()["autoBindSpawnedDiscordSubagent"] as any)(...args)) as FacadeModule["autoBindSpawnedDiscordSubagent"];
+export const createThreadBindingManager: FacadeModule["createThreadBindingManager"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createThreadBindingManager"] as any)(...args)) as FacadeModule["createThreadBindingManager"];
+export const getThreadBindingManager: FacadeModule["getThreadBindingManager"] = ((...args: any[]) =>
+  (loadFacadeModule()["getThreadBindingManager"] as any)(...args)) as FacadeModule["getThreadBindingManager"];
 export const listThreadBindingsBySessionKey: FacadeModule["listThreadBindingsBySessionKey"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["listThreadBindingsBySessionKey"](
-    ...args,
-  )) as FacadeModule["listThreadBindingsBySessionKey"];
+  (loadFacadeModule()["listThreadBindingsBySessionKey"] as any)(...args)) as FacadeModule["listThreadBindingsBySessionKey"];
 export const resolveThreadBindingIdleTimeoutMs: FacadeModule["resolveThreadBindingIdleTimeoutMs"] =
-  ((...args) =>
-    loadFacadeModule()["resolveThreadBindingIdleTimeoutMs"](
-      ...args,
-    )) as FacadeModule["resolveThreadBindingIdleTimeoutMs"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveThreadBindingIdleTimeoutMs"] as any)(...args)) as FacadeModule["resolveThreadBindingIdleTimeoutMs"];
 export const resolveThreadBindingInactivityExpiresAt: FacadeModule["resolveThreadBindingInactivityExpiresAt"] =
-  ((...args) =>
-    loadFacadeModule()["resolveThreadBindingInactivityExpiresAt"](
-      ...args,
-    )) as FacadeModule["resolveThreadBindingInactivityExpiresAt"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveThreadBindingInactivityExpiresAt"] as any)(...args)) as FacadeModule["resolveThreadBindingInactivityExpiresAt"];
 export const resolveThreadBindingMaxAgeExpiresAt: FacadeModule["resolveThreadBindingMaxAgeExpiresAt"] =
-  ((...args) =>
-    loadFacadeModule()["resolveThreadBindingMaxAgeExpiresAt"](
-      ...args,
-    )) as FacadeModule["resolveThreadBindingMaxAgeExpiresAt"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveThreadBindingMaxAgeExpiresAt"] as any)(...args)) as FacadeModule["resolveThreadBindingMaxAgeExpiresAt"];
 export const resolveThreadBindingMaxAgeMs: FacadeModule["resolveThreadBindingMaxAgeMs"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveThreadBindingMaxAgeMs"](
-    ...args,
-  )) as FacadeModule["resolveThreadBindingMaxAgeMs"];
+  (loadFacadeModule()["resolveThreadBindingMaxAgeMs"] as any)(...args)) as FacadeModule["resolveThreadBindingMaxAgeMs"];
 export const setThreadBindingIdleTimeoutBySessionKey: FacadeModule["setThreadBindingIdleTimeoutBySessionKey"] =
-  ((...args) =>
-    loadFacadeModule()["setThreadBindingIdleTimeoutBySessionKey"](
-      ...args,
-    )) as FacadeModule["setThreadBindingIdleTimeoutBySessionKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["setThreadBindingIdleTimeoutBySessionKey"] as any)(...args)) as FacadeModule["setThreadBindingIdleTimeoutBySessionKey"];
 export const setThreadBindingMaxAgeBySessionKey: FacadeModule["setThreadBindingMaxAgeBySessionKey"] =
-  ((...args) =>
-    loadFacadeModule()["setThreadBindingMaxAgeBySessionKey"](
-      ...args,
-    )) as FacadeModule["setThreadBindingMaxAgeBySessionKey"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["setThreadBindingMaxAgeBySessionKey"] as any)(...args)) as FacadeModule["setThreadBindingMaxAgeBySessionKey"];
 export type ThreadBindingManager = FacadeEntry["types"]["ThreadBindingManager"];
 export type ThreadBindingRecord = FacadeEntry["types"]["ThreadBindingRecord"];
 export type ThreadBindingTargetKind = FacadeEntry["types"]["ThreadBindingTargetKind"];

@@ -10,7 +10,7 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const githubCopilotLoginCommand: FacadeModule["githubCopilotLoginCommand"] = ((...args) =>
-  loadFacadeModule()["githubCopilotLoginCommand"](
-    ...args,
-  )) as FacadeModule["githubCopilotLoginCommand"];
+export const githubCopilotLoginCommand: FacadeModule["githubCopilotLoginCommand"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["githubCopilotLoginCommand"] as any)(...args)) as FacadeModule["githubCopilotLoginCommand"];

@@ -2318,6 +2318,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
 
       if (deps.fs.existsSync(configPath)) {
         await maintainConfigBackups(configPath, deps.fs.promises, {
+          ioFs: deps.fs.promises,
           validateBeforeBackup: (rawContent: string) => {
             try {
               const parsed = parseConfigJson5(rawContent, deps.json5);

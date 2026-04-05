@@ -19,11 +19,11 @@ export const ircSetupAdapter: FacadeModule["ircSetupAdapter"] = createLazyFacade
 export const ircSetupWizard: FacadeModule["ircSetupWizard"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["ircSetupWizard"] as object,
 ) as FacadeModule["ircSetupWizard"];
-export const listIrcAccountIds: FacadeModule["listIrcAccountIds"] = ((...args) =>
-  loadFacadeModule()["listIrcAccountIds"](...args)) as FacadeModule["listIrcAccountIds"];
-export const resolveDefaultIrcAccountId: FacadeModule["resolveDefaultIrcAccountId"] = ((...args) =>
-  loadFacadeModule()["resolveDefaultIrcAccountId"](
-    ...args,
-  )) as FacadeModule["resolveDefaultIrcAccountId"];
-export const resolveIrcAccount: FacadeModule["resolveIrcAccount"] = ((...args) =>
-  loadFacadeModule()["resolveIrcAccount"](...args)) as FacadeModule["resolveIrcAccount"];
+export const listIrcAccountIds: FacadeModule["listIrcAccountIds"] = ((...args: any[]) =>
+  (loadFacadeModule()["listIrcAccountIds"] as any)(...args)) as FacadeModule["listIrcAccountIds"];
+export const resolveDefaultIrcAccountId: FacadeModule["resolveDefaultIrcAccountId"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["resolveDefaultIrcAccountId"] as any)(...args)) as FacadeModule["resolveDefaultIrcAccountId"];
+export const resolveIrcAccount: FacadeModule["resolveIrcAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveIrcAccount"] as any)(...args)) as FacadeModule["resolveIrcAccount"];

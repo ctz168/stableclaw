@@ -23,43 +23,31 @@ function loadFacadeModule2(): FacadeModule2 {
 }
 export const DEFAULT_WEB_MEDIA_BYTES: FacadeModule2["DEFAULT_WEB_MEDIA_BYTES"] =
   loadFacadeModule2()["DEFAULT_WEB_MEDIA_BYTES"];
-export const hasAnyWhatsAppAuth: FacadeModule["hasAnyWhatsAppAuth"] = ((...args) =>
-  loadFacadeModule()["hasAnyWhatsAppAuth"](...args)) as FacadeModule["hasAnyWhatsAppAuth"];
+export const hasAnyWhatsAppAuth: FacadeModule["hasAnyWhatsAppAuth"] = ((...args: any[]) =>
+  (loadFacadeModule()["hasAnyWhatsAppAuth"] as any)(...args)) as FacadeModule["hasAnyWhatsAppAuth"];
 export const listEnabledWhatsAppAccounts: FacadeModule["listEnabledWhatsAppAccounts"] = ((
   ...args
 ) =>
-  loadFacadeModule()["listEnabledWhatsAppAccounts"](
-    ...args,
-  )) as FacadeModule["listEnabledWhatsAppAccounts"];
+  (loadFacadeModule()["listEnabledWhatsAppAccounts"] as any)(...args)) as FacadeModule["listEnabledWhatsAppAccounts"];
 export const listWhatsAppDirectoryGroupsFromConfig: FacadeModule["listWhatsAppDirectoryGroupsFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listWhatsAppDirectoryGroupsFromConfig"](
-      ...args,
-    )) as FacadeModule["listWhatsAppDirectoryGroupsFromConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listWhatsAppDirectoryGroupsFromConfig"] as any)(...args)) as FacadeModule["listWhatsAppDirectoryGroupsFromConfig"];
 export const listWhatsAppDirectoryPeersFromConfig: FacadeModule["listWhatsAppDirectoryPeersFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listWhatsAppDirectoryPeersFromConfig"](
-      ...args,
-    )) as FacadeModule["listWhatsAppDirectoryPeersFromConfig"];
-export const resolveWhatsAppAccount: FacadeModule["resolveWhatsAppAccount"] = ((...args) =>
-  loadFacadeModule()["resolveWhatsAppAccount"](...args)) as FacadeModule["resolveWhatsAppAccount"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listWhatsAppDirectoryPeersFromConfig"] as any)(...args)) as FacadeModule["listWhatsAppDirectoryPeersFromConfig"];
+export const resolveWhatsAppAccount: FacadeModule["resolveWhatsAppAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveWhatsAppAccount"] as any)(...args)) as FacadeModule["resolveWhatsAppAccount"];
 export const resolveWhatsAppGroupRequireMention: FacadeModule["resolveWhatsAppGroupRequireMention"] =
-  ((...args) =>
-    loadFacadeModule()["resolveWhatsAppGroupRequireMention"](
-      ...args,
-    )) as FacadeModule["resolveWhatsAppGroupRequireMention"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveWhatsAppGroupRequireMention"] as any)(...args)) as FacadeModule["resolveWhatsAppGroupRequireMention"];
 export const resolveWhatsAppGroupToolPolicy: FacadeModule["resolveWhatsAppGroupToolPolicy"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveWhatsAppGroupToolPolicy"](
-    ...args,
-  )) as FacadeModule["resolveWhatsAppGroupToolPolicy"];
+  (loadFacadeModule()["resolveWhatsAppGroupToolPolicy"] as any)(...args)) as FacadeModule["resolveWhatsAppGroupToolPolicy"];
 export const resolveWhatsAppOutboundTarget: FacadeModule["resolveWhatsAppOutboundTarget"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveWhatsAppOutboundTarget"](
-    ...args,
-  )) as FacadeModule["resolveWhatsAppOutboundTarget"];
+  (loadFacadeModule()["resolveWhatsAppOutboundTarget"] as any)(...args)) as FacadeModule["resolveWhatsAppOutboundTarget"];
 export const whatsappAccessControlTesting: FacadeModule["whatsappAccessControlTesting"] =
   createLazyFacadeObjectValue(
     () => loadFacadeModule()["whatsappAccessControlTesting"] as object,

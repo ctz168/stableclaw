@@ -10,6 +10,6 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const resolveTelegramAccount: FacadeModule["resolveTelegramAccount"] = ((...args) =>
-  loadFacadeModule()["resolveTelegramAccount"](...args)) as FacadeModule["resolveTelegramAccount"];
+export const resolveTelegramAccount: FacadeModule["resolveTelegramAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveTelegramAccount"] as any)(...args)) as FacadeModule["resolveTelegramAccount"];
 export type ResolvedTelegramAccount = FacadeEntry["types"]["ResolvedTelegramAccount"];

@@ -30,179 +30,151 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "runtime-api.js",
   });
 }
-export const applyBrowserProxyPaths: FacadeModule["applyBrowserProxyPaths"] = ((...args) =>
-  loadFacadeModule()["applyBrowserProxyPaths"](...args)) as FacadeModule["applyBrowserProxyPaths"];
-export const browserAct: FacadeModule["browserAct"] = ((...args) =>
-  loadFacadeModule()["browserAct"](...args)) as FacadeModule["browserAct"];
-export const browserArmDialog: FacadeModule["browserArmDialog"] = ((...args) =>
-  loadFacadeModule()["browserArmDialog"](...args)) as FacadeModule["browserArmDialog"];
-export const browserArmFileChooser: FacadeModule["browserArmFileChooser"] = ((...args) =>
-  loadFacadeModule()["browserArmFileChooser"](...args)) as FacadeModule["browserArmFileChooser"];
-export const browserCloseTab: FacadeModule["browserCloseTab"] = ((...args) =>
-  loadFacadeModule()["browserCloseTab"](...args)) as FacadeModule["browserCloseTab"];
-export const browserConsoleMessages: FacadeModule["browserConsoleMessages"] = ((...args) =>
-  loadFacadeModule()["browserConsoleMessages"](...args)) as FacadeModule["browserConsoleMessages"];
-export const browserCreateProfile: FacadeModule["browserCreateProfile"] = ((...args) =>
-  loadFacadeModule()["browserCreateProfile"](...args)) as FacadeModule["browserCreateProfile"];
-export const browserDeleteProfile: FacadeModule["browserDeleteProfile"] = ((...args) =>
-  loadFacadeModule()["browserDeleteProfile"](...args)) as FacadeModule["browserDeleteProfile"];
-export const browserFocusTab: FacadeModule["browserFocusTab"] = ((...args) =>
-  loadFacadeModule()["browserFocusTab"](...args)) as FacadeModule["browserFocusTab"];
+export const applyBrowserProxyPaths: FacadeModule["applyBrowserProxyPaths"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyBrowserProxyPaths"] as any)(...args)) as FacadeModule["applyBrowserProxyPaths"];
+export const browserAct: FacadeModule["browserAct"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserAct"] as any)(...args)) as FacadeModule["browserAct"];
+export const browserArmDialog: FacadeModule["browserArmDialog"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserArmDialog"] as any)(...args)) as FacadeModule["browserArmDialog"];
+export const browserArmFileChooser: FacadeModule["browserArmFileChooser"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserArmFileChooser"] as any)(...args)) as FacadeModule["browserArmFileChooser"];
+export const browserCloseTab: FacadeModule["browserCloseTab"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserCloseTab"] as any)(...args)) as FacadeModule["browserCloseTab"];
+export const browserConsoleMessages: FacadeModule["browserConsoleMessages"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserConsoleMessages"] as any)(...args)) as FacadeModule["browserConsoleMessages"];
+export const browserCreateProfile: FacadeModule["browserCreateProfile"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserCreateProfile"] as any)(...args)) as FacadeModule["browserCreateProfile"];
+export const browserDeleteProfile: FacadeModule["browserDeleteProfile"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserDeleteProfile"] as any)(...args)) as FacadeModule["browserDeleteProfile"];
+export const browserFocusTab: FacadeModule["browserFocusTab"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserFocusTab"] as any)(...args)) as FacadeModule["browserFocusTab"];
 export const browserHandlers: FacadeModule["browserHandlers"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["browserHandlers"] as object,
 ) as FacadeModule["browserHandlers"];
-export const browserNavigate: FacadeModule["browserNavigate"] = ((...args) =>
-  loadFacadeModule()["browserNavigate"](...args)) as FacadeModule["browserNavigate"];
-export const browserOpenTab: FacadeModule["browserOpenTab"] = ((...args) =>
-  loadFacadeModule()["browserOpenTab"](...args)) as FacadeModule["browserOpenTab"];
-export const browserPdfSave: FacadeModule["browserPdfSave"] = ((...args) =>
-  loadFacadeModule()["browserPdfSave"](...args)) as FacadeModule["browserPdfSave"];
-export const browserProfiles: FacadeModule["browserProfiles"] = ((...args) =>
-  loadFacadeModule()["browserProfiles"](...args)) as FacadeModule["browserProfiles"];
-export const browserResetProfile: FacadeModule["browserResetProfile"] = ((...args) =>
-  loadFacadeModule()["browserResetProfile"](...args)) as FacadeModule["browserResetProfile"];
-export const browserScreenshotAction: FacadeModule["browserScreenshotAction"] = ((...args) =>
-  loadFacadeModule()["browserScreenshotAction"](
-    ...args,
-  )) as FacadeModule["browserScreenshotAction"];
-export const browserSnapshot: FacadeModule["browserSnapshot"] = ((...args) =>
-  loadFacadeModule()["browserSnapshot"](...args)) as FacadeModule["browserSnapshot"];
-export const browserStart: FacadeModule["browserStart"] = ((...args) =>
-  loadFacadeModule()["browserStart"](...args)) as FacadeModule["browserStart"];
-export const browserStatus: FacadeModule["browserStatus"] = ((...args) =>
-  loadFacadeModule()["browserStatus"](...args)) as FacadeModule["browserStatus"];
-export const browserStop: FacadeModule["browserStop"] = ((...args) =>
-  loadFacadeModule()["browserStop"](...args)) as FacadeModule["browserStop"];
-export const browserTabAction: FacadeModule["browserTabAction"] = ((...args) =>
-  loadFacadeModule()["browserTabAction"](...args)) as FacadeModule["browserTabAction"];
-export const browserTabs: FacadeModule["browserTabs"] = ((...args) =>
-  loadFacadeModule()["browserTabs"](...args)) as FacadeModule["browserTabs"];
+export const browserNavigate: FacadeModule["browserNavigate"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserNavigate"] as any)(...args)) as FacadeModule["browserNavigate"];
+export const browserOpenTab: FacadeModule["browserOpenTab"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserOpenTab"] as any)(...args)) as FacadeModule["browserOpenTab"];
+export const browserPdfSave: FacadeModule["browserPdfSave"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserPdfSave"] as any)(...args)) as FacadeModule["browserPdfSave"];
+export const browserProfiles: FacadeModule["browserProfiles"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserProfiles"] as any)(...args)) as FacadeModule["browserProfiles"];
+export const browserResetProfile: FacadeModule["browserResetProfile"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserResetProfile"] as any)(...args)) as FacadeModule["browserResetProfile"];
+export const browserScreenshotAction: FacadeModule["browserScreenshotAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserScreenshotAction"] as any)(...args)) as FacadeModule["browserScreenshotAction"];
+export const browserSnapshot: FacadeModule["browserSnapshot"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserSnapshot"] as any)(...args)) as FacadeModule["browserSnapshot"];
+export const browserStart: FacadeModule["browserStart"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserStart"] as any)(...args)) as FacadeModule["browserStart"];
+export const browserStatus: FacadeModule["browserStatus"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserStatus"] as any)(...args)) as FacadeModule["browserStatus"];
+export const browserStop: FacadeModule["browserStop"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserStop"] as any)(...args)) as FacadeModule["browserStop"];
+export const browserTabAction: FacadeModule["browserTabAction"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserTabAction"] as any)(...args)) as FacadeModule["browserTabAction"];
+export const browserTabs: FacadeModule["browserTabs"] = ((...args: any[]) =>
+  (loadFacadeModule()["browserTabs"] as any)(...args)) as FacadeModule["browserTabs"];
 export const createBrowserControlContext: FacadeModule["createBrowserControlContext"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["createBrowserControlContext"](
-    ...args,
-  )) as FacadeModule["createBrowserControlContext"];
-export const createBrowserPluginService: FacadeModule["createBrowserPluginService"] = ((...args) =>
-  loadFacadeModule()["createBrowserPluginService"](
-    ...args,
-  )) as FacadeModule["createBrowserPluginService"];
-export const createBrowserRouteContext: FacadeModule["createBrowserRouteContext"] = ((...args) =>
-  loadFacadeModule()["createBrowserRouteContext"](
-    ...args,
-  )) as FacadeModule["createBrowserRouteContext"];
+  (loadFacadeModule()["createBrowserControlContext"] as any)(...args)) as FacadeModule["createBrowserControlContext"];
+export const createBrowserPluginService: FacadeModule["createBrowserPluginService"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createBrowserPluginService"] as any)(...args)) as FacadeModule["createBrowserPluginService"];
+export const createBrowserRouteContext: FacadeModule["createBrowserRouteContext"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createBrowserRouteContext"] as any)(...args)) as FacadeModule["createBrowserRouteContext"];
 export const createBrowserRouteDispatcher: FacadeModule["createBrowserRouteDispatcher"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["createBrowserRouteDispatcher"](
-    ...args,
-  )) as FacadeModule["createBrowserRouteDispatcher"];
-export const createBrowserRuntimeState: FacadeModule["createBrowserRuntimeState"] = ((...args) =>
-  loadFacadeModule()["createBrowserRuntimeState"](
-    ...args,
-  )) as FacadeModule["createBrowserRuntimeState"];
-export const createBrowserTool: FacadeModule["createBrowserTool"] = ((...args) =>
-  loadFacadeModule()["createBrowserTool"](...args)) as FacadeModule["createBrowserTool"];
-export const definePluginEntry: FacadeModule["definePluginEntry"] = ((...args) =>
-  loadFacadeModule()["definePluginEntry"](...args)) as FacadeModule["definePluginEntry"];
-export const ensureBrowserControlAuth: FacadeModule["ensureBrowserControlAuth"] = ((...args) =>
-  loadFacadeModule()["ensureBrowserControlAuth"](
-    ...args,
-  )) as FacadeModule["ensureBrowserControlAuth"];
-export const getBrowserControlState: FacadeModule["getBrowserControlState"] = ((...args) =>
-  loadFacadeModule()["getBrowserControlState"](...args)) as FacadeModule["getBrowserControlState"];
+  (loadFacadeModule()["createBrowserRouteDispatcher"] as any)(...args)) as FacadeModule["createBrowserRouteDispatcher"];
+export const createBrowserRuntimeState: FacadeModule["createBrowserRuntimeState"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["createBrowserRuntimeState"] as any)(...args)) as FacadeModule["createBrowserRuntimeState"];
+export const createBrowserTool: FacadeModule["createBrowserTool"] = ((...args: any[]) =>
+  (loadFacadeModule()["createBrowserTool"] as any)(...args)) as FacadeModule["createBrowserTool"];
+export const definePluginEntry: FacadeModule["definePluginEntry"] = ((...args: any[]) =>
+  (loadFacadeModule()["definePluginEntry"] as any)(...args)) as FacadeModule["definePluginEntry"];
+export const ensureBrowserControlAuth: FacadeModule["ensureBrowserControlAuth"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["ensureBrowserControlAuth"] as any)(...args)) as FacadeModule["ensureBrowserControlAuth"];
+export const getBrowserControlState: FacadeModule["getBrowserControlState"] = ((...args: any[]) =>
+  (loadFacadeModule()["getBrowserControlState"] as any)(...args)) as FacadeModule["getBrowserControlState"];
 export const getBrowserProfileCapabilities: FacadeModule["getBrowserProfileCapabilities"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["getBrowserProfileCapabilities"](
-    ...args,
-  )) as FacadeModule["getBrowserProfileCapabilities"];
+  (loadFacadeModule()["getBrowserProfileCapabilities"] as any)(...args)) as FacadeModule["getBrowserProfileCapabilities"];
 export const handleBrowserGatewayRequest: FacadeModule["handleBrowserGatewayRequest"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["handleBrowserGatewayRequest"](
-    ...args,
-  )) as FacadeModule["handleBrowserGatewayRequest"];
+  (loadFacadeModule()["handleBrowserGatewayRequest"] as any)(...args)) as FacadeModule["handleBrowserGatewayRequest"];
 export const installBrowserAuthMiddleware: FacadeModule["installBrowserAuthMiddleware"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["installBrowserAuthMiddleware"](
-    ...args,
-  )) as FacadeModule["installBrowserAuthMiddleware"];
+  (loadFacadeModule()["installBrowserAuthMiddleware"] as any)(...args)) as FacadeModule["installBrowserAuthMiddleware"];
 export const installBrowserCommonMiddleware: FacadeModule["installBrowserCommonMiddleware"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["installBrowserCommonMiddleware"](
-    ...args,
-  )) as FacadeModule["installBrowserCommonMiddleware"];
+  (loadFacadeModule()["installBrowserCommonMiddleware"] as any)(...args)) as FacadeModule["installBrowserCommonMiddleware"];
 export const isPersistentBrowserProfileMutation: FacadeModule["isPersistentBrowserProfileMutation"] =
-  ((...args) =>
-    loadFacadeModule()["isPersistentBrowserProfileMutation"](
-      ...args,
-    )) as FacadeModule["isPersistentBrowserProfileMutation"];
-export const normalizeBrowserFormField: FacadeModule["normalizeBrowserFormField"] = ((...args) =>
-  loadFacadeModule()["normalizeBrowserFormField"](
-    ...args,
-  )) as FacadeModule["normalizeBrowserFormField"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["isPersistentBrowserProfileMutation"] as any)(...args)) as FacadeModule["isPersistentBrowserProfileMutation"];
+export const normalizeBrowserFormField: FacadeModule["normalizeBrowserFormField"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["normalizeBrowserFormField"] as any)(...args)) as FacadeModule["normalizeBrowserFormField"];
 export const normalizeBrowserFormFieldValue: FacadeModule["normalizeBrowserFormFieldValue"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeBrowserFormFieldValue"](
-    ...args,
-  )) as FacadeModule["normalizeBrowserFormFieldValue"];
+  (loadFacadeModule()["normalizeBrowserFormFieldValue"] as any)(...args)) as FacadeModule["normalizeBrowserFormFieldValue"];
 export const normalizeBrowserRequestPath: FacadeModule["normalizeBrowserRequestPath"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeBrowserRequestPath"](
-    ...args,
-  )) as FacadeModule["normalizeBrowserRequestPath"];
-export const persistBrowserProxyFiles: FacadeModule["persistBrowserProxyFiles"] = ((...args) =>
-  loadFacadeModule()["persistBrowserProxyFiles"](
-    ...args,
-  )) as FacadeModule["persistBrowserProxyFiles"];
-export const registerBrowserCli: FacadeModule["registerBrowserCli"] = ((...args) =>
-  loadFacadeModule()["registerBrowserCli"](...args)) as FacadeModule["registerBrowserCli"];
-export const registerBrowserRoutes: FacadeModule["registerBrowserRoutes"] = ((...args) =>
-  loadFacadeModule()["registerBrowserRoutes"](...args)) as FacadeModule["registerBrowserRoutes"];
+  (loadFacadeModule()["normalizeBrowserRequestPath"] as any)(...args)) as FacadeModule["normalizeBrowserRequestPath"];
+export const persistBrowserProxyFiles: FacadeModule["persistBrowserProxyFiles"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["persistBrowserProxyFiles"] as any)(...args)) as FacadeModule["persistBrowserProxyFiles"];
+export const registerBrowserCli: FacadeModule["registerBrowserCli"] = ((...args: any[]) =>
+  (loadFacadeModule()["registerBrowserCli"] as any)(...args)) as FacadeModule["registerBrowserCli"];
+export const registerBrowserRoutes: FacadeModule["registerBrowserRoutes"] = ((...args: any[]) =>
+  (loadFacadeModule()["registerBrowserRoutes"] as any)(...args)) as FacadeModule["registerBrowserRoutes"];
 export const resolveExistingPathsWithinRoot: FacadeModule["resolveExistingPathsWithinRoot"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveExistingPathsWithinRoot"](
-    ...args,
-  )) as FacadeModule["resolveExistingPathsWithinRoot"];
+  (loadFacadeModule()["resolveExistingPathsWithinRoot"] as any)(...args)) as FacadeModule["resolveExistingPathsWithinRoot"];
 export const resolveRequestedBrowserProfile: FacadeModule["resolveRequestedBrowserProfile"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveRequestedBrowserProfile"](
-    ...args,
-  )) as FacadeModule["resolveRequestedBrowserProfile"];
-export const runBrowserProxyCommand: FacadeModule["runBrowserProxyCommand"] = ((...args) =>
-  loadFacadeModule()["runBrowserProxyCommand"](...args)) as FacadeModule["runBrowserProxyCommand"];
-export const startBrowserBridgeServer: FacadeModule["startBrowserBridgeServer"] = ((...args) =>
-  loadFacadeModule()["startBrowserBridgeServer"](
-    ...args,
-  )) as FacadeModule["startBrowserBridgeServer"];
+  (loadFacadeModule()["resolveRequestedBrowserProfile"] as any)(...args)) as FacadeModule["resolveRequestedBrowserProfile"];
+export const runBrowserProxyCommand: FacadeModule["runBrowserProxyCommand"] = ((...args: any[]) =>
+  (loadFacadeModule()["runBrowserProxyCommand"] as any)(...args)) as FacadeModule["runBrowserProxyCommand"];
+export const startBrowserBridgeServer: FacadeModule["startBrowserBridgeServer"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["startBrowserBridgeServer"] as any)(...args)) as FacadeModule["startBrowserBridgeServer"];
 export const startBrowserControlServiceFromConfig: FacadeModule["startBrowserControlServiceFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["startBrowserControlServiceFromConfig"](
-      ...args,
-    )) as FacadeModule["startBrowserControlServiceFromConfig"];
-export const stopBrowserBridgeServer: FacadeModule["stopBrowserBridgeServer"] = ((...args) =>
-  loadFacadeModule()["stopBrowserBridgeServer"](
-    ...args,
-  )) as FacadeModule["stopBrowserBridgeServer"];
-export const stopBrowserControlService: FacadeModule["stopBrowserControlService"] = ((...args) =>
-  loadFacadeModule()["stopBrowserControlService"](
-    ...args,
-  )) as FacadeModule["stopBrowserControlService"];
-export const stopBrowserRuntime: FacadeModule["stopBrowserRuntime"] = ((...args) =>
-  loadFacadeModule()["stopBrowserRuntime"](...args)) as FacadeModule["stopBrowserRuntime"];
-export const trackSessionBrowserTab: FacadeModule["trackSessionBrowserTab"] = ((...args) =>
-  loadFacadeModule()["trackSessionBrowserTab"](...args)) as FacadeModule["trackSessionBrowserTab"];
-export const untrackSessionBrowserTab: FacadeModule["untrackSessionBrowserTab"] = ((...args) =>
-  loadFacadeModule()["untrackSessionBrowserTab"](
-    ...args,
-  )) as FacadeModule["untrackSessionBrowserTab"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["startBrowserControlServiceFromConfig"] as any)(...args)) as FacadeModule["startBrowserControlServiceFromConfig"];
+export const stopBrowserBridgeServer: FacadeModule["stopBrowserBridgeServer"] = ((...args: any[]) =>
+  (loadFacadeModule()["stopBrowserBridgeServer"] as any)(...args)) as FacadeModule["stopBrowserBridgeServer"];
+export const stopBrowserControlService: FacadeModule["stopBrowserControlService"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["stopBrowserControlService"] as any)(...args)) as FacadeModule["stopBrowserControlService"];
+export const stopBrowserRuntime: FacadeModule["stopBrowserRuntime"] = ((...args: any[]) =>
+  (loadFacadeModule()["stopBrowserRuntime"] as any)(...args)) as FacadeModule["stopBrowserRuntime"];
+export const trackSessionBrowserTab: FacadeModule["trackSessionBrowserTab"] = ((...args: any[]) =>
+  (loadFacadeModule()["trackSessionBrowserTab"] as any)(...args)) as FacadeModule["trackSessionBrowserTab"];
+export const untrackSessionBrowserTab: FacadeModule["untrackSessionBrowserTab"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["untrackSessionBrowserTab"] as any)(...args)) as FacadeModule["untrackSessionBrowserTab"];
 export type BrowserBridge = FacadeEntry["types"]["BrowserBridge"];
 export type BrowserCreateProfileResult = FacadeEntry["types"]["BrowserCreateProfileResult"];
 export type BrowserDeleteProfileResult = FacadeEntry["types"]["BrowserDeleteProfileResult"];

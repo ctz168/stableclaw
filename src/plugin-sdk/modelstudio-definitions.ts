@@ -14,16 +14,12 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildModelStudioDefaultModelDefinition: FacadeModule["buildModelStudioDefaultModelDefinition"] =
-  ((...args) =>
-    loadFacadeModule()["buildModelStudioDefaultModelDefinition"](
-      ...args,
-    )) as FacadeModule["buildModelStudioDefaultModelDefinition"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["buildModelStudioDefaultModelDefinition"] as any)(...args)) as FacadeModule["buildModelStudioDefaultModelDefinition"];
 export const buildModelStudioModelDefinition: FacadeModule["buildModelStudioModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildModelStudioModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildModelStudioModelDefinition"];
+  (loadFacadeModule()["buildModelStudioModelDefinition"] as any)(...args)) as FacadeModule["buildModelStudioModelDefinition"];
 export const MODELSTUDIO_CN_BASE_URL: FacadeModule["MODELSTUDIO_CN_BASE_URL"] =
   loadFacadeModule()["MODELSTUDIO_CN_BASE_URL"];
 export const MODELSTUDIO_DEFAULT_COST: FacadeModule["MODELSTUDIO_DEFAULT_COST"] =

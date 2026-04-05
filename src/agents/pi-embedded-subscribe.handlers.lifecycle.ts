@@ -39,9 +39,9 @@ export function handleAgentStart(ctx: EmbeddedPiSubscribeContext) {
 export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
   const lastAssistant = ctx.state.lastAssistant;
   const isError = isAssistantMessage(lastAssistant) && lastAssistant.stopReason === "error";
-
+  let friendlyError: string | undefined;
   if (isError && lastAssistant) {
-    const friendlyError = formatAssistantErrorText(lastAssistant, {
+    friendlyError = formatAssistantErrorText(lastAssistant, {
       cfg: ctx.params.config,
       sessionKey: ctx.params.sessionKey,
       provider: lastAssistant.provider,
@@ -109,7 +109,6 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
       runId: ctx.params.runId,
       sessionId: ctx.params.sessionId,
       sessionKey: ctx.params.sessionKey,
-      workspaceDir: ctx.params.workspaceDir,
       cfg: ctx.params.config,
       isError,
       error: isError && lastAssistant ? (friendlyError || lastAssistant.errorMessage) : undefined,

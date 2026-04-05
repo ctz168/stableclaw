@@ -14,32 +14,26 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyMinimaxApiConfig: FacadeModule["applyMinimaxApiConfig"] = ((...args) =>
-  loadFacadeModule()["applyMinimaxApiConfig"](...args)) as FacadeModule["applyMinimaxApiConfig"];
-export const applyMinimaxApiConfigCn: FacadeModule["applyMinimaxApiConfigCn"] = ((...args) =>
-  loadFacadeModule()["applyMinimaxApiConfigCn"](
-    ...args,
-  )) as FacadeModule["applyMinimaxApiConfigCn"];
+export const applyMinimaxApiConfig: FacadeModule["applyMinimaxApiConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyMinimaxApiConfig"] as any)(...args)) as FacadeModule["applyMinimaxApiConfig"];
+export const applyMinimaxApiConfigCn: FacadeModule["applyMinimaxApiConfigCn"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyMinimaxApiConfigCn"] as any)(...args)) as FacadeModule["applyMinimaxApiConfigCn"];
 export const applyMinimaxApiProviderConfig: FacadeModule["applyMinimaxApiProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyMinimaxApiProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyMinimaxApiProviderConfig"];
+  (loadFacadeModule()["applyMinimaxApiProviderConfig"] as any)(...args)) as FacadeModule["applyMinimaxApiProviderConfig"];
 export const applyMinimaxApiProviderConfigCn: FacadeModule["applyMinimaxApiProviderConfigCn"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyMinimaxApiProviderConfigCn"](
-    ...args,
-  )) as FacadeModule["applyMinimaxApiProviderConfigCn"];
-export const buildMinimaxPortalProvider: FacadeModule["buildMinimaxPortalProvider"] = ((...args) =>
-  loadFacadeModule()["buildMinimaxPortalProvider"](
-    ...args,
-  )) as FacadeModule["buildMinimaxPortalProvider"];
-export const buildMinimaxProvider: FacadeModule["buildMinimaxProvider"] = ((...args) =>
-  loadFacadeModule()["buildMinimaxProvider"](...args)) as FacadeModule["buildMinimaxProvider"];
-export const isMiniMaxModernModelId: FacadeModule["isMiniMaxModernModelId"] = ((...args) =>
-  loadFacadeModule()["isMiniMaxModernModelId"](...args)) as FacadeModule["isMiniMaxModernModelId"];
+  (loadFacadeModule()["applyMinimaxApiProviderConfigCn"] as any)(...args)) as FacadeModule["applyMinimaxApiProviderConfigCn"];
+export const buildMinimaxPortalProvider: FacadeModule["buildMinimaxPortalProvider"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildMinimaxPortalProvider"] as any)(...args)) as FacadeModule["buildMinimaxPortalProvider"];
+export const buildMinimaxProvider: FacadeModule["buildMinimaxProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildMinimaxProvider"] as any)(...args)) as FacadeModule["buildMinimaxProvider"];
+export const isMiniMaxModernModelId: FacadeModule["isMiniMaxModernModelId"] = ((...args: any[]) =>
+  (loadFacadeModule()["isMiniMaxModernModelId"] as any)(...args)) as FacadeModule["isMiniMaxModernModelId"];
 export const MINIMAX_API_BASE_URL: FacadeModule["MINIMAX_API_BASE_URL"] =
   loadFacadeModule()["MINIMAX_API_BASE_URL"];
 export const MINIMAX_CN_API_BASE_URL: FacadeModule["MINIMAX_CN_API_BASE_URL"] =

@@ -10,18 +10,18 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyOpenAIConfig: FacadeModule["applyOpenAIConfig"] = ((...args) =>
-  loadFacadeModule()["applyOpenAIConfig"](...args)) as FacadeModule["applyOpenAIConfig"];
-export const applyOpenAIProviderConfig: FacadeModule["applyOpenAIProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyOpenAIProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyOpenAIProviderConfig"];
-export const buildOpenAICodexProvider: FacadeModule["buildOpenAICodexProvider"] = ((...args) =>
-  loadFacadeModule()["buildOpenAICodexProvider"](
-    ...args,
-  )) as FacadeModule["buildOpenAICodexProvider"];
-export const buildOpenAIProvider: FacadeModule["buildOpenAIProvider"] = ((...args) =>
-  loadFacadeModule()["buildOpenAIProvider"](...args)) as FacadeModule["buildOpenAIProvider"];
+export const applyOpenAIConfig: FacadeModule["applyOpenAIConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyOpenAIConfig"] as any)(...args)) as FacadeModule["applyOpenAIConfig"];
+export const applyOpenAIProviderConfig: FacadeModule["applyOpenAIProviderConfig"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["applyOpenAIProviderConfig"] as any)(...args)) as FacadeModule["applyOpenAIProviderConfig"];
+export const buildOpenAICodexProvider: FacadeModule["buildOpenAICodexProvider"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildOpenAICodexProvider"] as any)(...args)) as FacadeModule["buildOpenAICodexProvider"];
+export const buildOpenAIProvider: FacadeModule["buildOpenAIProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildOpenAIProvider"] as any)(...args)) as FacadeModule["buildOpenAIProvider"];
 export const OPENAI_CODEX_DEFAULT_MODEL: FacadeModule["OPENAI_CODEX_DEFAULT_MODEL"] =
   loadFacadeModule()["OPENAI_CODEX_DEFAULT_MODEL"];
 export const OPENAI_DEFAULT_AUDIO_TRANSCRIPTION_MODEL: FacadeModule["OPENAI_DEFAULT_AUDIO_TRANSCRIPTION_MODEL"] =

@@ -13,30 +13,24 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildOllamaModelDefinition: FacadeModule["buildOllamaModelDefinition"] = ((...args) =>
-  loadFacadeModule()["buildOllamaModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildOllamaModelDefinition"];
-export const buildOllamaProvider: FacadeModule["buildOllamaProvider"] = ((...args) =>
-  loadFacadeModule()["buildOllamaProvider"](...args)) as FacadeModule["buildOllamaProvider"];
+export const buildOllamaModelDefinition: FacadeModule["buildOllamaModelDefinition"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildOllamaModelDefinition"] as any)(...args)) as FacadeModule["buildOllamaModelDefinition"];
+export const buildOllamaProvider: FacadeModule["buildOllamaProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildOllamaProvider"] as any)(...args)) as FacadeModule["buildOllamaProvider"];
 export const configureOllamaNonInteractive: FacadeModule["configureOllamaNonInteractive"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["configureOllamaNonInteractive"](
-    ...args,
-  )) as FacadeModule["configureOllamaNonInteractive"];
-export const ensureOllamaModelPulled: FacadeModule["ensureOllamaModelPulled"] = ((...args) =>
-  loadFacadeModule()["ensureOllamaModelPulled"](
-    ...args,
-  )) as FacadeModule["ensureOllamaModelPulled"];
+  (loadFacadeModule()["configureOllamaNonInteractive"] as any)(...args)) as FacadeModule["configureOllamaNonInteractive"];
+export const ensureOllamaModelPulled: FacadeModule["ensureOllamaModelPulled"] = ((...args: any[]) =>
+  (loadFacadeModule()["ensureOllamaModelPulled"] as any)(...args)) as FacadeModule["ensureOllamaModelPulled"];
 export const enrichOllamaModelsWithContext: FacadeModule["enrichOllamaModelsWithContext"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["enrichOllamaModelsWithContext"](
-    ...args,
-  )) as FacadeModule["enrichOllamaModelsWithContext"];
-export const fetchOllamaModels: FacadeModule["fetchOllamaModels"] = ((...args) =>
-  loadFacadeModule()["fetchOllamaModels"](...args)) as FacadeModule["fetchOllamaModels"];
+  (loadFacadeModule()["enrichOllamaModelsWithContext"] as any)(...args)) as FacadeModule["enrichOllamaModelsWithContext"];
+export const fetchOllamaModels: FacadeModule["fetchOllamaModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["fetchOllamaModels"] as any)(...args)) as FacadeModule["fetchOllamaModels"];
 export const OLLAMA_DEFAULT_BASE_URL: FacadeModule["OLLAMA_DEFAULT_BASE_URL"] =
   loadFacadeModule()["OLLAMA_DEFAULT_BASE_URL"];
 export const OLLAMA_DEFAULT_CONTEXT_WINDOW: FacadeModule["OLLAMA_DEFAULT_CONTEXT_WINDOW"] =
@@ -48,16 +42,16 @@ export const OLLAMA_DEFAULT_MAX_TOKENS: FacadeModule["OLLAMA_DEFAULT_MAX_TOKENS"
   loadFacadeModule()["OLLAMA_DEFAULT_MAX_TOKENS"];
 export const OLLAMA_DEFAULT_MODEL: FacadeModule["OLLAMA_DEFAULT_MODEL"] =
   loadFacadeModule()["OLLAMA_DEFAULT_MODEL"];
-export const promptAndConfigureOllama: FacadeModule["promptAndConfigureOllama"] = ((...args) =>
-  loadFacadeModule()["promptAndConfigureOllama"](
-    ...args,
-  )) as FacadeModule["promptAndConfigureOllama"];
-export const queryOllamaContextWindow: FacadeModule["queryOllamaContextWindow"] = ((...args) =>
-  loadFacadeModule()["queryOllamaContextWindow"](
-    ...args,
-  )) as FacadeModule["queryOllamaContextWindow"];
-export const resolveOllamaApiBase: FacadeModule["resolveOllamaApiBase"] = ((...args) =>
-  loadFacadeModule()["resolveOllamaApiBase"](...args)) as FacadeModule["resolveOllamaApiBase"];
+export const promptAndConfigureOllama: FacadeModule["promptAndConfigureOllama"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["promptAndConfigureOllama"] as any)(...args)) as FacadeModule["promptAndConfigureOllama"];
+export const queryOllamaContextWindow: FacadeModule["queryOllamaContextWindow"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["queryOllamaContextWindow"] as any)(...args)) as FacadeModule["queryOllamaContextWindow"];
+export const resolveOllamaApiBase: FacadeModule["resolveOllamaApiBase"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveOllamaApiBase"] as any)(...args)) as FacadeModule["resolveOllamaApiBase"];
 export type OllamaModelWithContext = FacadeEntry["types"]["OllamaModelWithContext"];
 export type OllamaTagModel = FacadeEntry["types"]["OllamaTagModel"];
 export type OllamaTagsResponse = FacadeEntry["types"]["OllamaTagsResponse"];

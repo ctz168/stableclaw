@@ -10,7 +10,7 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isReasoningModelHeuristic: FacadeModule["isReasoningModelHeuristic"] = ((...args) =>
-  loadFacadeModule()["isReasoningModelHeuristic"](
-    ...args,
-  )) as FacadeModule["isReasoningModelHeuristic"];
+export const isReasoningModelHeuristic: FacadeModule["isReasoningModelHeuristic"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["isReasoningModelHeuristic"] as any)(...args)) as FacadeModule["isReasoningModelHeuristic"];

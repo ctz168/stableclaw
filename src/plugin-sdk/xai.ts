@@ -10,34 +10,30 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyXaiConfig: FacadeModule["applyXaiConfig"] = ((...args) =>
-  loadFacadeModule()["applyXaiConfig"](...args)) as FacadeModule["applyXaiConfig"];
-export const applyXaiProviderConfig: FacadeModule["applyXaiProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyXaiProviderConfig"](...args)) as FacadeModule["applyXaiProviderConfig"];
-export const applyXaiModelCompat: FacadeModule["applyXaiModelCompat"] = ((...args) =>
-  loadFacadeModule()["applyXaiModelCompat"](...args)) as FacadeModule["applyXaiModelCompat"];
-export const buildXaiCatalogModels: FacadeModule["buildXaiCatalogModels"] = ((...args) =>
-  loadFacadeModule()["buildXaiCatalogModels"](...args)) as FacadeModule["buildXaiCatalogModels"];
-export const buildXaiModelDefinition: FacadeModule["buildXaiModelDefinition"] = ((...args) =>
-  loadFacadeModule()["buildXaiModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildXaiModelDefinition"];
-export const buildXaiProvider: FacadeModule["buildXaiProvider"] = ((...args) =>
-  loadFacadeModule()["buildXaiProvider"](...args)) as FacadeModule["buildXaiProvider"];
+export const applyXaiConfig: FacadeModule["applyXaiConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyXaiConfig"] as any)(...args)) as FacadeModule["applyXaiConfig"];
+export const applyXaiProviderConfig: FacadeModule["applyXaiProviderConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyXaiProviderConfig"] as any)(...args)) as FacadeModule["applyXaiProviderConfig"];
+export const applyXaiModelCompat: FacadeModule["applyXaiModelCompat"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyXaiModelCompat"] as any)(...args)) as FacadeModule["applyXaiModelCompat"];
+export const buildXaiCatalogModels: FacadeModule["buildXaiCatalogModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildXaiCatalogModels"] as any)(...args)) as FacadeModule["buildXaiCatalogModels"];
+export const buildXaiModelDefinition: FacadeModule["buildXaiModelDefinition"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildXaiModelDefinition"] as any)(...args)) as FacadeModule["buildXaiModelDefinition"];
+export const buildXaiProvider: FacadeModule["buildXaiProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildXaiProvider"] as any)(...args)) as FacadeModule["buildXaiProvider"];
 export const HTML_ENTITY_TOOL_CALL_ARGUMENTS_ENCODING: FacadeModule["HTML_ENTITY_TOOL_CALL_ARGUMENTS_ENCODING"] =
   loadFacadeModule()["HTML_ENTITY_TOOL_CALL_ARGUMENTS_ENCODING"];
-export const isModernXaiModel: FacadeModule["isModernXaiModel"] = ((...args) =>
-  loadFacadeModule()["isModernXaiModel"](...args)) as FacadeModule["isModernXaiModel"];
-export const normalizeXaiModelId: FacadeModule["normalizeXaiModelId"] = ((...args) =>
-  loadFacadeModule()["normalizeXaiModelId"](...args)) as FacadeModule["normalizeXaiModelId"];
-export const resolveXaiCatalogEntry: FacadeModule["resolveXaiCatalogEntry"] = ((...args) =>
-  loadFacadeModule()["resolveXaiCatalogEntry"](...args)) as FacadeModule["resolveXaiCatalogEntry"];
+export const isModernXaiModel: FacadeModule["isModernXaiModel"] = ((...args: any[]) =>
+  (loadFacadeModule()["isModernXaiModel"] as any)(...args)) as FacadeModule["isModernXaiModel"];
+export const normalizeXaiModelId: FacadeModule["normalizeXaiModelId"] = ((...args: any[]) =>
+  (loadFacadeModule()["normalizeXaiModelId"] as any)(...args)) as FacadeModule["normalizeXaiModelId"];
+export const resolveXaiCatalogEntry: FacadeModule["resolveXaiCatalogEntry"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveXaiCatalogEntry"] as any)(...args)) as FacadeModule["resolveXaiCatalogEntry"];
 export const resolveXaiForwardCompatModel: FacadeModule["resolveXaiForwardCompatModel"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveXaiForwardCompatModel"](
-    ...args,
-  )) as FacadeModule["resolveXaiForwardCompatModel"];
+  (loadFacadeModule()["resolveXaiForwardCompatModel"] as any)(...args)) as FacadeModule["resolveXaiForwardCompatModel"];
 export const XAI_BASE_URL: FacadeModule["XAI_BASE_URL"] = loadFacadeModule()["XAI_BASE_URL"];
 export const XAI_DEFAULT_CONTEXT_WINDOW: FacadeModule["XAI_DEFAULT_CONTEXT_WINDOW"] =
   loadFacadeModule()["XAI_DEFAULT_CONTEXT_WINDOW"];

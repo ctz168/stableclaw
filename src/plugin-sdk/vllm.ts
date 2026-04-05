@@ -10,8 +10,8 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildVllmProvider: FacadeModule["buildVllmProvider"] = ((...args) =>
-  loadFacadeModule()["buildVllmProvider"](...args)) as FacadeModule["buildVllmProvider"];
+export const buildVllmProvider: FacadeModule["buildVllmProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildVllmProvider"] as any)(...args)) as FacadeModule["buildVllmProvider"];
 export const VLLM_DEFAULT_API_KEY_ENV_VAR: FacadeModule["VLLM_DEFAULT_API_KEY_ENV_VAR"] =
   loadFacadeModule()["VLLM_DEFAULT_API_KEY_ENV_VAR"];
 export const VLLM_DEFAULT_BASE_URL: FacadeModule["VLLM_DEFAULT_BASE_URL"] =

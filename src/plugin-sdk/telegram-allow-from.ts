@@ -10,13 +10,9 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isNumericTelegramUserId: FacadeModule["isNumericTelegramUserId"] = ((...args) =>
-  loadFacadeModule()["isNumericTelegramUserId"](
-    ...args,
-  )) as FacadeModule["isNumericTelegramUserId"];
+export const isNumericTelegramUserId: FacadeModule["isNumericTelegramUserId"] = ((...args: any[]) =>
+  (loadFacadeModule()["isNumericTelegramUserId"] as any)(...args)) as FacadeModule["isNumericTelegramUserId"];
 export const normalizeTelegramAllowFromEntry: FacadeModule["normalizeTelegramAllowFromEntry"] = ((
   ...args
 ) =>
-  loadFacadeModule()["normalizeTelegramAllowFromEntry"](
-    ...args,
-  )) as FacadeModule["normalizeTelegramAllowFromEntry"];
+  (loadFacadeModule()["normalizeTelegramAllowFromEntry"] as any)(...args)) as FacadeModule["normalizeTelegramAllowFromEntry"];

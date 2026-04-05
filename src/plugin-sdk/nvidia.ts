@@ -10,5 +10,5 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildNvidiaProvider: FacadeModule["buildNvidiaProvider"] = ((...args) =>
-  loadFacadeModule()["buildNvidiaProvider"](...args)) as FacadeModule["buildNvidiaProvider"];
+export const buildNvidiaProvider: FacadeModule["buildNvidiaProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildNvidiaProvider"] as any)(...args)) as FacadeModule["buildNvidiaProvider"];

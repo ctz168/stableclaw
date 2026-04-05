@@ -10,6 +10,6 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const resolveSlackAccount: FacadeModule["resolveSlackAccount"] = ((...args) =>
-  loadFacadeModule()["resolveSlackAccount"](...args)) as FacadeModule["resolveSlackAccount"];
+export const resolveSlackAccount: FacadeModule["resolveSlackAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveSlackAccount"] as any)(...args)) as FacadeModule["resolveSlackAccount"];
 export type ResolvedSlackAccount = FacadeEntry["types"]["ResolvedSlackAccount"];

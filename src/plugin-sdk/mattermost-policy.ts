@@ -10,7 +10,7 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const isMattermostSenderAllowed: FacadeModule["isMattermostSenderAllowed"] = ((...args) =>
-  loadFacadeModule()["isMattermostSenderAllowed"](
-    ...args,
-  )) as FacadeModule["isMattermostSenderAllowed"];
+export const isMattermostSenderAllowed: FacadeModule["isMattermostSenderAllowed"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["isMattermostSenderAllowed"] as any)(...args)) as FacadeModule["isMattermostSenderAllowed"];

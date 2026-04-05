@@ -10,8 +10,8 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildSglangProvider: FacadeModule["buildSglangProvider"] = ((...args) =>
-  loadFacadeModule()["buildSglangProvider"](...args)) as FacadeModule["buildSglangProvider"];
+export const buildSglangProvider: FacadeModule["buildSglangProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildSglangProvider"] as any)(...args)) as FacadeModule["buildSglangProvider"];
 export const SGLANG_DEFAULT_API_KEY_ENV_VAR: FacadeModule["SGLANG_DEFAULT_API_KEY_ENV_VAR"] =
   loadFacadeModule()["SGLANG_DEFAULT_API_KEY_ENV_VAR"];
 export const SGLANG_DEFAULT_BASE_URL: FacadeModule["SGLANG_DEFAULT_BASE_URL"] =

@@ -14,18 +14,14 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const createMatrixThreadBindingManager: FacadeModule["createMatrixThreadBindingManager"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["createMatrixThreadBindingManager"](
-    ...args,
-  )) as FacadeModule["createMatrixThreadBindingManager"];
+  (loadFacadeModule()["createMatrixThreadBindingManager"] as any)(...args)) as FacadeModule["createMatrixThreadBindingManager"];
 export const matrixSessionBindingAdapterChannels: FacadeModule["matrixSessionBindingAdapterChannels"] =
   createLazyFacadeArrayValue(
     () =>
       loadFacadeModule()["matrixSessionBindingAdapterChannels"] as unknown as readonly unknown[],
   ) as FacadeModule["matrixSessionBindingAdapterChannels"];
 export const resetMatrixThreadBindingsForTests: FacadeModule["resetMatrixThreadBindingsForTests"] =
-  ((...args) =>
-    loadFacadeModule()["resetMatrixThreadBindingsForTests"](
-      ...args,
-    )) as FacadeModule["resetMatrixThreadBindingsForTests"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resetMatrixThreadBindingsForTests"] as any)(...args)) as FacadeModule["resetMatrixThreadBindingsForTests"];

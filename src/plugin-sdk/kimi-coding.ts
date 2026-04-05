@@ -10,7 +10,5 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildKimiCodingProvider: FacadeModule["buildKimiCodingProvider"] = ((...args) =>
-  loadFacadeModule()["buildKimiCodingProvider"](
-    ...args,
-  )) as FacadeModule["buildKimiCodingProvider"];
+export const buildKimiCodingProvider: FacadeModule["buildKimiCodingProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildKimiCodingProvider"] as any)(...args)) as FacadeModule["buildKimiCodingProvider"];

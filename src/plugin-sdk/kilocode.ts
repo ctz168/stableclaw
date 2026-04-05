@@ -14,21 +14,17 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const buildKilocodeProvider: FacadeModule["buildKilocodeProvider"] = ((...args) =>
-  loadFacadeModule()["buildKilocodeProvider"](...args)) as FacadeModule["buildKilocodeProvider"];
+export const buildKilocodeProvider: FacadeModule["buildKilocodeProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildKilocodeProvider"] as any)(...args)) as FacadeModule["buildKilocodeProvider"];
 export const buildKilocodeProviderWithDiscovery: FacadeModule["buildKilocodeProviderWithDiscovery"] =
-  ((...args) =>
-    loadFacadeModule()["buildKilocodeProviderWithDiscovery"](
-      ...args,
-    )) as FacadeModule["buildKilocodeProviderWithDiscovery"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["buildKilocodeProviderWithDiscovery"] as any)(...args)) as FacadeModule["buildKilocodeProviderWithDiscovery"];
 export const buildKilocodeModelDefinition: FacadeModule["buildKilocodeModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildKilocodeModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildKilocodeModelDefinition"];
-export const discoverKilocodeModels: FacadeModule["discoverKilocodeModels"] = ((...args) =>
-  loadFacadeModule()["discoverKilocodeModels"](...args)) as FacadeModule["discoverKilocodeModels"];
+  (loadFacadeModule()["buildKilocodeModelDefinition"] as any)(...args)) as FacadeModule["buildKilocodeModelDefinition"];
+export const discoverKilocodeModels: FacadeModule["discoverKilocodeModels"] = ((...args: any[]) =>
+  (loadFacadeModule()["discoverKilocodeModels"] as any)(...args)) as FacadeModule["discoverKilocodeModels"];
 export const KILOCODE_BASE_URL: FacadeModule["KILOCODE_BASE_URL"] =
   loadFacadeModule()["KILOCODE_BASE_URL"];
 export const KILOCODE_DEFAULT_CONTEXT_WINDOW: FacadeModule["KILOCODE_DEFAULT_CONTEXT_WINDOW"] =

@@ -14,19 +14,17 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildHuggingfaceModelDefinition: FacadeModule["buildHuggingfaceModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildHuggingfaceModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildHuggingfaceModelDefinition"];
-export const buildHuggingfaceProvider: FacadeModule["buildHuggingfaceProvider"] = ((...args) =>
-  loadFacadeModule()["buildHuggingfaceProvider"](
-    ...args,
-  )) as FacadeModule["buildHuggingfaceProvider"];
-export const discoverHuggingfaceModels: FacadeModule["discoverHuggingfaceModels"] = ((...args) =>
-  loadFacadeModule()["discoverHuggingfaceModels"](
-    ...args,
-  )) as FacadeModule["discoverHuggingfaceModels"];
+  (loadFacadeModule()["buildHuggingfaceModelDefinition"] as any)(...args)) as FacadeModule["buildHuggingfaceModelDefinition"];
+export const buildHuggingfaceProvider: FacadeModule["buildHuggingfaceProvider"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildHuggingfaceProvider"] as any)(...args)) as FacadeModule["buildHuggingfaceProvider"];
+export const discoverHuggingfaceModels: FacadeModule["discoverHuggingfaceModels"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["discoverHuggingfaceModels"] as any)(...args)) as FacadeModule["discoverHuggingfaceModels"];
 export const HUGGINGFACE_BASE_URL: FacadeModule["HUGGINGFACE_BASE_URL"] =
   loadFacadeModule()["HUGGINGFACE_BASE_URL"];
 export const HUGGINGFACE_DEFAULT_MODEL_REF: FacadeModule["HUGGINGFACE_DEFAULT_MODEL_REF"] =
@@ -39,7 +37,7 @@ export const HUGGINGFACE_POLICY_SUFFIXES: FacadeModule["HUGGINGFACE_POLICY_SUFFI
   createLazyFacadeArrayValue(
     () => loadFacadeModule()["HUGGINGFACE_POLICY_SUFFIXES"] as unknown as readonly unknown[],
   ) as FacadeModule["HUGGINGFACE_POLICY_SUFFIXES"];
-export const isHuggingfacePolicyLocked: FacadeModule["isHuggingfacePolicyLocked"] = ((...args) =>
-  loadFacadeModule()["isHuggingfacePolicyLocked"](
-    ...args,
-  )) as FacadeModule["isHuggingfacePolicyLocked"];
+export const isHuggingfacePolicyLocked: FacadeModule["isHuggingfacePolicyLocked"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["isHuggingfacePolicyLocked"] as any)(...args)) as FacadeModule["isHuggingfacePolicyLocked"];

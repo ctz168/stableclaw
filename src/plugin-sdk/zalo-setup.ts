@@ -13,16 +13,12 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const evaluateZaloGroupAccess: FacadeModule["evaluateZaloGroupAccess"] = ((...args) =>
-  loadFacadeModule()["evaluateZaloGroupAccess"](
-    ...args,
-  )) as FacadeModule["evaluateZaloGroupAccess"];
+export const evaluateZaloGroupAccess: FacadeModule["evaluateZaloGroupAccess"] = ((...args: any[]) =>
+  (loadFacadeModule()["evaluateZaloGroupAccess"] as any)(...args)) as FacadeModule["evaluateZaloGroupAccess"];
 export const resolveZaloRuntimeGroupPolicy: FacadeModule["resolveZaloRuntimeGroupPolicy"] = ((
   ...args
 ) =>
-  loadFacadeModule()["resolveZaloRuntimeGroupPolicy"](
-    ...args,
-  )) as FacadeModule["resolveZaloRuntimeGroupPolicy"];
+  (loadFacadeModule()["resolveZaloRuntimeGroupPolicy"] as any)(...args)) as FacadeModule["resolveZaloRuntimeGroupPolicy"];
 export const zaloSetupAdapter: FacadeModule["zaloSetupAdapter"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["zaloSetupAdapter"] as object,
 ) as FacadeModule["zaloSetupAdapter"];

@@ -69,8 +69,8 @@ function loadRuntimeImageGenerationModule(): RuntimeImageGenerationModule {
 
 function createRuntimeImageGeneration(): PluginRuntime["imageGeneration"] {
   return {
-    generate: (params) => loadRuntimeImageGenerationModule().generateImage(params),
-    listProviders: (params) =>
+    generate: (params: any) => loadRuntimeImageGenerationModule().generateImage(params),
+    listProviders: (params: any) =>
       loadRuntimeImageGenerationModule().listRuntimeImageGenerationProviders(params),
   };
 }

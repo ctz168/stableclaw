@@ -13,22 +13,18 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applySyntheticConfig: FacadeModule["applySyntheticConfig"] = ((...args) =>
-  loadFacadeModule()["applySyntheticConfig"](...args)) as FacadeModule["applySyntheticConfig"];
+export const applySyntheticConfig: FacadeModule["applySyntheticConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applySyntheticConfig"] as any)(...args)) as FacadeModule["applySyntheticConfig"];
 export const applySyntheticProviderConfig: FacadeModule["applySyntheticProviderConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applySyntheticProviderConfig"](
-    ...args,
-  )) as FacadeModule["applySyntheticProviderConfig"];
+  (loadFacadeModule()["applySyntheticProviderConfig"] as any)(...args)) as FacadeModule["applySyntheticProviderConfig"];
 export const buildSyntheticModelDefinition: FacadeModule["buildSyntheticModelDefinition"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildSyntheticModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildSyntheticModelDefinition"];
-export const buildSyntheticProvider: FacadeModule["buildSyntheticProvider"] = ((...args) =>
-  loadFacadeModule()["buildSyntheticProvider"](...args)) as FacadeModule["buildSyntheticProvider"];
+  (loadFacadeModule()["buildSyntheticModelDefinition"] as any)(...args)) as FacadeModule["buildSyntheticModelDefinition"];
+export const buildSyntheticProvider: FacadeModule["buildSyntheticProvider"] = ((...args: any[]) =>
+  (loadFacadeModule()["buildSyntheticProvider"] as any)(...args)) as FacadeModule["buildSyntheticProvider"];
 export const SYNTHETIC_BASE_URL: FacadeModule["SYNTHETIC_BASE_URL"] =
   loadFacadeModule()["SYNTHETIC_BASE_URL"];
 export const SYNTHETIC_DEFAULT_MODEL_REF: FacadeModule["SYNTHETIC_DEFAULT_MODEL_REF"] =

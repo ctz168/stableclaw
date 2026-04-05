@@ -11,97 +11,71 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const buildDiscordComponentMessage: FacadeModule["buildDiscordComponentMessage"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildDiscordComponentMessage"](
-    ...args,
-  )) as FacadeModule["buildDiscordComponentMessage"];
-export const collectDiscordStatusIssues: FacadeModule["collectDiscordStatusIssues"] = ((...args) =>
-  loadFacadeModule()["collectDiscordStatusIssues"](
-    ...args,
-  )) as FacadeModule["collectDiscordStatusIssues"];
-export const createDiscordActionGate: FacadeModule["createDiscordActionGate"] = ((...args) =>
-  loadFacadeModule()["createDiscordActionGate"](
-    ...args,
-  )) as FacadeModule["createDiscordActionGate"];
-export const handleDiscordMessageAction: FacadeModule["handleDiscordMessageAction"] = ((...args) =>
-  loadFacadeModule()["handleDiscordMessageAction"](
-    ...args,
-  )) as FacadeModule["handleDiscordMessageAction"];
-export const inspectDiscordAccount: FacadeModule["inspectDiscordAccount"] = ((...args) =>
-  loadFacadeModule()["inspectDiscordAccount"](...args)) as FacadeModule["inspectDiscordAccount"];
+  (loadFacadeModule()["buildDiscordComponentMessage"] as any)(...args)) as FacadeModule["buildDiscordComponentMessage"];
+export const collectDiscordStatusIssues: FacadeModule["collectDiscordStatusIssues"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["collectDiscordStatusIssues"] as any)(...args)) as FacadeModule["collectDiscordStatusIssues"];
+export const createDiscordActionGate: FacadeModule["createDiscordActionGate"] = ((...args: any[]) =>
+  (loadFacadeModule()["createDiscordActionGate"] as any)(...args)) as FacadeModule["createDiscordActionGate"];
+export const handleDiscordMessageAction: FacadeModule["handleDiscordMessageAction"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["handleDiscordMessageAction"] as any)(...args)) as FacadeModule["handleDiscordMessageAction"];
+export const inspectDiscordAccount: FacadeModule["inspectDiscordAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["inspectDiscordAccount"] as any)(...args)) as FacadeModule["inspectDiscordAccount"];
 export const isDiscordExecApprovalApprover: FacadeModule["isDiscordExecApprovalApprover"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["isDiscordExecApprovalApprover"](
-    ...args,
-  )) as FacadeModule["isDiscordExecApprovalApprover"];
+  (loadFacadeModule()["isDiscordExecApprovalApprover"] as any)(...args)) as FacadeModule["isDiscordExecApprovalApprover"];
 export const isDiscordExecApprovalClientEnabled: FacadeModule["isDiscordExecApprovalClientEnabled"] =
-  ((...args) =>
-    loadFacadeModule()["isDiscordExecApprovalClientEnabled"](
-      ...args,
-    )) as FacadeModule["isDiscordExecApprovalClientEnabled"];
-export const listDiscordAccountIds: FacadeModule["listDiscordAccountIds"] = ((...args) =>
-  loadFacadeModule()["listDiscordAccountIds"](...args)) as FacadeModule["listDiscordAccountIds"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["isDiscordExecApprovalClientEnabled"] as any)(...args)) as FacadeModule["isDiscordExecApprovalClientEnabled"];
+export const listDiscordAccountIds: FacadeModule["listDiscordAccountIds"] = ((...args: any[]) =>
+  (loadFacadeModule()["listDiscordAccountIds"] as any)(...args)) as FacadeModule["listDiscordAccountIds"];
 export const listDiscordDirectoryGroupsFromConfig: FacadeModule["listDiscordDirectoryGroupsFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listDiscordDirectoryGroupsFromConfig"](
-      ...args,
-    )) as FacadeModule["listDiscordDirectoryGroupsFromConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listDiscordDirectoryGroupsFromConfig"] as any)(...args)) as FacadeModule["listDiscordDirectoryGroupsFromConfig"];
 export const listDiscordDirectoryPeersFromConfig: FacadeModule["listDiscordDirectoryPeersFromConfig"] =
-  ((...args) =>
-    loadFacadeModule()["listDiscordDirectoryPeersFromConfig"](
-      ...args,
-    )) as FacadeModule["listDiscordDirectoryPeersFromConfig"];
-export const looksLikeDiscordTargetId: FacadeModule["looksLikeDiscordTargetId"] = ((...args) =>
-  loadFacadeModule()["looksLikeDiscordTargetId"](
-    ...args,
-  )) as FacadeModule["looksLikeDiscordTargetId"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["listDiscordDirectoryPeersFromConfig"] as any)(...args)) as FacadeModule["listDiscordDirectoryPeersFromConfig"];
+export const looksLikeDiscordTargetId: FacadeModule["looksLikeDiscordTargetId"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["looksLikeDiscordTargetId"] as any)(...args)) as FacadeModule["looksLikeDiscordTargetId"];
 export const normalizeDiscordMessagingTarget: FacadeModule["normalizeDiscordMessagingTarget"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeDiscordMessagingTarget"](
-    ...args,
-  )) as FacadeModule["normalizeDiscordMessagingTarget"];
+  (loadFacadeModule()["normalizeDiscordMessagingTarget"] as any)(...args)) as FacadeModule["normalizeDiscordMessagingTarget"];
 export const normalizeDiscordOutboundTarget: FacadeModule["normalizeDiscordOutboundTarget"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["normalizeDiscordOutboundTarget"](
-    ...args,
-  )) as FacadeModule["normalizeDiscordOutboundTarget"];
-export const readDiscordComponentSpec: FacadeModule["readDiscordComponentSpec"] = ((...args) =>
-  loadFacadeModule()["readDiscordComponentSpec"](
-    ...args,
-  )) as FacadeModule["readDiscordComponentSpec"];
+  (loadFacadeModule()["normalizeDiscordOutboundTarget"] as any)(...args)) as FacadeModule["normalizeDiscordOutboundTarget"];
+export const readDiscordComponentSpec: FacadeModule["readDiscordComponentSpec"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["readDiscordComponentSpec"] as any)(...args)) as FacadeModule["readDiscordComponentSpec"];
 export const resolveDefaultDiscordAccountId: FacadeModule["resolveDefaultDiscordAccountId"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveDefaultDiscordAccountId"](
-    ...args,
-  )) as FacadeModule["resolveDefaultDiscordAccountId"];
-export const resolveDiscordAccount: FacadeModule["resolveDiscordAccount"] = ((...args) =>
-  loadFacadeModule()["resolveDiscordAccount"](...args)) as FacadeModule["resolveDiscordAccount"];
-export const resolveDiscordChannelId: FacadeModule["resolveDiscordChannelId"] = ((...args) =>
-  loadFacadeModule()["resolveDiscordChannelId"](
-    ...args,
-  )) as FacadeModule["resolveDiscordChannelId"];
+  (loadFacadeModule()["resolveDefaultDiscordAccountId"] as any)(...args)) as FacadeModule["resolveDefaultDiscordAccountId"];
+export const resolveDiscordAccount: FacadeModule["resolveDiscordAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveDiscordAccount"] as any)(...args)) as FacadeModule["resolveDiscordAccount"];
+export const resolveDiscordChannelId: FacadeModule["resolveDiscordChannelId"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveDiscordChannelId"] as any)(...args)) as FacadeModule["resolveDiscordChannelId"];
 export const resolveDiscordRuntimeGroupPolicy: FacadeModule["resolveDiscordRuntimeGroupPolicy"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveDiscordRuntimeGroupPolicy"](
-    ...args,
-  )) as FacadeModule["resolveDiscordRuntimeGroupPolicy"];
+  (loadFacadeModule()["resolveDiscordRuntimeGroupPolicy"] as any)(...args)) as FacadeModule["resolveDiscordRuntimeGroupPolicy"];
 export const resolveDiscordGroupRequireMention: FacadeModule["resolveDiscordGroupRequireMention"] =
-  ((...args) =>
-    loadFacadeModule()["resolveDiscordGroupRequireMention"](
-      ...args,
-    )) as FacadeModule["resolveDiscordGroupRequireMention"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveDiscordGroupRequireMention"] as any)(...args)) as FacadeModule["resolveDiscordGroupRequireMention"];
 export const resolveDiscordGroupToolPolicy: FacadeModule["resolveDiscordGroupToolPolicy"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["resolveDiscordGroupToolPolicy"](
-    ...args,
-  )) as FacadeModule["resolveDiscordGroupToolPolicy"];
+  (loadFacadeModule()["resolveDiscordGroupToolPolicy"] as any)(...args)) as FacadeModule["resolveDiscordGroupToolPolicy"];
 export type DiscordComponentMessageSpec = FacadeEntry["types"]["DiscordComponentMessageSpec"];
 export type DiscordProbe = FacadeEntry["types"]["DiscordProbe"];
 export type DiscordSendComponents = FacadeEntry["types"]["DiscordSendComponents"];

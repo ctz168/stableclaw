@@ -83,7 +83,7 @@ export function resolveWorkflowSummaryConfig(cfg?: OpenClawConfig, workspaceDir?
       ? Math.min(hooksConfig.recentMessages, 50)
       : DEFAULT_RECENT_MESSAGE_COUNT;
 
-  const defaultWorkspace = path.join(resolveStateDir(process.env, os.homedir()), "workspace");
+  const defaultWorkspace = path.join(resolveStateDir(process.env, () => os.homedir()), "workspace");
   const memoryDir = path.join(workspaceDir ?? defaultWorkspace, "memory", "workflow-summaries");
 
   return { memoryDir, recentMessageCount, enabled };

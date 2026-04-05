@@ -16,17 +16,15 @@ function loadFacadeModule(): FacadeModule {
 export const browserHandlers: FacadeModule["browserHandlers"] = createLazyFacadeObjectValue(
   () => loadFacadeModule()["browserHandlers"] as object,
 ) as FacadeModule["browserHandlers"];
-export const createBrowserPluginService: FacadeModule["createBrowserPluginService"] = ((...args) =>
-  loadFacadeModule()["createBrowserPluginService"](
-    ...args,
-  )) as FacadeModule["createBrowserPluginService"];
-export const createBrowserTool: FacadeModule["createBrowserTool"] = ((...args) =>
-  loadFacadeModule()["createBrowserTool"](...args)) as FacadeModule["createBrowserTool"];
-export const handleBrowserGatewayRequest: FacadeModule["handleBrowserGatewayRequest"] = ((
-  ...args
+export const createBrowserPluginService: FacadeModule["createBrowserPluginService"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["handleBrowserGatewayRequest"](
-    ...args,
-  )) as FacadeModule["handleBrowserGatewayRequest"];
-export const registerBrowserCli: FacadeModule["registerBrowserCli"] = ((...args) =>
-  loadFacadeModule()["registerBrowserCli"](...args)) as FacadeModule["registerBrowserCli"];
+  (loadFacadeModule()["createBrowserPluginService"] as any)(...args)) as FacadeModule["createBrowserPluginService"];
+export const createBrowserTool: FacadeModule["createBrowserTool"] = ((...args: any[]) =>
+  (loadFacadeModule()["createBrowserTool"] as any)(...args)) as FacadeModule["createBrowserTool"];
+export const handleBrowserGatewayRequest: FacadeModule["handleBrowserGatewayRequest"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["handleBrowserGatewayRequest"] as any)(...args)) as FacadeModule["handleBrowserGatewayRequest"];
+export const registerBrowserCli: FacadeModule["registerBrowserCli"] = ((...args: any[]) =>
+  (loadFacadeModule()["registerBrowserCli"] as any)(...args)) as FacadeModule["registerBrowserCli"];

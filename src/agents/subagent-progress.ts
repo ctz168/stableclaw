@@ -272,6 +272,7 @@ export function createSubagentProgressTracker(): {
   const activeRuns = new Map<
     string,
     {
+      runId: string;
       phase: SubagentProgressPhase;
       message: string;
       detail?: Record<string, unknown>;
@@ -295,6 +296,7 @@ export function createSubagentProgressTracker(): {
       // Terminal phase: keep in map briefly for UI to render final state,
       // then remove after a short delay
       activeRuns.set(event.runId, {
+        runId: event.runId,
         phase: event.phase,
         message: event.message,
         detail: event.detail,
@@ -311,6 +313,7 @@ export function createSubagentProgressTracker(): {
     }
 
     activeRuns.set(event.runId, {
+      runId: event.runId,
       phase: event.phase,
       message: event.message,
       detail: event.detail,

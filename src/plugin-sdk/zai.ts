@@ -10,10 +10,10 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyZaiConfig: FacadeModule["applyZaiConfig"] = ((...args) =>
-  loadFacadeModule()["applyZaiConfig"](...args)) as FacadeModule["applyZaiConfig"];
-export const applyZaiProviderConfig: FacadeModule["applyZaiProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyZaiProviderConfig"](...args)) as FacadeModule["applyZaiProviderConfig"];
+export const applyZaiConfig: FacadeModule["applyZaiConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyZaiConfig"] as any)(...args)) as FacadeModule["applyZaiConfig"];
+export const applyZaiProviderConfig: FacadeModule["applyZaiProviderConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyZaiProviderConfig"] as any)(...args)) as FacadeModule["applyZaiProviderConfig"];
 export const ZAI_CN_BASE_URL: FacadeModule["ZAI_CN_BASE_URL"] =
   loadFacadeModule()["ZAI_CN_BASE_URL"];
 export const ZAI_CODING_CN_BASE_URL: FacadeModule["ZAI_CODING_CN_BASE_URL"] =

@@ -11,26 +11,18 @@ function loadFacadeModule(): FacadeModule {
   });
 }
 export const applyCloudflareAiGatewayConfig: FacadeModule["applyCloudflareAiGatewayConfig"] = ((
-  ...args
+  ...args: any[]
 ) =>
-  loadFacadeModule()["applyCloudflareAiGatewayConfig"](
-    ...args,
-  )) as FacadeModule["applyCloudflareAiGatewayConfig"];
+  (loadFacadeModule()["applyCloudflareAiGatewayConfig"] as any)(...args)) as FacadeModule["applyCloudflareAiGatewayConfig"];
 export const applyCloudflareAiGatewayProviderConfig: FacadeModule["applyCloudflareAiGatewayProviderConfig"] =
-  ((...args) =>
-    loadFacadeModule()["applyCloudflareAiGatewayProviderConfig"](
-      ...args,
-    )) as FacadeModule["applyCloudflareAiGatewayProviderConfig"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["applyCloudflareAiGatewayProviderConfig"] as any)(...args)) as FacadeModule["applyCloudflareAiGatewayProviderConfig"];
 export const buildCloudflareAiGatewayConfigPatch: FacadeModule["buildCloudflareAiGatewayConfigPatch"] =
-  ((...args) =>
-    loadFacadeModule()["buildCloudflareAiGatewayConfigPatch"](
-      ...args,
-    )) as FacadeModule["buildCloudflareAiGatewayConfigPatch"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["buildCloudflareAiGatewayConfigPatch"] as any)(...args)) as FacadeModule["buildCloudflareAiGatewayConfigPatch"];
 export const buildCloudflareAiGatewayModelDefinition: FacadeModule["buildCloudflareAiGatewayModelDefinition"] =
-  ((...args) =>
-    loadFacadeModule()["buildCloudflareAiGatewayModelDefinition"](
-      ...args,
-    )) as FacadeModule["buildCloudflareAiGatewayModelDefinition"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["buildCloudflareAiGatewayModelDefinition"] as any)(...args)) as FacadeModule["buildCloudflareAiGatewayModelDefinition"];
 export const CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_ID: FacadeModule["CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_ID"] =
   loadFacadeModule()["CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_ID"];
 export const CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF: FacadeModule["CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF"] =
@@ -38,7 +30,5 @@ export const CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF: FacadeModule["CLOUDFLARE_A
 export const CLOUDFLARE_AI_GATEWAY_PROVIDER_ID: FacadeModule["CLOUDFLARE_AI_GATEWAY_PROVIDER_ID"] =
   loadFacadeModule()["CLOUDFLARE_AI_GATEWAY_PROVIDER_ID"];
 export const resolveCloudflareAiGatewayBaseUrl: FacadeModule["resolveCloudflareAiGatewayBaseUrl"] =
-  ((...args) =>
-    loadFacadeModule()["resolveCloudflareAiGatewayBaseUrl"](
-      ...args,
-    )) as FacadeModule["resolveCloudflareAiGatewayBaseUrl"];
+  ((...args: any[]) =>
+    (loadFacadeModule()["resolveCloudflareAiGatewayBaseUrl"] as any)(...args)) as FacadeModule["resolveCloudflareAiGatewayBaseUrl"];

@@ -10,7 +10,7 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const parseSlackTarget: FacadeModule["parseSlackTarget"] = ((...args) =>
-  loadFacadeModule()["parseSlackTarget"](...args)) as FacadeModule["parseSlackTarget"];
-export const resolveSlackChannelId: FacadeModule["resolveSlackChannelId"] = ((...args) =>
-  loadFacadeModule()["resolveSlackChannelId"](...args)) as FacadeModule["resolveSlackChannelId"];
+export const parseSlackTarget: FacadeModule["parseSlackTarget"] = ((...args: any[]) =>
+  (loadFacadeModule()["parseSlackTarget"] as any)(...args)) as FacadeModule["parseSlackTarget"];
+export const resolveSlackChannelId: FacadeModule["resolveSlackChannelId"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveSlackChannelId"] as any)(...args)) as FacadeModule["resolveSlackChannelId"];

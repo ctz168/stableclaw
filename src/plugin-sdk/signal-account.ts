@@ -10,6 +10,6 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const resolveSignalAccount: FacadeModule["resolveSignalAccount"] = ((...args) =>
-  loadFacadeModule()["resolveSignalAccount"](...args)) as FacadeModule["resolveSignalAccount"];
+export const resolveSignalAccount: FacadeModule["resolveSignalAccount"] = ((...args: any[]) =>
+  (loadFacadeModule()["resolveSignalAccount"] as any)(...args)) as FacadeModule["resolveSignalAccount"];
 export type ResolvedSignalAccount = FacadeEntry["types"]["ResolvedSignalAccount"];

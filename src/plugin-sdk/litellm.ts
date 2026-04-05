@@ -10,18 +10,16 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-export const applyLitellmConfig: FacadeModule["applyLitellmConfig"] = ((...args) =>
-  loadFacadeModule()["applyLitellmConfig"](...args)) as FacadeModule["applyLitellmConfig"];
-export const applyLitellmProviderConfig: FacadeModule["applyLitellmProviderConfig"] = ((...args) =>
-  loadFacadeModule()["applyLitellmProviderConfig"](
-    ...args,
-  )) as FacadeModule["applyLitellmProviderConfig"];
-export const buildLitellmModelDefinition: FacadeModule["buildLitellmModelDefinition"] = ((
-  ...args
+export const applyLitellmConfig: FacadeModule["applyLitellmConfig"] = ((...args: any[]) =>
+  (loadFacadeModule()["applyLitellmConfig"] as any)(...args)) as FacadeModule["applyLitellmConfig"];
+export const applyLitellmProviderConfig: FacadeModule["applyLitellmProviderConfig"] = ((
+  ...args: any[]
 ) =>
-  loadFacadeModule()["buildLitellmModelDefinition"](
-    ...args,
-  )) as FacadeModule["buildLitellmModelDefinition"];
+  (loadFacadeModule()["applyLitellmProviderConfig"] as any)(...args)) as FacadeModule["applyLitellmProviderConfig"];
+export const buildLitellmModelDefinition: FacadeModule["buildLitellmModelDefinition"] = ((
+  ...args: any[]
+) =>
+  (loadFacadeModule()["buildLitellmModelDefinition"] as any)(...args)) as FacadeModule["buildLitellmModelDefinition"];
 export const LITELLM_BASE_URL: FacadeModule["LITELLM_BASE_URL"] =
   loadFacadeModule()["LITELLM_BASE_URL"];
 export const LITELLM_DEFAULT_MODEL_ID: FacadeModule["LITELLM_DEFAULT_MODEL_ID"] =
