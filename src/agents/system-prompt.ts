@@ -269,6 +269,7 @@ export function buildAgentSystemPrompt(params: {
       "Show a /status-equivalent status card (usage + time + Reasoning/Verbose/Elevated); use for model-use questions (📊 session_status); optional per-session model override",
     image: "Analyze an image with the configured image model",
     image_generate: "Generate images with the configured image-generation model",
+    task_plan: "Create, update, and track structured task plans with step-by-step progress (persisted to task.md)",
   };
 
   const toolOrder = [
@@ -298,6 +299,7 @@ export function buildAgentSystemPrompt(params: {
     "session_status",
     "image",
     "image_generate",
+    "task_plan",
   ];
 
   const rawToolNames = (params.toolNames ?? []).map((tool) => tool.trim());
@@ -447,6 +449,7 @@ export function buildAgentSystemPrompt(params: {
     "TOOLS.md does not control tool availability; it is user guidance for how to use external tools.",
     `For long waits, avoid rapid poll loops: use ${execToolName} with enough yieldMs or ${processToolName}(action=poll, timeout=<ms>).`,
     "If a task is more complex or takes longer, spawn a sub-agent. Completion is push-based: it will auto-announce when done.",
+    "For complex multi-step tasks (3+ steps), use the `task_plan` tool to create a structured checklist BEFORE starting work. Break the task into clear steps with priorities, update step status as you progress (pending → in_progress → completed), and show the plan markdown to the user regularly. This provides visibility and helps track progress. Plans are auto-saved to task.md in the workspace.",
     ...(acpHarnessSpawnAllowed
       ? [
           'For requests like "do this in codex/claude code/cursor/gemini" or similar ACP harnesses, treat it as ACP harness intent and call `sessions_spawn` with `runtime: "acp"`.',

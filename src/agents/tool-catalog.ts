@@ -36,6 +36,7 @@ const CORE_TOOL_SECTION_ORDER: Array<{ id: string; label: string }> = [
   { id: "nodes", label: "Nodes" },
   { id: "agents", label: "Agents" },
   { id: "media", label: "Media" },
+  { id: "planning", label: "Planning" },
 ];
 
 const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
@@ -263,6 +264,14 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     description: "Text-to-speech conversion",
     sectionId: "media",
     profiles: [],
+    includeInOpenClawGroup: true,
+  },
+  {
+    id: "task_plan",
+    label: "task_plan",
+    description: "Task decomposition and progress tracking",
+    sectionId: "planning",
+    profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
 ];

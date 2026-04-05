@@ -534,7 +534,9 @@ export function createTaskPlanTool(opts?: {
             : undefined;
           const plan = createPlan({ sessionKey, title, goal, steps });
           // Auto-sync to task.md after creation
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after create:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -550,7 +552,9 @@ export function createTaskPlanTool(opts?: {
           const plan = updatePlan({ sessionKey, planId, title, goal });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           // Auto-sync to task.md after plan update
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after update:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -570,7 +574,9 @@ export function createTaskPlanTool(opts?: {
           const plan = addStep({ sessionKey, planId, description, priority, detail, insertBefore, insertAfter });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           // Auto-sync to task.md after step addition
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after add_step:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -593,7 +599,9 @@ export function createTaskPlanTool(opts?: {
           const plan = updateStep({ sessionKey, planId, stepId, status, description, detail });
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
           // Auto-sync to task.md after step update
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after update_step:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -609,7 +617,9 @@ export function createTaskPlanTool(opts?: {
           const plan = removeStep({ sessionKey, planId, stepId });
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
           // Auto-sync to task.md after step removal
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after remove_step:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -628,7 +638,9 @@ export function createTaskPlanTool(opts?: {
           });
           if (!plan) throw new ToolInputError(`Plan "${planId}" not found`);
           // Auto-sync to task.md after reorder
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after reorder:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -642,7 +654,9 @@ export function createTaskPlanTool(opts?: {
           const deleted = deletePlan(sessionKey, planId);
           if (!deleted) throw new ToolInputError(`Plan "${planId}" not found`);
           // Auto-sync to task.md after mutation
-          await syncPlansToTaskMd(sessionKey).catch(() => {});
+          await syncPlansToTaskMd(sessionKey).catch((err) => {
+            console.warn("[task_plan] Failed to sync task.md after delete:", err instanceof Error ? err.message : err);
+          });
           return jsonResult({ deleted: true, planId });
         }
 
