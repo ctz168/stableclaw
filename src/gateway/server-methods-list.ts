@@ -128,6 +128,7 @@ export const GATEWAY_EVENTS = [
   "session.message",
   "session.tool",
   "sessions.changed",
+  "config.changed",
   "presence",
   "tick",
   "talk.mode",

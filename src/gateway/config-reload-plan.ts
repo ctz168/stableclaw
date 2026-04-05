@@ -14,6 +14,14 @@ export type GatewayReloadPlan = {
   restartHeartbeat: boolean;
   restartHealthMonitor: boolean;
   restartChannels: Set<ChannelKind>;
+  /** Model catalog or model-related config changed; refresh model list. */
+  invalidateModelCatalog: boolean;
+  /** Channel config changed; refresh channel status. */
+  invalidateChannelCatalog: boolean;
+  /** Plugin list changed via hot-reload (install/uninstall/update). */
+  reloadPlugins: boolean;
+  /** Config changed in a way that the dashboard should refresh. */
+  notifyDashboard: boolean;
   noopPaths: string[];
 };
 
@@ -29,6 +37,10 @@ type ReloadAction =
   | "restart-cron"
   | "restart-heartbeat"
   | "restart-health-monitor"
+  | "invalidate-model-catalog"
+  | "invalidate-channel-catalog"
+  | "reload-plugins"
+  | "notify-dashboard"
   | `restart-channel:${ChannelId}`;
 
 const BASE_RELOAD_RULES: ReloadRule[] = [
@@ -71,7 +83,7 @@ const BASE_RELOAD_RULES: ReloadRule[] = [
   {
     prefix: "models",
     kind: "hot",
-    actions: ["restart-heartbeat"],
+    actions: ["restart-heartbeat", "invalidate-model-catalog", "notify-dashboard"],
   },
   { prefix: "agent.heartbeat", kind: "hot", actions: ["restart-heartbeat"] },
   { prefix: "cron", kind: "hot", actions: ["restart-cron"] },
@@ -94,10 +106,18 @@ const BASE_RELOAD_RULES_TAIL: ReloadRule[] = [
   { prefix: "talk", kind: "none" },
   { prefix: "skills", kind: "none" },
   { prefix: "secrets", kind: "none" },
-  { prefix: "plugins", kind: "restart" },
+  { prefix: "plugins.load", kind: "hot", actions: ["reload-plugins", "notify-dashboard"] },
+  { prefix: "plugins.allow", kind: "hot", actions: ["reload-plugins", "notify-dashboard"] },
+  { prefix: "plugins.entries", kind: "hot", actions: ["reload-plugins", "notify-dashboard"] },
+  { prefix: "plugins", kind: "hot", actions: ["reload-plugins", "notify-dashboard"] },
   { prefix: "ui", kind: "none" },
+  { prefix: "gateway.reload", kind: "none" },
+  { prefix: "gateway.remote", kind: "none" },
+  { prefix: "gateway.channelHealthCheckMinutes", kind: "none" },
+  { prefix: "gateway.channelStaleEventThresholdMinutes", kind: "none" },
+  { prefix: "gateway.channelMaxRestartsPerHour", kind: "none" },
   { prefix: "gateway", kind: "restart" },
-  { prefix: "discovery", kind: "restart" },
+  { prefix: "discovery", kind: "hot", actions: ["notify-dashboard"] },
   { prefix: "canvasHost", kind: "restart" },
 ];
 
@@ -155,6 +175,10 @@ export function buildGatewayReloadPlan(changedPaths: string[]): GatewayReloadPla
     restartHeartbeat: false,
     restartHealthMonitor: false,
     restartChannels: new Set(),
+    invalidateModelCatalog: false,
+    invalidateChannelCatalog: false,
+    reloadPlugins: false,
+    notifyDashboard: false,
     noopPaths: [],
   };
 
@@ -179,6 +203,20 @@ export function buildGatewayReloadPlan(changedPaths: string[]): GatewayReloadPla
         break;
       case "restart-health-monitor":
         plan.restartHealthMonitor = true;
+        break;
+      case "invalidate-model-catalog":
+        plan.invalidateModelCatalog = true;
+        plan.notifyDashboard = true;
+        break;
+      case "invalidate-channel-catalog":
+        plan.invalidateChannelCatalog = true;
+        plan.notifyDashboard = true;
+        break;
+      case "reload-plugins":
+        plan.reloadPlugins = true;
+        break;
+      case "notify-dashboard":
+        plan.notifyDashboard = true;
         break;
       default:
         break;

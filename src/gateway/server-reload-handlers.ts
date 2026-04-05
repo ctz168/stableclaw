@@ -139,6 +139,22 @@ export function createGatewayReloadHandlers(params: {
     setCommandLaneConcurrency(CommandLane.Main, resolveAgentMaxConcurrent(nextConfig));
     setCommandLaneConcurrency(CommandLane.Subagent, resolveSubagentMaxConcurrent(nextConfig));
 
+    // Broadcast config.changed event to all connected dashboard clients so
+    // they can refresh model lists, channel status, and other dynamic data.
+    if (plan.notifyDashboard) {
+      try {
+        params.broadcast("config.changed", {
+          ts: Date.now(),
+          changedPaths: plan.hotReasons,
+          modelsInvalidated: plan.invalidateModelCatalog,
+          channelsInvalidated: plan.invalidateChannelCatalog,
+          pluginsReloaded: plan.reloadPlugins,
+        });
+      } catch (err) {
+        params.logReload.warn(`dashboard notification failed: ${String(err)}`);
+      }
+    }
+
     if (plan.hotReasons.length > 0) {
       params.logReload.info(`config hot reload applied (${plan.hotReasons.join(", ")})`);
     } else if (plan.noopPaths.length > 0) {

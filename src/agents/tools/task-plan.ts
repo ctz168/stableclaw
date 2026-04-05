@@ -59,6 +59,9 @@ export type TaskPlan = {
 
 const planStore = new Map<string, Map<string, TaskPlan>>();
 
+/** Track workspace dirs for task.md persistence per session. */
+const sessionWorkspaceDirs = new Map<string, string>();
+
 function getSessionPlans(sessionKey: string): Map<string, TaskPlan> {
   let session = planStore.get(sessionKey);
   if (!session) {
@@ -364,6 +367,86 @@ function reindexPriorities(steps: TaskStep[]): void {
  */
 export function clearSessionPlans(sessionKey: string): void {
   planStore.delete(sessionKey);
+  sessionWorkspaceDirs.delete(sessionKey);
+}
+
+// ─── task.md Persistence ──────────────────────────────────────────
+
+import { promises as fsp } from "node:fs";
+import path from "node:path";
+
+/**
+ * Set the workspace directory for a session. Used for task.md persistence.
+ */
+export function setSessionWorkspaceDir(sessionKey: string, workspaceDir: string): void {
+  sessionWorkspaceDirs.set(sessionKey, workspaceDir);
+}
+
+/**
+ * Get the task.md file path for a session.
+ */
+function getTaskMdPath(sessionKey: string): string | null {
+  const workspaceDir = sessionWorkspaceDirs.get(sessionKey);
+  if (!workspaceDir) return null;
+  return path.join(workspaceDir, "task.md");
+}
+
+/**
+ * Synchronize all plans for a session to task.md.
+ * The file contains a rendered markdown version of all active plans.
+ */
+export async function syncPlansToTaskMd(sessionKey: string): Promise<{ ok: boolean; path?: string; error?: string }> {
+  const taskMdPath = getTaskMdPath(sessionKey);
+  if (!taskMdPath) {
+    return { ok: false, error: "No workspace directory configured for this session" };
+  }
+
+  try {
+    const plans = getAllPlans(sessionKey);
+    const now = new Date().toISOString();
+
+    if (plans.length === 0) {
+      // Write an empty task.md header
+      const content = `# Task Plan\n\n_Last updated: ${now}_\n\n_No active task plans._\n`;
+      await fsp.writeFile(taskMdPath, content, "utf-8");
+      return { ok: true, path: taskMdPath };
+    }
+
+    const sections = plans.map((plan) => renderPlanMarkdown(plan));
+    const content = [
+      `# Task Plan`,
+      ``,
+      `_Last updated: ${now}_`,
+      ``,
+      ...sections,
+      ``,
+    ].join("\n");
+
+    await fsp.writeFile(taskMdPath, content, "utf-8");
+    return { ok: true, path: taskMdPath };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: errorMsg };
+  }
+}
+
+/**
+ * Load plans from task.md (best-effort, informational only).
+ * Returns the raw content of task.md for the session's workspace.
+ */
+export async function loadTaskMdContent(sessionKey: string): Promise<{ content?: string; path?: string; error?: string }> {
+  const taskMdPath = getTaskMdPath(sessionKey);
+  if (!taskMdPath) {
+    return { error: "No workspace directory configured for this session" };
+  }
+
+  try {
+    const content = await fsp.readFile(taskMdPath, "utf-8");
+    return { content, path: taskMdPath };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    return { error: errorMsg };
+  }
 }
 
 // ─── Tool Definitions ─────────────────────────────────────────────
@@ -387,6 +470,7 @@ export function createTaskPlanTool(opts?: {
       "1. **Break down** a complex task into numbered steps",
       "2. **Track progress** by marking steps as completed/in_progress/failed",
       "3. **Show progress** to the user as a markdown checklist",
+      "4. **Persist** plans to task.md in the workspace for continuity across sessions",
       "",
       "Actions:",
       "- `create` — Create a new plan with optional steps",
@@ -397,6 +481,8 @@ export function createTaskPlanTool(opts?: {
       "- `reorder` — Reorder steps by providing ordered step IDs",
       "- `delete` — Delete a plan",
       "- `show` — Render plan as markdown (default action)",
+      "- `sync` — Save all plans to task.md in workspace (auto-called after mutations)",
+      "- `load` — Read task.md content from workspace",
       "",
       "Status values: `pending`, `in_progress`, `completed`, `failed`",
       "",
@@ -404,7 +490,7 @@ export function createTaskPlanTool(opts?: {
     ].join("\n"),
     parameters: Type.Object({
       action: Type.Optional(Type.String({
-        description: 'Plan action: "create" | "update" | "add_step" | "update_step" | "remove_step" | "reorder" | "delete" | "show"',
+        description: 'Plan action: "create" | "update" | "add_step" | "update_step" | "remove_step" | "reorder" | "delete" | "show" | "sync" | "load"',
       })),
       planId: Type.Optional(Type.String({ description: "Plan ID (returned by create, required for all actions except create)" })),
       title: Type.Optional(Type.String({ description: "Plan title (for create/update)" })),
@@ -441,6 +527,8 @@ export function createTaskPlanTool(opts?: {
             ? (params.steps as Array<{ description: string; priority?: number; detail?: string }>)
             : undefined;
           const plan = createPlan({ sessionKey, title, goal, steps });
+          // Auto-sync to task.md after creation
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -494,6 +582,8 @@ export function createTaskPlanTool(opts?: {
           const detail = readStringParam(params, "stepDetail");
           const plan = updateStep({ sessionKey, planId, stepId, status, description, detail });
           if (!plan) throw new ToolInputError(`Plan "${planId}" or step "${stepId}" not found`);
+          // Auto-sync to task.md after step update
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({
             planId: plan.id,
             title: plan.title,
@@ -537,7 +627,19 @@ export function createTaskPlanTool(opts?: {
           if (!planId) throw new ToolInputError("planId is required for delete action");
           const deleted = deletePlan(sessionKey, planId);
           if (!deleted) throw new ToolInputError(`Plan "${planId}" not found`);
+          // Auto-sync to task.md after mutation
+          await syncPlansToTaskMd(sessionKey).catch(() => {});
           return jsonResult({ deleted: true, planId });
+        }
+
+        case "sync": {
+          const result = await syncPlansToTaskMd(sessionKey);
+          return jsonResult(result);
+        }
+
+        case "load": {
+          const result = await loadTaskMdContent(sessionKey);
+          return jsonResult(result);
         }
 
         case "show":
@@ -580,10 +682,14 @@ export function createTaskPlanTool(opts?: {
 export const __testing = {
   resetStore() {
     planStore.clear();
+    sessionWorkspaceDirs.clear();
     stepCounter = 0;
     planCounter = 0;
   },
   getStore() {
     return planStore;
+  },
+  getWorkspaceDirs() {
+    return sessionWorkspaceDirs;
   },
 };

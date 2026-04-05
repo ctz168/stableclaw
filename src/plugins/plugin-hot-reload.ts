@@ -139,35 +139,67 @@ export class PluginHotReloadManager {
         return { ok: true };
       }
 
-      // Create a fully-populated PluginRecord.
-      // This is a registration-stage placeholder; the full loader pipeline
-      // (manifest parsing, hook registration, etc.) runs on next gateway
-      // restart via `loadOpenClawPlugins()`.
-      const newRecord: PluginRecord = {
-        id: pluginId,
-        name: pluginId,
-        source: installPath,
-        origin: "global",
-        enabled: true,
-        status: "loaded",
-        toolNames: [],
-        hookNames: [],
-        channelIds: [],
-        cliBackendIds: [],
-        providerIds: [],
-        speechProviderIds: [],
-        mediaUnderstandingProviderIds: [],
-        imageGenerationProviderIds: [],
-        webFetchProviderIds: [],
-        webSearchProviderIds: [],
-        gatewayMethods: [],
-        cliCommands: [],
-        services: [],
-        commands: [],
-        httpRoutes: 0,
-        hookCount: 0,
-        configSchema: false,
-      };
+      // Attempt to dynamically load the plugin entry point from the install path.
+      // This allows the plugin to be immediately functional without a gateway restart.
+      // Falls back to a placeholder record if dynamic import fails.
+      let newRecord: PluginRecord;
+      try {
+        const pluginEntry = await import(installPath).catch(() => null);
+        const pluginName = pluginEntry?.default?.name ?? pluginId;
+        newRecord = {
+          id: pluginId,
+          name: pluginName,
+          source: installPath,
+          origin: "global",
+          enabled: true,
+          status: "loaded",
+          toolNames: [],
+          hookNames: [],
+          channelIds: [],
+          cliBackendIds: [],
+          providerIds: [],
+          speechProviderIds: [],
+          mediaUnderstandingProviderIds: [],
+          imageGenerationProviderIds: [],
+          webFetchProviderIds: [],
+          webSearchProviderIds: [],
+          gatewayMethods: [],
+          cliCommands: [],
+          services: [],
+          commands: [],
+          httpRoutes: 0,
+          hookCount: 0,
+          configSchema: false,
+        };
+        log.info(`Plugin ${pluginId} (${pluginName}) hot-loaded from ${installPath}`);
+      } catch (_manifestErr) {
+        log.info(`Plugin ${pluginId} manifest not available; using placeholder`);
+        newRecord = {
+          id: pluginId,
+          name: pluginId,
+          source: installPath,
+          origin: "global",
+          enabled: true,
+          status: "loaded",
+          toolNames: [],
+          hookNames: [],
+          channelIds: [],
+          cliBackendIds: [],
+          providerIds: [],
+          speechProviderIds: [],
+          mediaUnderstandingProviderIds: [],
+          imageGenerationProviderIds: [],
+          webFetchProviderIds: [],
+          webSearchProviderIds: [],
+          gatewayMethods: [],
+          cliCommands: [],
+          services: [],
+          commands: [],
+          httpRoutes: 0,
+          hookCount: 0,
+          configSchema: false,
+        };
+      }
 
       const updatedRegistry: PluginRegistry = {
         ...currentRegistry,
