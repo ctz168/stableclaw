@@ -981,5 +981,209 @@
   border-color: var(--accent);
 }
 
+/* =============================================
+   TASK PANEL - Collapsible task list above chat input
+   ============================================= */
+
+.task-panel {
+  margin: 0 16px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.task-panel--loading {
+  opacity: 0.6;
+}
+
+.task-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: background var(--duration-fast) ease;
+}
+
+.task-panel__header:hover {
+  background: var(--panel-hover);
+}
+
+.task-panel__icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.task-panel__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-panel__body {
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.task-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px;
+}
+
+.task-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) ease;
+}
+
+.task-panel__item:hover {
+  background: var(--panel-hover);
+}
+
+.task-panel__item--done .task-panel__text {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.task-panel__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.task-panel__check input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.task-panel__check-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+
+.task-panel__check-box svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--bg);
+  stroke-width: 3;
+}
+
+.task-panel__check input:checked + .task-panel__check-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.task-panel__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.task-panel__remove {
+  opacity: 0;
+  padding: 2px;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.task-panel__remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.task-panel__item:hover .task-panel__remove {
+  opacity: 1;
+}
+
+.task-panel__remove:hover {
+  color: var(--danger);
+}
+
+.task-panel__empty {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.task-panel__add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+}
+
+.task-panel__input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 13px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  outline: none;
+  transition: border-color var(--duration-fast) ease;
+}
+
+.task-panel__input:focus {
+  border-color: var(--accent);
+}
+
+.task-panel__input::placeholder {
+  color: var(--muted);
+}
+
+.task-panel__add-btn {
+  padding: 4px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.task-panel__add-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.task-panel__add-btn:hover {
+  color: var(--accent);
+}
+
 /* Mobile dropdown toggle — hidden on desktop */
 /* Mobile gear toggle + dropdown are hidden by default in layout.css */

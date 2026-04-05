@@ -173,6 +173,11 @@ export class OpenClawApp extends LitElement {
   @state() chatManualRefreshInFlight = false;
   @state() navDrawerOpen = false;
 
+  // Task panel state
+  @state() taskMdContent: string | null = null;
+  @state() taskMdLoading = false;
+  @state() taskPanelExpanded = false;
+
   onSlashAction?: (action: string) => void;
 
   // Sidebar state for tool output viewing
@@ -453,6 +458,7 @@ export class OpenClawApp extends LitElement {
   private nodesPollInterval: number | null = null;
   private logsPollInterval: number | null = null;
   private debugPollInterval: number | null = null;
+  private chatPollInterval: number | null = null;
   private logsScrollFrame: number | null = null;
   private toolStreamById = new Map<string, ToolStreamEntry>();
   private toolStreamOrder: string[] = [];
@@ -755,6 +761,49 @@ export class OpenClawApp extends LitElement {
     const newRatio = Math.max(0.4, Math.min(0.7, ratio));
     this.splitRatio = newRatio;
     this.applySettings({ ...this.settings, splitRatio: newRatio });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Task panel methods – reads/writes task.md via the agent files API
+  // ---------------------------------------------------------------------------
+
+  async loadTaskMd(agentId: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.taskMdLoading = true;
+    try {
+      const res = await this.client.request<{ file?: { content?: string } | null } | null>(
+        "agents.files.get",
+        { agentId, name: "task.md" },
+      );
+      this.taskMdContent = res?.file?.content ?? null;
+    } catch {
+      // task.md may not exist yet — that's fine
+      this.taskMdContent = null;
+    } finally {
+      this.taskMdLoading = false;
+    }
+  }
+
+  async saveTaskMd(agentId: string, content: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    try {
+      await this.client.request("agents.files.set", {
+        agentId,
+        name: "task.md",
+        content,
+      });
+      this.taskMdContent = content;
+    } catch (err) {
+      this.lastError = `Failed to save task.md: ${String(err)}`;
+    }
+  }
+
+  handleTaskPanelToggle() {
+    this.taskPanelExpanded = !this.taskPanelExpanded;
   }
 
   render() {

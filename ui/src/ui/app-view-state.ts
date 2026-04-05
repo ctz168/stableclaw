@@ -81,6 +81,13 @@ export type AppViewState = {
   nodes: Array<Record<string, unknown>>;
   chatNewMessagesBelow: boolean;
   navDrawerOpen: boolean;
+  // Task panel state
+  taskMdContent: string | null;
+  taskMdLoading: boolean;
+  taskPanelExpanded: boolean;
+  loadTaskMd: (agentId: string) => Promise<void>;
+  saveTaskMd: (agentId: string, content: string) => Promise<void>;
+  handleTaskPanelToggle: () => void;
   sidebarOpen: boolean;
   sidebarContent: string | null;
   sidebarError: string | null;

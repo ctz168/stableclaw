@@ -6,6 +6,8 @@ import {
   stopNodesPolling,
   startDebugPolling,
   stopDebugPolling,
+  startChatPolling,
+  stopChatPolling,
 } from "./app-polling.ts";
 import { observeTopbar, scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
 import {
@@ -58,6 +60,7 @@ export function handleConnected(host: LifecycleHost) {
     connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
   });
   startNodesPolling(host as unknown as Parameters<typeof startNodesPolling>[0]);
+  startChatPolling(host as unknown as Parameters<typeof startChatPolling>[0]);
   if (host.tab === "logs") {
     startLogsPolling(host as unknown as Parameters<typeof startLogsPolling>[0]);
   }
@@ -76,6 +79,7 @@ export function handleDisconnected(host: LifecycleHost) {
   stopNodesPolling(host as unknown as Parameters<typeof stopNodesPolling>[0]);
   stopLogsPolling(host as unknown as Parameters<typeof stopLogsPolling>[0]);
   stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
+  stopChatPolling(host as unknown as Parameters<typeof stopChatPolling>[0]);
   host.client?.stop();
   host.client = null;
   host.connected = false;

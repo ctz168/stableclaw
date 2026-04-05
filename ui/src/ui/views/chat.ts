@@ -29,6 +29,15 @@ import {
   type SlashCommandCategory,
   type SlashCommandDef,
 } from "../chat/slash-commands.ts";
+import {
+  renderTaskPanel,
+  parseTaskMd,
+  toggleTaskCheck,
+  removeTask,
+  addTask,
+  type TaskItem,
+  type TaskPanelProps,
+} from "../chat/task-panel.ts";
 import { isSttSupported, startStt, stopStt } from "../chat/speech.ts";
 import { icons } from "../icons.ts";
 import { detectTextDirection } from "../text-direction.ts";
@@ -89,6 +98,12 @@ export type ChatProps = {
     defaultId?: string;
   } | null;
   currentAgentId: string;
+  taskMdContent: string | null;
+  onTaskMdChange: (content: string) => void;
+  onRefreshTaskMd: () => void;
+  taskMdLoading: boolean;
+  taskPanelExpanded: boolean;
+  onTaskPanelToggle: () => void;
   onAgentChange: (agentId: string) => void;
   onNavigateToAgent?: () => void;
   onSessionSelect?: (sessionKey: string) => void;
@@ -1186,6 +1201,27 @@ export function renderChat(props: ChatProps) {
           : nothing
       }
       ${renderSearchBar(requestUpdate)} ${renderPinnedSection(props, pinned, requestUpdate)}
+      ${renderTaskPanel({
+        content: props.taskMdContent,
+        loading: props.taskMdLoading,
+        expanded: props.taskPanelExpanded,
+        onToggle: () => props.onTaskPanelToggle(),
+        onCheckToggle: (task: TaskItem) => {
+          if (!props.taskMdContent) return;
+          const next = toggleTaskCheck(props.taskMdContent, task);
+          props.onTaskMdChange(next);
+        },
+        onRemove: (task: TaskItem) => {
+          if (!props.taskMdContent) return;
+          const next = removeTask(props.taskMdContent, task);
+          props.onTaskMdChange(next);
+        },
+        onAdd: (text: string) => {
+          const base = props.taskMdContent ?? "";
+          props.onTaskMdChange(addTask(base, text));
+        },
+        hasTasks: props.taskMdContent ? parseTaskMd(props.taskMdContent).length > 0 : false,
+      })}
 
       <div class="chat-split-container ${sidebarOpen ? "chat-split-container--open" : ""}">
         <div

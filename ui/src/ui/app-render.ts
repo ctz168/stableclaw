@@ -1487,11 +1487,27 @@ export function renderApp(state: AppViewState) {
               },
               agentsList: state.agentsList,
               currentAgentId: resolvedAgentId ?? "main",
+              // Task panel props
+              taskMdContent: state.taskMdContent,
+              taskMdLoading: state.taskMdLoading,
+              taskPanelExpanded: state.taskPanelExpanded,
+              onTaskMdChange: (content: string) => {
+                const agentId = resolvedAgentId ?? "main";
+                void state.saveTaskMd(agentId, content);
+                state.taskMdContent = content;
+              },
+              onRefreshTaskMd: () => {
+                const agentId = resolvedAgentId ?? "main";
+                void state.loadTaskMd(agentId);
+              },
+              onTaskPanelToggle: () => state.handleTaskPanelToggle(),
               onAgentChange: (agentId: string) => {
                 state.sessionKey = buildAgentMainSessionKey({ agentId });
                 state.chatMessages = [];
                 state.chatStream = null;
                 state.chatRunId = null;
+                state.taskMdContent = null;
+                state.taskPanelExpanded = false;
                 state.applySettings({
                   ...state.settings,
                   sessionKey: state.sessionKey,
@@ -1499,6 +1515,7 @@ export function renderApp(state: AppViewState) {
                 });
                 void loadChatHistory(state);
                 void state.loadAssistantIdentity();
+                void state.loadTaskMd(agentId);
               },
               onNavigateToAgent: () => {
                 state.agentsSelectedId = resolvedAgentId;
