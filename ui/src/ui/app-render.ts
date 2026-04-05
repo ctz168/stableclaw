@@ -543,7 +543,7 @@ export function renderApp(state: AppViewState) {
               <div class="sidebar-utility-group">
                 <a
                   class="nav-item nav-item--external sidebar-utility-link"
-                  href="https://docs.stableclaw.ai"
+                  href="https://github.com/ctz168/stableclaw"
                   target=${EXTERNAL_LINK_TARGET}
                   rel=${buildExternalLinkRel()}
                   title="${t("common.docs")} (opens in new tab)"

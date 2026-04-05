@@ -221,7 +221,7 @@ export function renderAgentChannels(params: {
                           ? html`
                               <div>
                                 <a
-                                  href="https://docs.stableclaw.ai/channels"
+                                  href="https://github.com/ctz168/stableclaw/channels"
                                   target="_blank"
                                   rel="noopener"
                                   style="color: var(--accent); font-size: 12px"

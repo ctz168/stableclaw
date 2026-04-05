@@ -117,7 +117,7 @@ export function renderLoginGate(state: AppViewState) {
           <div class="login-gate__docs">
             <a
               class="session-link"
-              href="https://docs.stableclaw.ai/web/dashboard"
+              href="https://github.com/ctz168/stableclaw/web/dashboard"
               target="_blank"
               rel="noreferrer"
               >${t("overview.connection.docsLink")}</a
