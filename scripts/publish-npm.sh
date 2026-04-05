@@ -170,6 +170,19 @@ step_build() {
     pnpm_cmd="pnpm.cmd"
   fi
 
+  # 确保 pnpm 可用（处理 corepack / 非 PATH 环境）
+  if ! command -v "$pnpm_cmd" &>/dev/null; then
+    # 尝试 corepack shims 路径
+    local corepack_shim="/usr/lib/node_modules/corepack/shims/$pnpm_cmd"
+    if [[ -x "$corepack_shim" ]]; then
+      pnpm_cmd="$corepack_shim"
+      ok "使用 corepack shim: $pnpm_cmd"
+    else
+      error "pnpm 不可用，请先安装: npm install -g pnpm 或 corepack enable"
+      exit 1
+    fi
+  fi
+
   info "构建项目..."
 
   # 安装依赖
@@ -177,15 +190,70 @@ step_build() {
   "$pnpm_cmd" install
   ok "  [1/3] 依赖安装完成"
 
-  # 构建
-  info "  [2/3] pnpm build..."
+  # 清理旧构建产物，避免残留文件混淆
+  info "  [2/3] 清理旧 dist..."
+  rm -rf "$PROJECT_DIR/dist"
+  ok "  [2/3] 旧 dist 已清理"
+
+  # 构建（核心：生成 dist/entry.js 等必要文件）
+  info "  [3/4] pnpm build..."
   "$pnpm_cmd" build
-  ok "  [2/3] 构建完成"
+  ok "  [3/4] 构建完成"
 
   # 构建 UI
-  info "  [3/3] pnpm ui:build..."
-  "$pnpm_cmd" ui:build
-  ok "  [3/3] UI 构建完成"
+  info "  [4/4] pnpm ui:build..."
+  "$pnpm_cmd" ui:build || warn "  [4/4] UI 构建失败（非致命，继续发布）"
+  ok "  [4/4] UI 构建完成"
+
+  echo ""
+}
+
+# ── 步骤 3.5: 构建后验证（关键安全检查） ──
+step_verify_build() {
+  info "验证构建产物完整性..."
+  local errors=0
+
+  # 检查 dist/entry.js — 这是最关键的入口文件
+  # 如果缺失，stableclaw.mjs 会抛出 "missing dist/entry.(m)js (build output)"
+  if [[ ! -f "$PROJECT_DIR/dist/entry.js" && ! -f "$PROJECT_DIR/dist/entry.mjs" ]]; then
+    error "  dist/entry.js 或 dist/entry.mjs 不存在！构建失败或被跳过。"
+    error "  必须先执行完整构建: pnpm build"
+    errors=$((errors + 1))
+  else
+    ok "  dist/entry.js 存在"
+  fi
+
+  # 检查 dist/index.js
+  if [[ ! -f "$PROJECT_DIR/dist/index.js" && ! -f "$PROJECT_DIR/dist/index.mjs" ]]; then
+    error "  dist/index.js 或 dist/index.mjs 不存在！"
+    errors=$((errors + 1))
+  else
+    ok "  dist/index.js 存在"
+  fi
+
+  # 检查扩展的 runtime-api.js
+  local extensions=("speech-core" "image-generation-core" "media-understanding-core")
+  for ext in "${extensions[@]}"; do
+    if [[ -f "$PROJECT_DIR/dist/extensions/$ext/runtime-api.js" ]]; then
+      ok "  dist/extensions/$ext/runtime-api.js 存在"
+    fi
+  done
+
+  # 运行项目自带的 release-check（如果可用）
+  if [[ -f "$PROJECT_DIR/scripts/release-check.ts" ]]; then
+    info "  运行 release-check..."
+    if node --import tsx "$PROJECT_DIR/scripts/release-check.ts" 2>&1; then
+      ok "  release-check 通过"
+    else
+      warn "  release-check 失败（检查上方输出），但继续发布"
+    fi
+  fi
+
+  if [[ $errors -gt 0 ]]; then
+    error "构建产物验证失败 ($errors 个错误)，终止发布！"
+    error "请先运行完整构建: pnpm build"
+    exit 1
+  fi
 
   echo ""
 }
@@ -196,6 +264,15 @@ step_publish() {
   current_version=$(node -p "require('$PROJECT_DIR/package.json').version")
 
   info "发布 stableclaw@$current_version 到 npm..."
+  echo ""
+
+  # 先 dry-run 验证包可以正常打包
+  info "预检查 npm pack..."
+  if ! npm pack --dry-run --ignore-scripts > /dev/null 2>&1; then
+    error "npm pack --dry-run 失败，包可能有问题"
+    exit 1
+  fi
+  ok "npm pack 预检查通过"
   echo ""
 
   # 使用 OPENCLAW_PREPACK_PREPARED=1 跳过 prepack 中的重复构建
@@ -264,6 +341,7 @@ step_publish_only() {
 # ── 主流程 ──
 main() {
   local skip_build=false
+  local skip_verify_build=false
   local token=""
 
   # 解析参数
@@ -271,6 +349,10 @@ main() {
     case "$1" in
       --skip-build)
         skip_build=true
+        shift
+        ;;
+      --skip-verify)
+        skip_verify_build=true
         shift
         ;;
       --help|-h)
@@ -281,6 +363,7 @@ main() {
         echo ""
         echo "选项:"
         echo "  --skip-build    跳过构建步骤，直接发布（需要已有 dist/ 产物）"
+        echo "  --skip-verify   跳过构建后验证（不推荐）"
         echo "  --help, -h      显示帮助信息"
         echo ""
         echo "npm token 获取方式:"
@@ -311,6 +394,9 @@ main() {
     step_publish_only
   else
     step_build
+    if [[ "$skip_verify_build" != true ]]; then
+      step_verify_build   # 构建后验证（关键安全检查）
+    fi
     step_publish
   fi
 
