@@ -200,9 +200,14 @@ step_build() {
   "$pnpm_cmd" build
   ok "  [3/4] 构建完成"
 
-  # 构建 UI
+  # 构建 UI（Dashboard 控制面板前端资源）
+  # 注意：pnpm build 不包含 ui:build！这是独立的命令！
   info "  [4/4] pnpm ui:build..."
-  "$pnpm_cmd" ui:build || warn "  [4/4] UI 构建失败（非致命，继续发布）"
+  if ! "$pnpm_cmd" ui:build; then
+    error "  [4/4] UI 构建失败！Dashboard 将无法使用。终止发布。"
+    error "  请检查 ui/ 目录和 UI 依赖是否正确安装。"
+    exit 1
+  fi
   ok "  [4/4] UI 构建完成"
 
   echo ""
@@ -229,6 +234,16 @@ step_verify_build() {
     errors=$((errors + 1))
   else
     ok "  dist/index.js 存在"
+  fi
+
+  # 检查 Dashboard UI — 如果缺失，用户打开 Dashboard 会报错
+  # "Control UI assets not found"
+  if [[ ! -f "$PROJECT_DIR/dist/control-ui/index.html" ]]; then
+    error "  dist/control-ui/index.html 不存在！Dashboard 将无法加载。"
+    error "  必须执行: pnpm ui:build"
+    errors=$((errors + 1))
+  else
+    ok "  dist/control-ui/index.html 存在（Dashboard UI 可用）"
   fi
 
   # 检查扩展的 runtime-api.js
