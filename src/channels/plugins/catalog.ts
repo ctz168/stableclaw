@@ -4,7 +4,7 @@ import { MANIFEST_KEY } from "../../compat/legacy-names.js";
 import { resolveOpenClawPackageRootSync } from "../../infra/openclaw-root.js";
 import { resolveBundledPluginsDir } from "../../plugins/bundled-dir.js";
 import { discoverOpenClawPlugins } from "../../plugins/discovery.js";
-import { loadPluginManifest } from "../../plugins/manifest.js";
+import { getPackageManifestMetadata, loadPluginManifest } from "../../plugins/manifest.js";
 import type { OpenClawPackageManifest } from "../../plugins/manifest.js";
 import type { PackageManifest as PluginPackageManifest } from "../../plugins/manifest.js";
 import type { PluginOrigin } from "../../plugins/types.js";
@@ -340,7 +340,7 @@ function loadBundledMetadataCatalogEntries(options: CatalogOptions): ChannelPlug
       rootDir: pluginDir,
       origin: "bundled",
       workspaceDir: options.workspaceDir,
-      packageManifest: packageJson.openclaw,
+      packageManifest: getPackageManifestMetadata(packageJson),
     });
     if (entry) {
       entries.push(entry);

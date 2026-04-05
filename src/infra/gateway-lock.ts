@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
+import type { FileHandle as FileHandleType } from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
 import { z } from "zod";
@@ -279,7 +280,7 @@ export async function acquireGatewayLock(
   await fs.mkdir(path.dirname(globalLockPath), { recursive: true });
   
   const startedAt = now();
-  let globalLockHandle: fsSync.FileHandle | null = null;
+  let globalLockHandle: FileHandleType | null = null;
   let lastGlobalPayload: LockPayload | null = null;
   
   // Try to acquire global lock with retry and exponential backoff

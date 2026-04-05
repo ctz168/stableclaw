@@ -150,9 +150,9 @@ const handleWorkflowSummary = async (event: {
       (cfg
         ? resolveAgentWorkspaceDir(
             cfg,
-            resolveAgentIdByWorkspacePath(cfg, workspaceDir ?? ""),
+            resolveAgentIdByWorkspacePath(cfg, workspaceDir ?? "") ?? "",
           )
-        : path.join(resolveStateDir(process.env, os.homedir()), "workspace"));
+        : path.join(resolveStateDir(process.env, () => os.homedir()), "workspace"));
 
     const wfConfig: WorkflowSummaryConfig = resolveWorkflowSummaryConfig(cfg, resolvedWorkspace);
     if (!wfConfig.enabled) {

@@ -21,7 +21,7 @@ export type MigrateOptions = {
 async function formatMigrationSummary(summary: Awaited<ReturnType<typeof getMigrationSummary>>): Promise<string> {
   const lines: string[] = [];
 
-  lines.push(`${theme.bold("Migration Status:")}`);
+  lines.push(`${theme.heading("Migration Status:")}`);
   lines.push(`  OpenClaw directory:     ${summary.openclawDir || "Not found"}`);
   lines.push(`  OpenClaw exists:        ${summary.openclawExists ? "✓ Yes" : "✗ No"}`);
   lines.push(`  OpenClaw running:       ${summary.openclawRunning ? `✓ Yes (PID: ${summary.openclawPid})` : "✗ No"}`);
@@ -49,7 +49,7 @@ export function registerMigrateCli(program: Command) {
     .option("--openclaw-dir <path>", "Manually specify OpenClaw configuration directory")
     .action(async (opts: MigrateOptions) => {
       try {
-        console.log(theme.bold("\n🔄 OpenClaw → StableClaw Migration\n"));
+        console.log(theme.heading("\n🔄 OpenClaw → StableClaw Migration\n"));
 
         // Show migration summary
         const summary = await getMigrationSummary();
@@ -124,7 +124,7 @@ export function registerMigrateCli(program: Command) {
     .command("status")
     .description("Check migration status and available sources")
     .action(async () => {
-      console.log(theme.bold("\n📊 Migration Status\n"));
+      console.log(theme.heading("\n📊 Migration Status\n"));
 
       const summary = await getMigrationSummary();
       console.log(await formatMigrationSummary(summary));
