@@ -5,7 +5,13 @@ import { resetToolStream } from "./app-tool-stream.ts";
 import type { OpenClawApp } from "./app.ts";
 import { executeSlashCommand } from "./chat/slash-command-executor.ts";
 import { parseSlashCommand } from "./chat/slash-commands.ts";
-import { abortChatRun, loadChatHistory, sendChatMessage } from "./controllers/chat.ts";
+import {
+  abortChatRun,
+  loadChatHistory,
+  loadChatHistoryWithCache,
+  refreshChatHistoryIfNeeded,
+  sendChatMessage,
+} from "./controllers/chat.ts";
 import { loadModels } from "./controllers/models.ts";
 import { loadSessions } from "./controllers/sessions.ts";
 import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway.ts";
@@ -369,6 +375,9 @@ async function clearChatHistory(host: ChatHost) {
   if (!host.client || !host.connected) {
     return;
   }
+  // Invalidate cache for this session before clearing
+  const cacheHost = host as unknown as { invalidateChatCache?: (key?: string) => void };
+  cacheHost.invalidateChatCache?.(host.sessionKey);
   try {
     await host.client.request("sessions.reset", { key: host.sessionKey });
     host.chatMessages = [];
@@ -392,9 +401,15 @@ function injectCommandResult(host: ChatHost, content: string) {
   ];
 }
 
-export async function refreshChat(host: ChatHost, opts?: { scheduleScroll?: boolean }) {
+export async function refreshChat(host: ChatHost, opts?: { scheduleScroll?: boolean; background?: boolean }) {
+  const isBackground = Boolean(opts?.background);
+  const app = host as unknown as OpenClawApp;
   await Promise.all([
-    loadChatHistory(host as unknown as OpenClawApp),
+    isBackground
+      ? refreshChatHistoryIfNeeded(host as unknown as OpenClawApp)
+      : loadChatHistoryWithCache(host as unknown as OpenClawApp, {
+          restoreFromCache: (sessionKey: string) => app.restoreChatFromCache(sessionKey),
+        }),
     loadSessions(host as unknown as OpenClawApp, {
       activeMinutes: 0,
       limit: 0,

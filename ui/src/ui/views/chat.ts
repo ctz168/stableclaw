@@ -59,6 +59,7 @@ export type ChatProps = {
   canAbort?: boolean;
   compactionStatus?: CompactionIndicatorStatus | null;
   fallbackStatus?: FallbackIndicatorStatus | null;
+  chatRunId?: string | null;
   messages: unknown[];
   toolMessages: unknown[];
   streamSegments: Array<{ text: string; ts: number }>;
@@ -692,6 +693,59 @@ function renderWelcomeState(props: ChatProps): TemplateResult {
   `;
 }
 
+/**
+ * Animated thinking/execution indicator shown when the agent is actively
+ * processing a request but has not yet started streaming a response.
+ *
+ * Three distinct visual states:
+ *  - "waiting" (pulsing dot): message sent, agent has not started responding yet
+ *  - "thinking" (ripple animation): agent is actively reasoning or executing tools
+ *  - "streaming" (no extra indicator — the streaming bubble handles this)
+ */
+function renderAgentThinkingIndicator(
+  props: ChatProps,
+  assistantIdentity: { name: string; avatar: string | null },
+  isWaiting: boolean,
+  isBusy: boolean,
+): TemplateResult | typeof nothing {
+  // Don't show if agent is actively streaming text — the streaming bubble suffices
+  if (!isBusy || props.stream !== null) {
+    return nothing;
+  }
+  const name = assistantIdentity.name ?? "Assistant";
+
+  return html`
+    <div class="agent-thinking-indicator" role="status" aria-live="polite" aria-label="${name} is thinking">
+      <div class="agent-thinking-indicator__avatar">
+        ${assistantIdentity.avatar
+          ? html`<img
+              src=${assistantIdentity.avatar}
+              alt=${name}
+              style="width:24px; height:24px; border-radius:50%; object-fit:cover;"
+            />`
+          : html`<div class="agent-thinking-indicator__avatar-fallback">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16l-6.4 5.2L8 14 2 9.2h7.6z" />
+              </svg>
+            </div>`}
+      </div>
+      <div class="agent-thinking-indicator__bubble">
+        <div class="agent-thinking-indicator__content">
+          <div class="agent-thinking-indicator__dots" aria-hidden="true">
+            <span class="agent-thinking-indicator__dot"></span>
+            <span class="agent-thinking-indicator__dot"></span>
+            <span class="agent-thinking-indicator__dot"></span>
+          </div>
+          <span class="agent-thinking-indicator__label">
+            ${isWaiting ? "Thinking" : "Working"}
+          </span>
+        </div>
+        <div class="agent-thinking-indicator__progress" aria-hidden="true"></div>
+      </div>
+    </div>
+  `;
+}
+
 function renderSearchBar(requestUpdate: () => void): TemplateResult | typeof nothing {
   if (!vs.searchOpen) {
     return nothing;
@@ -958,6 +1012,8 @@ export function renderChat(props: ChatProps) {
 
   const chatItems = buildChatItems(props);
   const isEmpty = chatItems.length === 0 && !props.loading;
+  const isAgentBusy = props.sending || props.stream !== null || Boolean(props.canAbort && props.chatRunId);
+  const isWaitingForResponse = props.sending && props.stream === null && !isBusy;
 
   const thread = html`
     <div
@@ -1055,6 +1111,7 @@ export function renderChat(props: ChatProps) {
             return nothing;
           },
         )}
+        ${renderAgentThinkingIndicator(props, assistantIdentity, isWaitingForResponse, isAgentBusy)}
       </div>
     </div>
   `;

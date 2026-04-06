@@ -12,7 +12,7 @@ import {
   resolveChatModelSelectState,
 } from "./chat-model-select-state.ts";
 import { refreshVisibleToolsEffectiveForCurrentSession } from "./controllers/agents.ts";
-import { ChatState, loadChatHistory } from "./controllers/chat.ts";
+import { ChatState, loadChatHistoryWithCache } from "./controllers/chat.ts";
 import { loadSessions } from "./controllers/sessions.ts";
 import { icons } from "./icons.ts";
 import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation.ts";
@@ -493,6 +493,11 @@ export function renderChatMobileToggle(state: AppViewState) {
 }
 
 export function switchChatSession(state: AppViewState, nextSessionKey: string) {
+  // AJAX optimization: cache current session's messages before switching
+  // so we can instantly restore them when switching back.
+  const appRef = state as unknown as OpenClawApp;
+  appRef.cacheCurrentChatMessages();
+
   state.sessionKey = nextSessionKey;
   state.chatMessage = "";
   state.chatStream = null;
@@ -513,7 +518,10 @@ export function switchChatSession(state: AppViewState, nextSessionKey: string) {
     nextSessionKey,
     true,
   );
-  void loadChatHistory(state as unknown as ChatState);
+  // Use cached history for instant display, then background refresh
+  void loadChatHistoryWithCache(state as unknown as ChatState, {
+    restoreFromCache: (key: string) => appRef.restoreChatFromCache(key),
+  });
   void refreshSessionOptions(state);
 }
 

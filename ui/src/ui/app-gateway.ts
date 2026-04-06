@@ -21,7 +21,7 @@ import { shouldReloadHistoryForFinalEvent } from "./chat-event-reload.ts";
 import { formatConnectError } from "./connect-error.ts";
 import { loadAgents } from "./controllers/agents.ts";
 import { loadAssistantIdentity } from "./controllers/assistant-identity.ts";
-import { loadChatHistory } from "./controllers/chat.ts";
+import { loadChatHistory, loadChatHistoryWithCache } from "./controllers/chat.ts";
 import { handleChatEvent, type ChatEventPayload } from "./controllers/chat.ts";
 import { loadDevices } from "./controllers/devices.ts";
 import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
@@ -246,6 +246,9 @@ export function connectGateway(host: GatewayHost, options?: ConnectGatewayOption
           host as unknown as Parameters<typeof flushChatQueueForEvent>[0],
         );
       }
+      void loadChatHistoryWithCache(host as unknown as OpenClawApp, {
+        restoreFromCache: (key: string) => (host as unknown as OpenClawApp).restoreChatFromCache(key),
+      });
       void subscribeSessions(host as unknown as OpenClawApp);
       void loadAssistantIdentity(host as unknown as OpenClawApp);
       void loadAgents(host as unknown as OpenClawApp);
@@ -337,9 +340,10 @@ function handleTerminalChatEvent(
     }
   }
   // Reload history when tools were used so the persisted tool results
-  // replace the now-cleared streaming state.
+  // replace the now-cleared streaming state. Use background refresh to avoid
+  // showing loading skeleton during active conversation.
   if (hadToolEvents && state === "final") {
-    void loadChatHistory(host as unknown as OpenClawApp);
+    void loadChatHistory(host as unknown as OpenClawApp, { background: true });
     return true;
   }
   return false;
@@ -355,7 +359,7 @@ function handleChatGatewayEvent(host: GatewayHost, payload: ChatEventPayload | u
   const state = handleChatEvent(host as unknown as OpenClawApp, payload);
   const historyReloaded = handleTerminalChatEvent(host, payload, state);
   if (state === "final" && !historyReloaded && shouldReloadHistoryForFinalEvent(payload)) {
-    void loadChatHistory(host as unknown as OpenClawApp);
+    void loadChatHistory(host as unknown as OpenClawApp, { background: true });
   }
 }
 

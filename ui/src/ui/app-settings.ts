@@ -268,7 +268,13 @@ export async function refreshActiveTab(host: SettingsHost) {
     await loadExecApprovals(host as unknown as OpenClawApp);
   }
   if (host.tab === "chat") {
-    await refreshChat(host as unknown as Parameters<typeof refreshChat>[0]);
+    // Use background refresh when switching to chat tab — if we already have
+    // messages loaded, don't show the loading skeleton. This provides a
+    // seamless AJAX-like experience.
+    const hasMessages = (host as unknown as { chatMessages?: unknown[] }).chatMessages?.length;
+    await refreshChat(host as unknown as Parameters<typeof refreshChat>[0], {
+      background: Boolean(hasMessages),
+    });
     scheduleChatScroll(
       host as unknown as Parameters<typeof scheduleChatScroll>[0],
       !host.chatHasAutoScrolled,

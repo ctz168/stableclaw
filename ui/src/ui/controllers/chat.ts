@@ -48,6 +48,26 @@ export type ChatState = {
   lastError: string | null;
 };
 
+/** Extended chat state with AJAX cache support (used internally). */
+export type ChatStateWithCache = ChatState & {
+  chatLastRefreshedAt: number;
+  chatBackgroundRefreshInFlight: boolean;
+};
+
+/** Cache accessors for session-based chat history caching. */
+export type ChatCacheAccessors = {
+  restoreFromCache: (sessionKey: string) => boolean;
+};
+
+export type LoadChatHistoryOptions = {
+  /** If true, load without showing loading skeleton (silent AJAX refresh). */
+  background?: boolean;
+  /** If true, skip the load entirely if data was refreshed recently. */
+  skipIfFresh?: boolean;
+  /** Maximum age in ms before data is considered stale (default 30s). */
+  staleThresholdMs?: number;
+};
+
 export type ChatEventPayload = {
   runId: string;
   sessionKey: string;
@@ -68,12 +88,44 @@ function maybeResetToolStream(state: ChatState) {
   }
 }
 
-export async function loadChatHistory(state: ChatState) {
+/**
+ * Default staleness threshold in ms — data fresher than this won't trigger
+ * a background reload unless forced.
+ */
+const DEFAULT_STALE_THRESHOLD_MS = 30_000;
+
+export async function loadChatHistory(state: ChatState, options?: LoadChatHistoryOptions) {
   if (!state.client || !state.connected) {
     return;
   }
-  state.chatLoading = true;
+
+  const isBackground = Boolean(options?.background);
+  const staleThresholdMs = options?.staleThresholdMs ?? DEFAULT_STALE_THRESHOLD_MS;
+  const cache = state as unknown as Partial<ChatStateWithCache>;
+
+  // Skip if data is fresh and this is a background/stale check
+  if (options?.skipIfFresh && cache.chatLastRefreshedAt) {
+    const age = Date.now() - cache.chatLastRefreshedAt;
+    if (age < staleThresholdMs) {
+      return;
+    }
+  }
+
+  // Prevent duplicate background refreshes
+  if (isBackground && cache.chatBackgroundRefreshInFlight) {
+    return;
+  }
+
+  // Only show loading skeleton for foreground (non-background) loads
+  if (!isBackground) {
+    state.chatLoading = true;
+  }
   state.lastError = null;
+
+  if (isBackground) {
+    cache.chatBackgroundRefreshInFlight = true;
+  }
+
   try {
     const res = await state.client.request<{ messages?: Array<unknown>; thinkingLevel?: string }>(
       "chat.history",
@@ -83,8 +135,10 @@ export async function loadChatHistory(state: ChatState) {
       },
     );
     const messages = Array.isArray(res.messages) ? res.messages : [];
-    state.chatMessages = messages.filter((message) => !isAssistantSilentReply(message));
+    const filteredMessages = messages.filter((message) => !isAssistantSilentReply(message));
+    state.chatMessages = filteredMessages;
     state.chatThinkingLevel = res.thinkingLevel ?? null;
+    cache.chatLastRefreshedAt = Date.now();
     // Clear all streaming state — history includes tool results and text
     // inline, so keeping streaming artifacts would cause duplicates.
     maybeResetToolStream(state);
@@ -95,12 +149,50 @@ export async function loadChatHistory(state: ChatState) {
       state.chatMessages = [];
       state.chatThinkingLevel = null;
       state.lastError = formatMissingOperatorReadScopeMessage("existing chat history");
-    } else {
+    } else if (!isBackground) {
+      // Only surface non-background errors to avoid noise
       state.lastError = String(err);
     }
   } finally {
-    state.chatLoading = false;
+    if (!isBackground) {
+      state.chatLoading = false;
+    }
+    cache.chatBackgroundRefreshInFlight = false;
   }
+}
+
+/**
+ * Smart chat history loader with caching:
+ * 1. Tries to restore from cache for instant display
+ * 2. Always refreshes in background to get latest data
+ * 3. Only shows loading skeleton when no cache is available
+ */
+export async function loadChatHistoryWithCache(
+  state: ChatState,
+  cacheAccessors?: ChatCacheAccessors,
+) {
+  if (!state.client || !state.connected) {
+    return;
+  }
+
+  // Try to restore from cache for instant display
+  const hadCache = cacheAccessors?.restoreFromCache(state.sessionKey) ?? false;
+
+  if (hadCache) {
+    // We have cached data — do a silent background refresh
+    await loadChatHistory(state, { background: true });
+  } else {
+    // No cache — do a full foreground load with loading skeleton
+    await loadChatHistory(state);
+  }
+}
+
+/**
+ * Background-only refresh that only fetches if data is stale.
+ * Ideal for tab switches where we want seamless UX.
+ */
+export async function refreshChatHistoryIfNeeded(state: ChatState) {
+  await loadChatHistory(state, { background: true, skipIfFresh: true });
 }
 
 function dataUrlToBase64(dataUrl: string): { content: string; mimeType: string } | null {

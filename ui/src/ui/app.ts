@@ -458,11 +458,70 @@ export class OpenClawApp extends LitElement {
   private nodesPollInterval: number | null = null;
   private logsPollInterval: number | null = null;
   private debugPollInterval: number | null = null;
-  private chatPollInterval: number | null = null;
   private logsScrollFrame: number | null = null;
   private toolStreamById = new Map<string, ToolStreamEntry>();
   private toolStreamOrder: string[] = [];
   refreshSessionsAfterChat = new Set<string>();
+
+  // ---------------------------------------------------------------------------
+  // Session-based chat history cache for AJAX-style smooth transitions
+  // ---------------------------------------------------------------------------
+  /** Cached messages per session key to avoid full reloads on switch. */
+  private chatHistoryCache = new Map<
+    string,
+    { messages: unknown[]; thinkingLevel: string | null; loadedAt: number }
+  >();
+  /** Timestamp of the last successful chat history load for staleness checks. */
+  chatLastRefreshedAt = 0;
+  /** Track if a background refresh is in-flight to avoid duplicate requests. */
+  chatBackgroundRefreshInFlight = false;
+
+  /**
+   * Save current chat messages to the session cache before switching.
+   * Called automatically before sessionKey changes.
+   */
+  cacheCurrentChatMessages() {
+    if (this.sessionKey && this.chatMessages.length > 0) {
+      this.chatHistoryCache.set(this.sessionKey, {
+        messages: this.chatMessages,
+        thinkingLevel: this.chatThinkingLevel,
+        loadedAt: this.chatLastRefreshedAt,
+      });
+      // Keep cache size bounded — evict oldest entries when > 20 sessions
+      if (this.chatHistoryCache.size > 20) {
+        const entries = [...this.chatHistoryCache.entries()];
+        entries.sort((a, b) => a[1].loadedAt - b[1].loadedAt);
+        for (let i = 0; i < entries.length - 15; i++) {
+          this.chatHistoryCache.delete(entries[i][0]);
+        }
+      }
+    }
+  }
+
+  /**
+   * Restore chat messages from session cache. Returns true if cache hit.
+   */
+  restoreChatFromCache(sessionKey: string): boolean {
+    const cached = this.chatHistoryCache.get(sessionKey);
+    if (!cached || cached.messages.length === 0) {
+      return false;
+    }
+    this.chatMessages = cached.messages;
+    this.chatThinkingLevel = cached.thinkingLevel;
+    this.chatLoading = false;
+    return true;
+  }
+
+  /** Invalidate a specific session's cache (e.g. after /clear, /reset). */
+  invalidateChatCache(sessionKey?: string) {
+    const key = sessionKey ?? this.sessionKey;
+    this.chatHistoryCache.delete(key);
+  }
+
+  /** Invalidate all session caches. */
+  invalidateAllChatCaches() {
+    this.chatHistoryCache.clear();
+  }
   basePath = "";
   private popStateHandler = () =>
     onPopStateInternal(this as unknown as Parameters<typeof onPopStateInternal>[0]);
