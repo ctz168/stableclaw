@@ -183,6 +183,94 @@ export function runBundledPluginPostinstall(params = {}) {
   }
 }
 
+/**
+ * Auto-install and start the Gateway daemon service after npm install.
+ * This ensures stableclaw runs in daemon mode by default after installation.
+ * Skipped for source checkouts and when OPENCLAW_SKIP_DAEMON_AUTOINSTALL is set.
+ */
+function runDaemonAutoInstall(params = {}) {
+  const env = params.env ?? process.env;
+  const log = params.log ?? console;
+  const packageRoot = params.packageRoot ?? DEFAULT_PACKAGE_ROOT;
+  const spawn = params.spawnSync ?? spawnSync;
+  const pathExists = params.existsSync ?? existsSync;
+
+  // Skip in source checkouts
+  if (isSourceCheckoutRoot({ packageRoot, existsSync: pathExists })) {
+    return;
+  }
+
+  // Allow opt-out
+  if (env.OPENCLAW_SKIP_DAEMON_AUTOINSTALL?.trim()) {
+    log.log("[postinstall] skipping daemon auto-install (OPENCLAW_SKIP_DAEMON_AUTOINSTALL is set)");
+    return;
+  }
+
+  // Resolve the stableclaw binary path
+  const platform = process.platform;
+  const binName = platform === "win32" ? "stableclaw.cmd" : "stableclaw";
+  let binPath = join(packageRoot, binName);
+
+  // For global installs, the bin might be symlinked elsewhere
+  if (!pathExists(binPath)) {
+    // Try to find it in node_modules/.bin or global bin dir
+    const globalNodeModules = dirname(dirname(process.execPath));
+    const possiblePaths = [
+      join(globalNodeModules, binName),
+      join("/usr/local/bin", binName),
+      join("/usr/bin", binName),
+    ];
+    for (const p of possiblePaths) {
+      if (pathExists(p)) {
+        binPath = p;
+        break;
+      }
+    }
+  }
+
+  if (!pathExists(binPath)) {
+    log.log("[postinstall] stableclaw binary not found, skipping daemon auto-install");
+    return;
+  }
+
+  log.log("[postinstall] auto-installing Gateway daemon service...");
+
+  // Install the daemon service (--force to overwrite if already exists)
+  const installResult = spawn(binPath, ["daemon", "install", "--force", "--json"], {
+    encoding: "utf8",
+    env: { ...env, OPENCLAW_SKIP_DAEMON_AUTOINSTALL: "1" },
+    stdio: "pipe",
+    shell: platform === "win32",
+  });
+
+  if (installResult.status === 0) {
+    log.log("[postinstall] Gateway daemon service installed successfully");
+
+    // Start the daemon service
+    log.log("[postinstall] starting Gateway daemon service...");
+    const startResult = spawn(binPath, ["daemon", "start", "--json"], {
+      encoding: "utf8",
+      env: { ...env, OPENCLAW_SKIP_DAEMON_AUTOINSTALL: "1" },
+      stdio: "pipe",
+      shell: platform === "win32",
+    });
+
+    if (startResult.status === 0) {
+      log.log("[postinstall] Gateway daemon service started successfully");
+    } else {
+      log.warn(
+        `[postinstall] failed to start daemon service: ${startResult.stderr || startResult.stdout || "unknown error"}`,
+      );
+    }
+  } else {
+    log.warn(
+      `[postinstall] failed to install daemon service: ${installResult.stderr || installResult.stdout || "unknown error"}`,
+    );
+  }
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   runBundledPluginPostinstall();
+  // After bundled plugins are installed, auto-install daemon mode
+  runDaemonAutoInstall();
 }
