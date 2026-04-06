@@ -42,6 +42,7 @@ import {
   type GatewayHelloOk,
 } from "./gateway.ts";
 import { GatewayBrowserClient } from "./gateway.ts";
+import { resolveAgentIdFromSessionKey } from "../../../src/routing/session-key.js";
 import type { Tab } from "./navigation.ts";
 import type { UiSettings } from "./storage.ts";
 import type {
@@ -256,6 +257,9 @@ export function connectGateway(host: GatewayHost, options?: ConnectGatewayOption
       void loadNodes(host as unknown as OpenClawApp, { quiet: true });
       void loadDevices(host as unknown as OpenClawApp, { quiet: true });
       void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);
+      // Load task.md for the current agent so the task panel renders on connect
+      const initialAgentId = resolveAgentIdFromSessionKey(host.sessionKey) || "main";
+      void (host as unknown as OpenClawApp).loadTaskMd(initialAgentId);
     },
     onClose: ({ code, reason, error }) => {
       if (host.client !== client) {
@@ -380,6 +384,10 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
       host as unknown as Parameters<typeof handleAgentEvent>[0],
       evt.payload as AgentEventPayload | undefined,
     );
+    // Refresh task.md when the agent emits an event (tool calls, file writes, etc.)
+    // so the task panel stays in sync with agent activity.
+    const agentId = resolveAgentIdFromSessionKey(host.sessionKey) || "main";
+    void (host as unknown as OpenClawApp).loadTaskMd(agentId);
     return;
   }
 
@@ -476,6 +484,9 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
 
   // When config changes on the server (models, channels, plugins), refresh
   // the model list so the chat page stays in sync without a page reload.
+  // Always refresh the model catalog on config changes — even if the server
+  // didn't explicitly mark models as invalidated, the available models may
+  // have changed due to provider config edits, API key rotations, etc.
   if (evt.event === "config.changed") {
     const payload = evt.payload as
       | {
@@ -485,10 +496,8 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
           changedPaths?: string[];
         }
       | undefined;
-    if (payload?.modelsInvalidated) {
-      // Refresh the model catalog in the chat page dropdown.
-      void refreshChatModels(host as unknown as Parameters<typeof refreshChatModels>[0]);
-    }
+    // Always refresh models on any config change for real-time sync.
+    void refreshChatModels(host as unknown as Parameters<typeof refreshChatModels>[0]);
     // Reload the active tab data (e.g. config page, channels page) so
     // edits that affect the current view are reflected immediately.
     void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);

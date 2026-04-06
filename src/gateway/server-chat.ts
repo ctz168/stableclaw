@@ -817,6 +817,18 @@ export function createAgentEventHandler({
         if (chatLink) {
           const finished = chatRunState.registry.shift(evt.runId);
           if (!finished) {
+            // Registry was already consumed (race condition or duplicate event).
+            // Always emit the final event so the client UI does not hang.
+            // Use the chatLink's sessionKey/clientRunId from the original registration.
+            emitChatFinal(
+              chatLink.sessionKey,
+              chatLink.clientRunId,
+              evt.runId,
+              evt.seq,
+              lifecyclePhase === "error" ? "error" : "done",
+              evt.data?.error,
+              evtStopReason,
+            );
             clearAgentRunContext(evt.runId);
             return;
           }

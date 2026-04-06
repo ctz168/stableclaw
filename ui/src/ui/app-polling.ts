@@ -2,15 +2,37 @@ import type { OpenClawApp } from "./app.ts";
 import { loadDebug } from "./controllers/debug.ts";
 import { loadLogs } from "./controllers/logs.ts";
 import { loadNodes } from "./controllers/nodes.ts";
+import { refreshChatModels } from "./app-chat.ts";
 
 type PollingHost = {
   nodesPollInterval: number | null;
   logsPollInterval: number | null;
   debugPollInterval: number | null;
+  modelsPollInterval: number | null;
   connected: boolean;
   tab: string;
   client: unknown;
 };
+
+/** Poll the model catalog every 30 seconds so the chat dropdown stays in sync
+ *  even if a `config.changed` event was missed (e.g. page was in background). */
+export function startModelsPolling(host: PollingHost) {
+  if (host.modelsPollInterval != null) {
+    return;
+  }
+  host.modelsPollInterval = window.setInterval(
+    () => void refreshChatModels(host as unknown as OpenClawApp),
+    30_000,
+  );
+}
+
+export function stopModelsPolling(host: PollingHost) {
+  if (host.modelsPollInterval == null) {
+    return;
+  }
+  clearInterval(host.modelsPollInterval);
+  host.modelsPollInterval = null;
+}
 
 export function startNodesPolling(host: PollingHost) {
   if (host.nodesPollInterval != null) {

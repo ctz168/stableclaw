@@ -1,8 +1,10 @@
 import { connectGateway } from "./app-gateway.ts";
 import {
   startLogsPolling,
+  startModelsPolling,
   startNodesPolling,
   stopLogsPolling,
+  stopModelsPolling,
   stopNodesPolling,
   startDebugPolling,
   stopDebugPolling,
@@ -58,8 +60,9 @@ export function handleConnected(host: LifecycleHost) {
     connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
   });
   startNodesPolling(host as unknown as Parameters<typeof startNodesPolling>[0]);
-  // Chat polling removed: chat history is now loaded on connect via the gateway
-  // hello handler, and subsequent updates arrive as real-time WebSocket events.
+  // Poll the model catalog periodically so the chat dropdown stays in sync
+  // even if a config.changed event was missed (e.g. page in background).
+  startModelsPolling(host as unknown as Parameters<typeof startModelsPolling>[0]);
   if (host.tab === "logs") {
     startLogsPolling(host as unknown as Parameters<typeof startLogsPolling>[0]);
   }
@@ -76,6 +79,7 @@ export function handleDisconnected(host: LifecycleHost) {
   host.connectGeneration += 1;
   window.removeEventListener("popstate", host.popStateHandler);
   stopNodesPolling(host as unknown as Parameters<typeof stopNodesPolling>[0]);
+  stopModelsPolling(host as unknown as Parameters<typeof stopModelsPolling>[0]);
   stopLogsPolling(host as unknown as Parameters<typeof stopLogsPolling>[0]);
   stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
   host.client?.stop();

@@ -11,6 +11,11 @@ import {
 
 const SILENT_REPLY_PATTERN = /^\s*NO_REPLY\s*$/;
 
+/** Maximum time (ms) a chat run can be active before the client auto-recovers.
+ *  If no terminal event (final/error/aborted) arrives within this window, the
+ *  client clears the stuck run state so the user can send new messages. */
+const CHAT_RUN_TIMEOUT_MS = 300_000; // 5 minutes
+
 function isSilentReplyStream(text: string): boolean {
   return SILENT_REPLY_PATTERN.test(text);
 }
@@ -85,6 +90,51 @@ function maybeResetToolStream(state: ChatState) {
     Array.isArray(toolHost.chatStreamSegments)
   ) {
     resetToolStream(toolHost as Parameters<typeof resetToolStream>[0]);
+  }
+}
+
+/** Timer ID for the chat run watchdog. */
+let chatRunWatchdogTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Start a watchdog timer that auto-recovers from stuck chat runs.
+ * If the run is still active after CHAT_RUN_TIMEOUT_MS, the client
+ * clears the stuck state and shows an error so the user can retry.
+ */
+function startChatRunWatchdog(state: ChatState) {
+  stopChatRunWatchdog();
+  chatRunWatchdogTimer = setTimeout(() => {
+    chatRunWatchdogTimer = null;
+    if (state.chatRunId && state.connected) {
+      const elapsed = state.chatStreamStartedAt
+        ? Date.now() - state.chatStreamStartedAt
+        : 0;
+      const timedOutRunId = state.chatRunId;
+      const streamedText = state.chatStream?.trim();
+      // Promote any streamed text into the message list before clearing
+      if (streamedText && !isSilentReplyStream(streamedText)) {
+        state.chatMessages = [
+          ...state.chatMessages,
+          {
+            role: "assistant",
+            content: [{ type: "text", text: streamedText }],
+            timestamp: Date.now(),
+          },
+        ];
+      }
+      state.chatRunId = null;
+      state.chatStream = null;
+      state.chatStreamStartedAt = null;
+      state.lastError = `Response timed out after ${Math.round(elapsed / 1000)}s (runId: ${timedOutRunId.slice(0, 8)}). The message was sent but the server did not complete the response.`;
+    }
+  }, CHAT_RUN_TIMEOUT_MS);
+}
+
+/** Stop the chat run watchdog timer. */
+function stopChatRunWatchdog() {
+  if (chatRunWatchdogTimer !== null) {
+    clearTimeout(chatRunWatchdogTimer);
+    chatRunWatchdogTimer = null;
   }
 }
 
@@ -298,6 +348,8 @@ export async function sendChatMessage(
   state.chatRunId = runId;
   state.chatStream = "";
   state.chatStreamStartedAt = now;
+  // Start watchdog to auto-recover if the server never sends a terminal event
+  startChatRunWatchdog(state);
 
   // Convert attachments to API format
   const apiAttachments = hasAttachments
@@ -326,6 +378,7 @@ export async function sendChatMessage(
     });
     return runId;
   } catch (err) {
+    stopChatRunWatchdog();
     const error = formatConnectError(err);
     state.chatRunId = null;
     state.chatStream = null;
@@ -390,6 +443,7 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
       state.chatStream = next;
     }
   } else if (payload.state === "final") {
+    stopChatRunWatchdog();
     const finalMessage = normalizeFinalAssistantMessage(payload.message);
     if (finalMessage && !isAssistantSilentReply(finalMessage)) {
       state.chatMessages = [...state.chatMessages, finalMessage];
@@ -407,6 +461,7 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
     state.chatRunId = null;
     state.chatStreamStartedAt = null;
   } else if (payload.state === "aborted") {
+    stopChatRunWatchdog();
     const normalizedMessage = normalizeAbortedAssistantMessage(payload.message);
     if (normalizedMessage && !isAssistantSilentReply(normalizedMessage)) {
       state.chatMessages = [...state.chatMessages, normalizedMessage];
@@ -427,6 +482,7 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
     state.chatRunId = null;
     state.chatStreamStartedAt = null;
   } else if (payload.state === "error") {
+    stopChatRunWatchdog();
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;

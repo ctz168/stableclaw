@@ -1841,7 +1841,34 @@ export const chatHandlers: GatewayRequestHandlers = {
               });
             }
           } else {
+            // Agent run was started but dispatchInboundMessage resolved.
+            // The agent event handler should have emitted chat final via the
+            // lifecycle end event, but if it didn't (e.g. agent finished
+            // before chatLink was registered, or the lifecycle event was lost),
+            // we must emit a final now to prevent the client from hanging.
             void emitUserTranscriptUpdate();
+            // Safety net: if the runId is still tracked in the abort
+            // controllers, it means no terminal event was broadcast yet.
+            if (context.chatAbortControllers.has(clientRunId)) {
+              context.logGateway.warn(
+                `chat.send agent run completed but no terminal chat event was emitted for runId=${clientRunId}; emitting fallback final`,
+              );
+              const bufferedText = context.chatRunBuffers?.get(clientRunId);
+              let fallbackMessage: Record<string, unknown> | undefined;
+              if (typeof bufferedText === "string" && bufferedText.trim()) {
+                fallbackMessage = {
+                  role: "assistant",
+                  content: [{ type: "text", text: bufferedText.trim() }],
+                  timestamp: Date.now(),
+                };
+              }
+              broadcastChatFinal({
+                context,
+                runId: clientRunId,
+                sessionKey,
+                message: fallbackMessage,
+              });
+            }
           }
           setGatewayDedupeEntry({
             dedupe: context.dedupe,
