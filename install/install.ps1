@@ -703,9 +703,9 @@ function Main {
             Write-Host "stableclaw onboard" -ForegroundColor Cyan -NoNewline
             Write-Host " later."
         } else {
-            Write-Host "Starting setup..." -ForegroundColor Cyan
+            Write-Host "Starting setup (daemon mode, local gateway)..." -ForegroundColor Cyan
             Write-Host ""
-            Invoke-StableClawCommand onboard
+            Invoke-StableClawCommand onboard --install-daemon --mode local
         }
     }
 }

@@ -344,9 +344,9 @@ main() {
     if $NO_ONBOARD; then
       echo -e "  Run ${ACCENT}stableclaw onboard${NC} later to complete setup."
     else
-      echo -e "  ${ACCENT}Starting setup...${NC}"
+      echo -e "  ${ACCENT}Starting setup (daemon mode, local gateway)...${NC}"
       echo ""
-      stableclaw onboard
+      stableclaw onboard --install-daemon --mode local
     fi
   fi
 }

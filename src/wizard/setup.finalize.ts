@@ -98,13 +98,9 @@ export async function finalizeSetupWizard(
     installDaemon = explicitInstallDaemon;
   } else if (process.platform === "linux" && !systemdAvailable) {
     installDaemon = false;
-  } else if (flow === "quickstart") {
-    installDaemon = true;
   } else {
-    installDaemon = await prompter.confirm({
-      message: "Install Gateway service (recommended)",
-      initialValue: true,
-    });
+    // Default to daemon mode for all flows (quickstart and advanced)
+    installDaemon = true;
   }
 
   if (process.platform === "linux" && !systemdAvailable && installDaemon) {
@@ -633,6 +629,39 @@ export async function finalizeSetupWizard(
     'What now: https://openclaw.ai/showcase ("What People Are Building").',
     "What now",
   );
+
+  // Auto-launch system tray if daemon was installed and gateway is reachable
+  if (installDaemon && gatewayProbe.ok) {
+    try {
+      const { spawn } = await import("node:child_process");
+      const { fileURLToPath } = await import("node:url");
+      const { dirname, resolve, join } = await import("node:path");
+      const trayScript = resolve(dirname(fileURLToPath(import.meta.url.replace(/\.ts$/, ".js"))), "..", "..", "..", "scripts", "tray.mjs");
+      // Try to find tray script from the package
+      let trayPath: string | undefined;
+      try {
+        const { createRequire } = await import("node:module");
+        const require = createRequire(import.meta.url);
+        const pkgRoot = dirname(require.resolve("stableclaw/package.json"));
+        trayPath = join(pkgRoot, "scripts", "tray.mjs");
+      } catch {
+        // fallback: skip tray auto-launch
+      }
+      if (trayPath) {
+        const { existsSync } = await import("node:fs");
+        if (existsSync(trayPath)) {
+          const trayChild = spawn(process.execPath, [trayPath], {
+            stdio: "ignore",
+            detached: true,
+            env: process.env,
+          });
+          trayChild.unref();
+        }
+      }
+    } catch {
+      // Tray auto-launch is best-effort; ignore errors
+    }
+  }
 
   await prompter.outro(
     controlUiOpened
