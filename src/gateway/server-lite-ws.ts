@@ -61,32 +61,79 @@ export type LiteWsHandlerOptions = {
 
 /** Maps gateway method prefixes to the lazy module that must be loaded. */
 const METHOD_MODULE_MAP: Record<string, string> = {
+  // Session & chat (core)
   "sessions.": "plugins",
   "chat.": "plugins",
+  // Agent management
   "agents.": "plugins",
   "agent.": "plugins",
+  // Direct send/poll (legacy compat)
   "send": "plugins",
   "poll": "plugins",
+  // Cron scheduling
   "cron.": "cron",
+  // Node management (mobile nodes, pending commands)
   "nodes.": "plugins",
   "node.": "plugins",
+  // Channel management (channels.status, channels.logout)
   "channels.": "channels",
-  "channel.": "channels",
+  // Model catalog & pricing
   "models.": "model-pricing",
+  // Secrets management
   "secrets.": "plugins",
+  // Config CRUD
   "config.": "plugins",
+  // Plugin lifecycle (plugins.list, plugins.install, etc.)
   "plugins.": "plugins",
-  "plugin.": "plugin-services",
+  // Plugin approval flow (plugin.approval.request, etc.) — needs plugin runtime
+  "plugin.": "plugins",
+  // Device pairing & token management
   "device.": "plugins",
-  "exec-approvals.": "plugins",
+  // Exec approvals (exec.approvals.get, exec.approval.request, etc.)
+  "exec.": "plugins",
+  // Log streaming
   "logs.": "plugins",
-  "presence.": "plugins",
+  // Canvas host commands
   "canvas.": "canvas-host",
-  "tasks.": "task-registry",
+  // Health checks (health., health, status)
   "health.": "channel-health",
+  "health": "plugins",
+  "status": "plugins",
+  // Memory backend
   "memory.": "memory",
+  // Hook lifecycle
   "hooks.": "hooks",
+  // Gmail watcher
   "gmail.": "gmail-watcher",
+  // Skills management (skills.status, skills.install, etc.)
+  "skills.": "plugins",
+  // Tools catalog & effective tools (tools.catalog, tools.effective)
+  "tools.": "plugins",
+  // TTS subsystem (tts.status, tts.convert, etc.)
+  "tts.": "plugins",
+  // Update runner (update.run)
+  "update.": "plugins",
+  // Usage tracking (usage.status, usage.cost, sessions.usage.*)
+  "usage.": "plugins",
+  // Voice wake triggers (voicewake.get, voicewake.set)
+  "voicewake.": "plugins",
+  // Web login flow (web.login.start, web.login.wait)
+  "web.": "plugins",
+  // Wizard flow (wizard.start, wizard.next, etc.)
+  "wizard.": "plugins",
+  // Push notification testing (push.test)
+  "push.": "plugins",
+  // Talk/speech subsystem (talk.config, talk.speak, etc.)
+  "talk.": "plugins",
+  // Doctor diagnostics (doctor.memory.status, etc.)
+  "doctor.": "plugins",
+  // Gateway identity (gateway.identity.get)
+  "gateway.": "plugins",
+  // Node system events (system-event, system-presence, last-heartbeat, set-heartbeats)
+  "system-event": "plugins",
+  "system-presence": "plugins",
+  "last-heartbeat": "plugins",
+  "set-heartbeats": "plugins",
 };
 
 /** Methods that can be handled without any lazy module. */
@@ -792,7 +839,7 @@ function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestCont
     chatDeltaSentAt,
     chatDeltaLastBroadcastLen,
     addChatRun: (_sessionId: string, _entry: { sessionKey: string; clientRunId: string }) => {},
-    removeChatRun: (_sessionId: string, _clientRunId: string) => undefined,
+    removeChatRun: (_sessionId: string, _clientRunId: string, _sessionKey?: string) => undefined,
     subscribeSessionEvents: (connId: string) => {
       sessionSubscribers.set(connId, new Set());
     },

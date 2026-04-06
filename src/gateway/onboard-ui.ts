@@ -5,18 +5,22 @@
  * endpoints for configuration bootstrapping.
  *
  * Routes:
- *   GET  /onboard          - HTML wizard page
+ *   GET  /onboard                - HTML wizard page
  *   GET  /api/onboard/status     - Current configuration status
  *   POST /api/onboard/config     - Save a wizard step's configuration
  *   POST /api/onboard/complete   - Finalize setup and optionally install daemon
  *   GET  /api/onboard/providers  - List available AI providers
  *   POST /api/onboard/test-provider - Validate a provider API key
+ *   GET  /api/onboard/skills     - List available skills
+ *   GET  /api/onboard/hooks      - List available hooks
+ *   POST /api/onboard/search-config  - Save search provider config
+ *   POST /api/onboard/skills-config  - Save skills preferences
+ *   POST /api/onboard/hooks-config   - Save hooks preferences
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import {
-  readConfigFileSnapshot,
   CONFIG_PATH,
 } from "../config/config.js";
 import { resolveGatewayPort } from "../config/paths.js";
@@ -52,6 +56,7 @@ type OnboardProvidersResponse = {
     name: string;
     envKey: string;
     models?: string[];
+    group?: string;
   }>;
 };
 
@@ -66,11 +71,54 @@ type OnboardConfigRequestBody = {
   authMode?: string;
   token?: string;
   password?: string;
+  workspaceDir?: string;
+  setupMode?: string;
 };
 
 type OnboardCompleteRequestBody = {
   workspaceDir?: string;
   customEnv?: string;
+  provider?: string;
+  model?: string;
+  setupMode?: string;
+  searchProvider?: string;
+  searchApiKey?: string;
+  enabledSkills?: string[];
+  enabledHooks?: string[];
+};
+
+type OnboardSearchConfigRequestBody = {
+  provider?: string;
+  apiKey?: string;
+};
+
+type OnboardSkillsConfigRequestBody = {
+  enabled?: string[];
+};
+
+type OnboardHooksConfigRequestBody = {
+  enabled?: string[];
+};
+
+type OnboardSkillsResponse = {
+  skills: Array<{
+    id: string;
+    name: string;
+    description: string;
+    emoji?: string;
+    eligible: boolean;
+    status: "eligible" | "missing" | "disabled" | "blocked";
+  }>;
+};
+
+type OnboardHooksResponse = {
+  hooks: Array<{
+    id: string;
+    name: string;
+    description: string;
+    emoji?: string;
+    loadable: boolean;
+  }>;
 };
 
 type OnboardConfigResponse = {
@@ -105,25 +153,107 @@ const PROVIDERS = [
     name: "OpenAI",
     envKey: "OPENAI_API_KEY",
     models: ["gpt-4o", "gpt-4o-mini", "o1", "o3-mini"],
+    group: "Major",
   },
   {
     id: "anthropic",
     name: "Anthropic",
     envKey: "ANTHROPIC_API_KEY",
     models: ["claude-sonnet-4-20250514", "claude-haiku-4-20250414"],
+    group: "Major",
   },
   {
     id: "google",
     name: "Google AI",
     envKey: "GEMINI_API_KEY",
     models: ["gemini-2.5-pro", "gemini-2.5-flash"],
+    group: "Major",
+  },
+  {
+    id: "deepseek",
+    name: "DeepSeek",
+    envKey: "DEEPSEEK_API_KEY",
+    models: ["deepseek-chat", "deepseek-reasoner"],
+    group: "Popular",
+  },
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    envKey: "OPENROUTER_API_KEY",
+    models: [],
+    group: "Popular",
+  },
+  {
+    id: "mistral",
+    name: "Mistral",
+    envKey: "MISTRAL_API_KEY",
+    models: ["mistral-large-latest", "mistral-small-latest"],
+    group: "Popular",
+  },
+  {
+    id: "xai",
+    name: "xAI (Grok)",
+    envKey: "XAI_API_KEY",
+    models: ["grok-3", "grok-3-mini"],
+    group: "Popular",
+  },
+  {
+    id: "together",
+    name: "Together AI",
+    envKey: "TOGETHER_API_KEY",
+    models: [],
+    group: "Popular",
   },
   {
     id: "custom",
     name: "Custom (OpenAI-Compatible)",
     envKey: "",
     models: [],
+    group: "Other",
   },
+] as const;
+
+// ---------------------------------------------------------------------------
+// Search providers (hardcoded, no external dependency)
+// ---------------------------------------------------------------------------
+
+const SEARCH_PROVIDERS = [
+  {
+    id: "brave",
+    name: "Brave Search",
+    envKey: "BRAVE_API_KEY",
+    description: "Web search via Brave Search API",
+  },
+  {
+    id: "tavily",
+    name: "Tavily",
+    envKey: "TAVILY_API_KEY",
+    description: "AI-powered search optimized for LLMs",
+  },
+] as const;
+
+// ---------------------------------------------------------------------------
+// Skills catalog (static defaults for wizard display)
+// ---------------------------------------------------------------------------
+
+const BUILTIN_SKILLS = [
+  { id: "docx", name: "DOCX", description: "Create and edit Word documents", emoji: "\u{1F4C4}" },
+  { id: "camsnap", name: "CamSnap", description: "Take photos from webcam", emoji: "\u{1F4F7}" },
+  { id: "discord", name: "Discord", description: "Discord channel integration", emoji: "\u{1F6EC}" },
+  { id: "notion", name: "Notion", description: "Notion workspace integration", emoji: "\u{1F4D3}" },
+  { id: "sherpa-onnx-tts", name: "TTS (Sherpa)", description: "Text-to-speech via Sherpa ONNX", emoji: "\u{1F399}" },
+  { id: "model-usage", name: "Model Usage", description: "Track and display model usage stats", emoji: "\u{1F4CA}" },
+  { id: "interview-designer", name: "Interview Designer", description: "Design interview guides", emoji: "\u{1F4DD}" },
+  { id: "aminer-open-academic", name: "AMiner Academic", description: "Academic paper search", emoji: "\u{1F4DA}" },
+] as const;
+
+// ---------------------------------------------------------------------------
+// Hooks catalog (static defaults for wizard display)
+// ---------------------------------------------------------------------------
+
+const BUILTIN_HOOKS = [
+  { id: "session-memory-on-new", name: "Session Memory on /new", description: "Save session context to memory when starting a new session", emoji: "\u{1F9E0}" },
+  { id: "session-summary-on-reset", name: "Session Summary on /reset", description: "Generate a summary before resetting the session", emoji: "\u{1F504}" },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -190,7 +320,7 @@ function isOnboardPage(pathname: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Provider key → env var mapping
+// Provider key -> env var mapping
 // ---------------------------------------------------------------------------
 
 function providerEnvVar(provider: string): string {
@@ -201,6 +331,16 @@ function providerEnvVar(provider: string): string {
       return "ANTHROPIC_API_KEY";
     case "google":
       return "GEMINI_API_KEY";
+    case "deepseek":
+      return "DEEPSEEK_API_KEY";
+    case "openrouter":
+      return "OPENROUTER_API_KEY";
+    case "mistral":
+      return "MISTRAL_API_KEY";
+    case "xai":
+      return "XAI_API_KEY";
+    case "together":
+      return "TOGETHER_API_KEY";
     default:
       return "";
   }
@@ -252,6 +392,21 @@ async function testProviderKey(
       return { ok: res.status < 500, error: res.status >= 500 ? "Provider returned a server error." : undefined };
     } else if (provider === "google") {
       endpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    } else if (provider === "deepseek") {
+      endpoint = "https://api.deepseek.com/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "openrouter") {
+      endpoint = "https://openrouter.ai/api/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "mistral") {
+      endpoint = "https://api.mistral.ai/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "xai") {
+      endpoint = "https://api.x.ai/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "together") {
+      endpoint = "https://api.together.xyz/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
     } else if (provider === "custom" && baseUrl) {
       endpoint = `${baseUrl.replace(/\/+$/, "")}/models`;
       headers = { Authorization: `Bearer ${apiKey}` };
@@ -259,21 +414,20 @@ async function testProviderKey(
       return { ok: false, error: "Unsupported provider or missing base URL." };
     }
 
-    if (provider !== "anthropic") {
-      const res = await fetch(endpoint, {
-        method: "GET",
-        headers,
-        signal: controller.signal,
-      });
-      clearTimeout(timer);
-      if (res.status === 401 || res.status === 403) {
-        return { ok: false, error: "Invalid API key." };
-      }
-      if (res.status >= 500) {
-        return { ok: false, error: "Provider returned a server error." };
-      }
-      return { ok: true };
+    // All providers except anthropic use GET /models endpoint
+    const res = await fetch(endpoint, {
+      method: "GET",
+      headers,
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, error: "Invalid API key." };
     }
+    if (res.status >= 500) {
+      return { ok: false, error: "Provider returned a server error." };
+    }
+    return { ok: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("abort") || msg.includes("timeout")) {
@@ -331,7 +485,11 @@ async function handleStatusRequest(): Promise<OnboardStatusResponse> {
     Boolean(envVars.OPENAI_API_KEY) ||
     Boolean(envVars.ANTHROPIC_API_KEY) ||
     Boolean(envVars.GEMINI_API_KEY) ||
-    Boolean(envVars.OPENROUTER_API_KEY);
+    Boolean(envVars.OPENROUTER_API_KEY) ||
+    Boolean(envVars.DEEPSEEK_API_KEY) ||
+    Boolean(envVars.MISTRAL_API_KEY) ||
+    Boolean(envVars.XAI_API_KEY) ||
+    Boolean(envVars.TOGETHER_API_KEY);
   const port = resolveGatewayPort(cfg);
 
   // Consider the gateway "configured" if it has auth set up and a provider key.
@@ -347,8 +505,155 @@ async function handleProvidersRequest(): Promise<OnboardProvidersResponse> {
       name: p.name,
       envKey: p.envKey,
       models: p.models ? [...p.models] : undefined,
+      group: p.group,
     })),
   };
+}
+
+async function handleSkillsRequest(): Promise<OnboardSkillsResponse> {
+  // Return static skill catalog. In a real implementation, this would
+  // dynamically discover skills from the workspace, but for the wizard
+  // we show the built-in catalog.
+  return {
+    skills: BUILTIN_SKILLS.map((s) => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      emoji: s.emoji,
+      eligible: true,
+      status: "eligible" as const,
+    })),
+  };
+}
+
+async function handleHooksRequest(): Promise<OnboardHooksResponse> {
+  return {
+    hooks: BUILTIN_HOOKS.map((h) => ({
+      id: h.id,
+      name: h.name,
+      description: h.description,
+      emoji: h.emoji,
+      loadable: true,
+    })),
+  };
+}
+
+async function handleSearchConfigRequest(
+  body: OnboardSearchConfigRequestBody,
+): Promise<OnboardConfigResponse> {
+  try {
+    const base = readRawConfig();
+    const provider = body.provider;
+    const apiKey = body.apiKey?.trim();
+
+    if (!provider) {
+      return { ok: false, error: "Search provider is required." };
+    }
+
+    const nextConfig: OpenClawConfig = { ...base };
+
+    // Set search provider in config
+    const existingTools = base.tools as Record<string, unknown> | undefined;
+    const existingWeb = (existingTools?.web ?? {}) as Record<string, unknown>;
+    nextConfig.tools = {
+      ...existingTools,
+      web: {
+        ...existingWeb,
+        search: {
+          provider: provider,
+          ...(apiKey ? { apiKey } : {}),
+        },
+      },
+    } as OpenClawConfig["tools"];
+
+    // Set search API key in env vars
+    if (apiKey) {
+      const searchProvider = SEARCH_PROVIDERS.find((p) => p.id === provider);
+      if (searchProvider) {
+        const envVars = buildEnvBlock(base.env, "__search_placeholder__", "");
+        // Remove the placeholder
+        const envKey = searchProvider.envKey;
+        if (envKey) {
+          envVars[envKey] = apiKey;
+        }
+        nextConfig.env = {
+          ...base.env,
+          vars: envVars,
+        };
+      }
+    }
+
+    writeConfigDirect(nextConfig);
+    return { ok: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: msg };
+  }
+}
+
+async function handleSkillsConfigRequest(
+  body: OnboardSkillsConfigRequestBody,
+): Promise<OnboardConfigResponse> {
+  try {
+    const base = readRawConfig();
+    const enabled = body.enabled ?? [];
+
+    const existingSkills = base.skills ?? {};
+    const existingEntries = existingSkills.entries ?? {};
+    // Build entries map: set enabled:true for selected skills
+    const entries: Record<string, { enabled?: boolean }> = { ...existingEntries };
+    for (const skillId of enabled) {
+      if (entries[skillId]) {
+        entries[skillId] = { ...entries[skillId], enabled: true };
+      } else {
+        entries[skillId] = { enabled: true };
+      }
+    }
+    const nextConfig: OpenClawConfig = {
+      ...base,
+      skills: {
+        ...existingSkills,
+        entries,
+      },
+    };
+
+    writeConfigDirect(nextConfig);
+    return { ok: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: msg };
+  }
+}
+
+async function handleHooksConfigRequest(
+  body: OnboardHooksConfigRequestBody,
+): Promise<OnboardConfigResponse> {
+  try {
+    const base = readRawConfig();
+    const enabled = body.enabled ?? [];
+
+    const entries: Record<string, { enabled: boolean }> = {};
+    for (const name of enabled) {
+      entries[name] = { enabled: true };
+    }
+
+    const nextConfig: OpenClawConfig = {
+      ...base,
+      hooks: {
+        ...base.hooks,
+        internal: {
+          enabled: enabled.length > 0,
+          entries,
+        },
+      },
+    };
+
+    writeConfigDirect(nextConfig);
+    return { ok: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: msg };
+  }
 }
 
 async function handleConfigRequest(
@@ -371,13 +676,55 @@ async function handleConfigRequest(
       }
 
       // Build env vars block
-      const envVars = buildEnvBlock(base.env as OpenClawConfig["env"] | undefined, provider, apiKey.trim());
+      const envVars = buildEnvBlock(base.env, provider, apiKey.trim());
 
       const nextConfig: OpenClawConfig = {
         ...base,
         env: {
           ...base.env,
           vars: envVars,
+        },
+      };
+
+      writeConfigDirect(nextConfig);
+      return { ok: true };
+    }
+
+    if (step === "model") {
+      const model = body.model;
+      if (!model || typeof model !== "string" || model.trim().length === 0) {
+        return { ok: false, error: "Model is required." };
+      }
+
+      const nextConfig: OpenClawConfig = {
+        ...base,
+        agents: {
+          ...base.agents,
+          defaults: {
+            ...base.agents?.defaults,
+            model: model.trim(),
+          },
+        },
+      };
+
+      writeConfigDirect(nextConfig);
+      return { ok: true };
+    }
+
+    if (step === "workspace") {
+      const workspaceDir = body.workspaceDir;
+      if (!workspaceDir || typeof workspaceDir !== "string" || workspaceDir.trim().length === 0) {
+        return { ok: false, error: "Workspace directory is required." };
+      }
+
+      const nextConfig: OpenClawConfig = {
+        ...base,
+        agents: {
+          ...base.agents,
+          defaults: {
+            ...base.agents?.defaults,
+            workspace: workspaceDir.trim(),
+          },
         },
       };
 
@@ -406,9 +753,9 @@ async function handleConfigRequest(
 
       // Preserve existing auth token/password when changing mode
       const existingAuth = (base.gateway as Record<string, unknown>)?.auth as Record<string, unknown> | undefined;
-      const authConfig: NonNullable<OpenClawConfig["gateway"]>["auth"] = {
-        ...(existingAuth ?? {}),
-      };
+      const authConfig: NonNullable<OpenClawConfig["gateway"]>["auth"] = existingAuth
+        ? { ...existingAuth }
+        : {};
       if (authMode === "token" || authMode === "password" || authMode === "none") {
         authConfig.mode = authMode;
       }
@@ -452,10 +799,14 @@ async function handleCompleteRequest(
           const envVars: Record<string, string> = {};
           const existingEnv = config.env?.vars ?? {};
           for (const [k, v] of Object.entries(existingEnv)) {
-            if (typeof v === "string") envVars[k] = v;
+            if (typeof v === "string") {
+              envVars[k] = v;
+            }
           }
           for (const [k, v] of Object.entries(parsed)) {
-            if (typeof v === "string") envVars[k] = v;
+            if (typeof v === "string") {
+              envVars[k] = v;
+            }
           }
           config = {
             ...config,
@@ -588,6 +939,50 @@ export async function handleOnboardHttpRequest(
     return true;
   }
 
+  // GET /api/onboard/skills
+  if (subpath === "skills") {
+    if (!isReadMethod(req.method)) {
+      res.statusCode = 405;
+      res.setHeader("Allow", "GET, HEAD");
+      res.end("Method Not Allowed");
+      return true;
+    }
+    try {
+      const skills = await handleSkillsRequest();
+      if (req.method === "HEAD") {
+        res.statusCode = 200;
+        res.end();
+      } else {
+        sendJson(res, 200, skills);
+      }
+    } catch {
+      sendJson(res, 500, { skills: [] });
+    }
+    return true;
+  }
+
+  // GET /api/onboard/hooks
+  if (subpath === "hooks") {
+    if (!isReadMethod(req.method)) {
+      res.statusCode = 405;
+      res.setHeader("Allow", "GET, HEAD");
+      res.end("Method Not Allowed");
+      return true;
+    }
+    try {
+      const hooks = await handleHooksRequest();
+      if (req.method === "HEAD") {
+        res.statusCode = 200;
+        res.end();
+      } else {
+        sendJson(res, 200, hooks);
+      }
+    } catch {
+      sendJson(res, 500, { hooks: [] });
+    }
+    return true;
+  }
+
   // POST /api/onboard/config
   if (subpath === "config") {
     if (req.method !== "POST") {
@@ -651,6 +1046,75 @@ export async function handleOnboardHttpRequest(
       }
       const result = await handleTestProviderRequest(body.value as OnboardTestProviderRequestBody);
       sendJson(res, 200, result);
+    } catch {
+      sendJson(res, 500, { ok: false, error: "Internal server error" });
+    }
+    return true;
+  }
+
+  // POST /api/onboard/search-config
+  if (subpath === "search-config") {
+    if (req.method !== "POST") {
+      res.statusCode = 405;
+      res.setHeader("Allow", "POST");
+      res.end("Method Not Allowed");
+      return true;
+    }
+    try {
+      const body = await readJsonBody(req, MAX_JSON_BODY);
+      if (!body.ok) {
+        const status = body.error === "payload too large" ? 413 : 400;
+        sendJson(res, status, { ok: false, error: body.error });
+        return true;
+      }
+      const result = await handleSearchConfigRequest(body.value as OnboardSearchConfigRequestBody);
+      sendJson(res, result.ok ? 200 : 400, result);
+    } catch {
+      sendJson(res, 500, { ok: false, error: "Internal server error" });
+    }
+    return true;
+  }
+
+  // POST /api/onboard/skills-config
+  if (subpath === "skills-config") {
+    if (req.method !== "POST") {
+      res.statusCode = 405;
+      res.setHeader("Allow", "POST");
+      res.end("Method Not Allowed");
+      return true;
+    }
+    try {
+      const body = await readJsonBody(req, MAX_JSON_BODY);
+      if (!body.ok) {
+        const status = body.error === "payload too large" ? 413 : 400;
+        sendJson(res, status, { ok: false, error: body.error });
+        return true;
+      }
+      const result = await handleSkillsConfigRequest(body.value as OnboardSkillsConfigRequestBody);
+      sendJson(res, result.ok ? 200 : 400, result);
+    } catch {
+      sendJson(res, 500, { ok: false, error: "Internal server error" });
+    }
+    return true;
+  }
+
+  // POST /api/onboard/hooks-config
+  if (subpath === "hooks-config") {
+    if (req.method !== "POST") {
+      res.statusCode = 405;
+      res.setHeader("Allow", "POST");
+      res.end("Method Not Allowed");
+      return true;
+    }
+    try {
+      const body = await readJsonBody(req, MAX_JSON_BODY);
+      if (!body.ok) {
+        const status = body.error === "payload too large" ? 413 : 400;
+        sendJson(res, status, { ok: false, error: body.error });
+        return true;
+      }
+      const result = await handleHooksConfigRequest(body.value as OnboardHooksConfigRequestBody);
+      sendJson(res, result.ok ? 200 : 400, result);
     } catch {
       sendJson(res, 500, { ok: false, error: "Internal server error" });
     }
