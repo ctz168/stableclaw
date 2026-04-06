@@ -1,0 +1,41 @@
+{
+  "name": "@stableclaw/mattermost",
+  "version": "2026.4.1-beta.1",
+  "description": "OpenClaw Mattermost channel plugin",
+  "type": "module",
+  "dependencies": {
+    "@sinclair/typebox": "0.34.49",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "mattermost",
+      "label": "Mattermost",
+      "selectionLabel": "Mattermost (plugin)",
+      "docsPath": "/channels/mattermost",
+      "docsLabel": "mattermost",
+      "blurb": "self-hosted Slack-style chat; install the plugin to enable.",
+      "order": 65
+    },
+    "install": {
+      "npmSpec": "@stableclaw/mattermost",
+      "defaultChoice": "npm",
+      "minHostVersion": ">=2026.4.1"
+    }
+  }
+}

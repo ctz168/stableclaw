@@ -1,0 +1,45 @@
+{
+  "name": "@stableclaw/whatsapp",
+  "version": "2026.4.1-beta.1",
+  "description": "OpenClaw WhatsApp channel plugin",
+  "type": "module",
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc.9",
+    "jimp": "^1.6.0"
+  },
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "whatsapp",
+      "label": "WhatsApp",
+      "selectionLabel": "WhatsApp (QR link)",
+      "detailLabel": "WhatsApp Web",
+      "docsPath": "/channels/whatsapp",
+      "docsLabel": "whatsapp",
+      "blurb": "works with your own number; recommend a separate phone + eSIM.",
+      "systemImage": "message"
+    },
+    "install": {
+      "npmSpec": "@stableclaw/whatsapp",
+      "defaultChoice": "npm",
+      "minHostVersion": ">=2026.4.1"
+    },
+    "release": {
+      "publishToNpm": true
+    }
+  }
+}

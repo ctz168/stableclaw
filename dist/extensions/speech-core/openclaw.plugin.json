@@ -1,0 +1,8 @@
+{
+  "id": "speech-core",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "@stableclaw/bluebubbles",
+  "version": "2026.4.1-beta.1",
+  "description": "OpenClaw BlueBubbles channel plugin",
+  "type": "module",
+  "devDependencies": {
+    "stableclaw": "workspace:*"
+  },
+  "peerDependencies": {
+    "stableclaw": ">=2026.4.1-beta.1"
+  },
+  "peerDependenciesMeta": {
+    "stableclaw": {
+      "optional": true
+    }
+  },
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "bluebubbles",
+      "label": "BlueBubbles",
+      "selectionLabel": "BlueBubbles (macOS app)",
+      "detailLabel": "BlueBubbles",
+      "docsPath": "/channels/bluebubbles",
+      "docsLabel": "bluebubbles",
+      "blurb": "iMessage via the BlueBubbles mac app + REST API.",
+      "aliases": [
+        "bb"
+      ],
+      "preferOver": [
+        "imessage"
+      ],
+      "systemImage": "bubble.left.and.text.bubble.right",
+      "order": 75
+    },
+    "install": {
+      "npmSpec": "@stableclaw/bluebubbles",
+      "defaultChoice": "npm",
+      "minHostVersion": ">=2026.4.1"
+    },
+    "release": {
+      "publishToNpm": true
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "media-understanding-core",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

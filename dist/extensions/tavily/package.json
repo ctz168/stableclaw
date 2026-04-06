@@ -1,0 +1,12 @@
+{
+  "name": "@stableclaw/tavily-plugin",
+  "version": "2026.4.1-beta.1",
+  "private": true,
+  "description": "OpenClaw Tavily plugin",
+  "type": "module",
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

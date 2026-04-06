@@ -1,0 +1,12 @@
+{
+  "name": "@stableclaw/openai-provider",
+  "version": "2026.4.1-beta.1",
+  "private": true,
+  "description": "OpenClaw OpenAI provider plugins",
+  "type": "module",
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

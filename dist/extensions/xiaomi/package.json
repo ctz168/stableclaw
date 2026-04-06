@@ -1,0 +1,12 @@
+{
+  "name": "@stableclaw/xiaomi-provider",
+  "version": "2026.4.1-beta.1",
+  "private": true,
+  "description": "OpenClaw Xiaomi provider plugin",
+  "type": "module",
+  "stableclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
