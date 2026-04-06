@@ -55,7 +55,7 @@ function runDaemonAction(action) {
 }
 
 function openDashboard() {
-  const url = "http://localhost:3210";
+  const url = "http://localhost:18789";
   const cmd =
     getPlatform() === "darwin"
       ? "open"
@@ -125,7 +125,7 @@ function createMacOSTray() {
           statusItem2.title = "Status: Stopping...";
         },
         "openDashboard:": function (sender) {
-          $.NSWorkspace.sharedWorkspace.openURL($.NSURL.URLWithString("http://localhost:3210"));
+          $.NSWorkspace.sharedWorkspace.openURL($.NSURL.URLWithString("http://localhost:18789"));
         },
         "checkStatus:": function (sender) {},
         "exitApp:": function (sender) {
@@ -200,7 +200,7 @@ $context.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
 
 $dash = $context.Items.Add("Open Dashboard")
 $dash.Add_Click({
-    Start-Process "http://localhost:3210"
+    Start-Process "http://localhost:18789"
 })
 
 $context.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
@@ -274,7 +274,7 @@ def run_daemon(action):
 
 def open_dashboard():
     try:
-        subprocess.Popen(["xdg-open", "http://localhost:3210"],
+        subprocess.Popen(["xdg-open", "http://localhost:18789"],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass

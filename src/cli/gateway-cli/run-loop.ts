@@ -3,7 +3,6 @@ import {
   getActiveEmbeddedRunCount,
   waitForActiveEmbeddedRuns,
 } from "../../agents/pi-embedded-runner/runs.js";
-import type { startGatewayServer } from "../../gateway/server.js";
 import { acquireGatewayLock } from "../../infra/gateway-lock.js";
 import { restartGatewayProcessWithFreshPid } from "../../infra/process-respawn.js";
 import {
@@ -26,15 +25,24 @@ const gatewayLog = createSubsystemLogger("gateway");
 
 type GatewayRunSignalAction = "stop" | "restart";
 
+/**
+ * Minimal server interface shared by both the full and lite gateway servers.
+ * Both `startGatewayServer` (server.impl.ts) and `startGatewayLite` (server-lite.ts)
+ * return objects satisfying this shape.
+ */
+type GatewayServerHandle = {
+  close: (opts?: { reason?: string; restartExpectedMs?: number | null }) => Promise<void>;
+};
+
 export async function runGatewayLoop(params: {
-  start: () => Promise<Awaited<ReturnType<typeof startGatewayServer>>>;
+  start: () => Promise<GatewayServerHandle>;
   runtime: RuntimeEnv;
   lockPort?: number;
 }) {
   gatewayLog.info("acquiring gateway lock...");
   let lock = await acquireGatewayLock({ port: params.lockPort });
   gatewayLog.info("gateway lock acquired");
-  let server: Awaited<ReturnType<typeof startGatewayServer>> | null = null;
+  let server: GatewayServerHandle | null = null;
   let shuttingDown = false;
   let restartResolver: (() => void) | null = null;
 

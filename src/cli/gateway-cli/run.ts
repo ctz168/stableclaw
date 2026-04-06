@@ -58,6 +58,7 @@ type GatewayRunOpts = {
   rawStreamPath?: unknown;
   dev?: boolean;
   reset?: boolean;
+  full?: boolean;
 };
 
 const gatewayLog = createSubsystemLogger("gateway");
@@ -85,6 +86,7 @@ const GATEWAY_RUN_BOOLEAN_KEYS = [
   "claudeCliLogs",
   "compact",
   "rawStream",
+  "full",
 ] as const;
 
 const SUPERVISED_GATEWAY_LOCK_RETRY_MS = 5000;
@@ -251,13 +253,27 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     process.env.OPENCLAW_RAW_STREAM_PATH = rawStreamPath;
   }
 
-  // The heaviest part of gateway startup is loading the server module tree
-  // (channels, plugins, HTTP stack, etc.). Show a spinner so the user sees
-  // progress instead of a silent 15-20 s pause (especially on Windows/NTFS).
-  const { startGatewayServer } = await withProgress(
-    { label: "Loading gateway modules…", indeterminate: true },
-    async () => import("../../gateway/server.js"),
-  );
+  // Select the gateway server implementation:
+  //   - Lite (default): fast startup (<2s), lazy module loading in background
+  //   - Full (--full): loads all modules upfront, slower but fully initialised
+  const useFullServer = Boolean(opts.full);
+  let startGatewayLite: ((port: number, opts?: Record<string, unknown>) => Promise<import("../../gateway/server-lite.js").GatewayServer>) | undefined;
+  let startGatewayServer: ((port: number, opts?: Record<string, unknown>) => Promise<import("../../gateway/server.js").GatewayServer>) | undefined;
+
+  if (useFullServer) {
+    // Full server: slow import with progress indicator
+    const fullMod = await withProgress(
+      { label: "Loading gateway modules (full mode)…", indeterminate: true },
+      async () => import("../../gateway/server.js"),
+    );
+    startGatewayServer = fullMod.startGatewayServer;
+    gatewayLog.info("using full gateway server (all modules loaded at boot)");
+  } else {
+    // Lite server: fast import, lazy module loading
+    const liteMod = await import("../../gateway/server-lite.js");
+    startGatewayLite = liteMod.startGatewayLite;
+    gatewayLog.info("using lite gateway server (fast startup, lazy module loading)");
+  }
 
   setConsoleTimestampPrefix(true);
 
@@ -531,12 +547,29 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     await runGatewayLoop({
       runtime: defaultRuntime,
       lockPort: port,
-      start: async () =>
-        await startGatewayServer(port, {
+      start: async () => {
+        if (useFullServer && startGatewayServer) {
+          return await startGatewayServer(port, {
+            bind,
+            auth: authOverride,
+            tailscale: tailscaleOverride,
+          });
+        }
+        if (startGatewayLite) {
+          return await startGatewayLite(port, {
+            bind,
+            auth: authOverride,
+            tailscale: tailscaleOverride,
+          });
+        }
+        // Fallback (should not reach here)
+        const { startGatewayServer: fallback } = await import("../../gateway/server.js");
+        return await fallback(port, {
           bind,
           auth: authOverride,
           tailscale: tailscaleOverride,
-        }),
+        });
+      },
     });
 
   try {
@@ -691,6 +724,11 @@ export function addGatewayRunCommand(cmd: Command): Command {
     .option("--compact", 'Alias for "--ws-log compact"', false)
     .option("--raw-stream", "Log raw model stream events to jsonl", false)
     .option("--raw-stream-path <path>", "Raw stream jsonl path")
+    .option(
+      "--full",
+      "Use full gateway startup (slower but all modules loaded at boot)",
+      false,
+    )
     .action(async (opts, command) => {
       await runGatewayCommand(resolveGatewayRunOptions(opts, command));
     });

@@ -70,6 +70,12 @@ export async function startGatewaySidecars(params: {
   defaultWorkspaceDir: string;
   deps: CliDeps;
   startChannels: () => Promise<void>;
+  /**
+   * Optional parallel channel start function. When provided, all channels
+   * are started concurrently via Promise.allSettled instead of sequentially.
+   * This is the single biggest startup latency improvement.
+   */
+  startChannelsParallel?: () => Promise<Map<string, unknown>>;
   log: { warn: (msg: string) => void };
   logHooks: {
     info: (msg: string) => void;
@@ -93,19 +99,35 @@ export async function startGatewaySidecars(params: {
     params.log.warn(`session lock cleanup failed on startup: ${String(err)}`);
   }
 
-  // Start Gmail watcher if configured (hooks.gmail.account).
-  await startGmailWatcherWithLogs({
-    cfg: params.cfg,
-    log: params.logHooks,
-  });
+  // ── Parallel sidecar init ────────────────────────────────────────────
+  // Gmail watcher, Gmail model validation, internal hooks, model prewarm,
+  // and channel startup are all independent. Run them concurrently via
+  // Promise.allSettled so one slow subsystem doesn't block the others.
 
-  // Validate hooks.gmail.model if configured.
-  if (params.cfg.hooks?.gmail?.model) {
-    const hooksModelRef = resolveHooksGmailModel({
-      cfg: params.cfg,
-      defaultProvider: DEFAULT_PROVIDER,
-    });
-    if (hooksModelRef) {
+  const skipChannels =
+    isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
+    isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS);
+
+  if (skipChannels) {
+    params.logChannels.info(
+      "skipping channel start (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+    );
+  }
+
+  await Promise.allSettled([
+    // Gmail watcher
+    startGmailWatcherWithLogs({ cfg: params.cfg, log: params.logHooks }).catch((err) => {
+      params.logHooks.warn(`gmail watcher failed: ${String(err)}`);
+    }),
+
+    // Gmail model validation (conditional)
+    (async () => {
+      if (!params.cfg.hooks?.gmail?.model) return;
+      const hooksModelRef = resolveHooksGmailModel({
+        cfg: params.cfg,
+        defaultProvider: DEFAULT_PROVIDER,
+      });
+      if (!hooksModelRef) return;
       const { provider: defaultProvider, model: defaultModel } = resolveConfiguredModelRef({
         cfg: params.cfg,
         defaultProvider: DEFAULT_PROVIDER,
@@ -129,43 +151,41 @@ export async function startGatewaySidecars(params: {
           `hooks.gmail.model "${status.key}" not in the model catalog (may fail at runtime)`,
         );
       }
-    }
-  }
+    })().catch((err) => {
+      params.logHooks.warn(`gmail model validation failed: ${String(err)}`);
+    }),
 
-  // Load internal hook handlers from configuration and directory discovery.
-  try {
-    // Clear any previously registered hooks to ensure fresh loading
-    clearInternalHooks();
-    const loadedCount = await loadInternalHooks(params.cfg, params.defaultWorkspaceDir);
-    if (loadedCount > 0) {
-      params.logHooks.info(
-        `loaded ${loadedCount} internal hook handler${loadedCount > 1 ? "s" : ""}`,
-      );
-    }
-  } catch (err) {
-    params.logHooks.error(`failed to load hooks: ${String(err)}`);
-  }
+    // Internal hooks
+    (async () => {
+      try {
+        clearInternalHooks();
+        const loadedCount = await loadInternalHooks(params.cfg, params.defaultWorkspaceDir);
+        if (loadedCount > 0) {
+          params.logHooks.info(
+            `loaded ${loadedCount} internal hook handler${loadedCount > 1 ? "s" : ""}`,
+          );
+        }
+      } catch (err) {
+        params.logHooks.error(`failed to load hooks: ${String(err)}`);
+      }
+    })(),
 
-  // Launch configured channels so gateway replies via the surface the message came from.
-  // Tests can opt out via OPENCLAW_SKIP_CHANNELS (or legacy OPENCLAW_SKIP_PROVIDERS).
-  const skipChannels =
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS);
-  if (!skipChannels) {
-    try {
-      await prewarmConfiguredPrimaryModel({
-        cfg: params.cfg,
-        log: params.log,
-      });
-      await params.startChannels();
-    } catch (err) {
-      params.logChannels.error(`channel startup failed: ${String(err)}`);
-    }
-  } else {
-    params.logChannels.info(
-      "skipping channel start (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
-    );
-  }
+    // Model prewarm + channel startup
+    (async () => {
+      if (skipChannels) return;
+      try {
+        await prewarmConfiguredPrimaryModel({ cfg: params.cfg, log: params.log });
+        // Prefer parallel channel start when available.
+        if (params.startChannelsParallel) {
+          await params.startChannelsParallel();
+        } else {
+          await params.startChannels();
+        }
+      } catch (err) {
+        params.logChannels.error(`channel startup failed: ${String(err)}`);
+      }
+    })(),
+  ]);
 
   if (params.cfg.hooks?.internal?.enabled !== false) {
     setTimeout(() => {

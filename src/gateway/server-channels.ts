@@ -140,9 +140,22 @@ type StartChannelOptions = {
   preserveManualStop?: boolean;
 };
 
+export type ChannelStartResult = {
+  channelId: ChannelId;
+  started: boolean;
+  error?: Error;
+  startTimeMs: number;
+};
+
 export type ChannelManager = {
   getRuntimeSnapshot: () => ChannelRuntimeSnapshot;
   startChannels: () => Promise<void>;
+  /**
+   * Start all channels in parallel using Promise.allSettled.
+   * Returns per-channel results for observability. One channel failure
+   * does not block others.
+   */
+  startChannelsParallel: () => Promise<Map<string, ChannelStartResult>>;
   startChannel: (channel: ChannelId, accountId?: string) => Promise<void>;
   stopChannel: (channel: ChannelId, accountId?: string) => Promise<void>;
   markChannelLoggedOut: (channelId: ChannelId, cleared: boolean, accountId?: string) => void;
@@ -524,6 +537,59 @@ export function createChannelManager(opts: ChannelManagerOptions): ChannelManage
     }
   };
 
+  /**
+   * Start all enabled channels in parallel instead of sequentially.
+   * Uses Promise.allSettled so that one channel failure does not block others.
+   */
+  const startChannelsParallel = async (): Promise<Map<string, ChannelStartResult>> => {
+    const plugins = listChannelPlugins();
+    if (plugins.length === 0) {
+      return new Map();
+    }
+    const results = new Map<string, ChannelStartResult>();
+    const settled = await Promise.allSettled(
+      plugins.map(async (plugin) => {
+        const startTime = performance.now();
+        try {
+          await startChannel(plugin.id);
+          return {
+            channelId: plugin.id,
+            started: true,
+            startTimeMs: performance.now() - startTime,
+          } as ChannelStartResult;
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error(String(err));
+          channelLogs[plugin.id]?.error?.(
+            `[${plugin.id}] parallel channel startup failed: ${formatErrorMessage(err)}`,
+          );
+          return {
+            channelId: plugin.id,
+            started: false,
+            error,
+            startTimeMs: performance.now() - startTime,
+          } as ChannelStartResult;
+        }
+      }),
+    );
+    for (let i = 0; i < settled.length; i++) {
+      const outcome = settled[i]!;
+      const result =
+        outcome.status === "fulfilled"
+          ? outcome.value
+          : {
+              channelId: plugins[i]!.id,
+              started: false,
+              error:
+                outcome.reason instanceof Error
+                  ? outcome.reason
+                  : new Error(String(outcome.reason)),
+              startTimeMs: 0,
+            };
+      results.set(result.channelId, result);
+    }
+    return results;
+  };
+
   const markChannelLoggedOut = (channelId: ChannelId, cleared: boolean, accountId?: string) => {
     const plugin = getChannelPlugin(channelId);
     if (!plugin) {
@@ -601,6 +667,7 @@ export function createChannelManager(opts: ChannelManagerOptions): ChannelManage
   return {
     getRuntimeSnapshot,
     startChannels,
+    startChannelsParallel,
     startChannel,
     stopChannel,
     markChannelLoggedOut,

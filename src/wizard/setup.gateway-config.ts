@@ -283,6 +283,7 @@ export async function configureGatewayForSetup(
     ...nextConfig,
     gateway: {
       ...nextConfig.gateway,
+      mode: nextConfig.gateway?.mode ?? "local",
       port,
       bind: bind as GatewayBindMode,
       ...(bind === "custom" && customBindHost ? { customBindHost } : {}),
