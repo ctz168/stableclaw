@@ -830,6 +830,20 @@ export async function runWithModelFallback<T>(params: {
       // (handled above) are truly non-retryable.
       const isKnownFailover = isFailoverError(normalized);
       if (!isKnownFailover && i === candidates.length - 1) {
+        // Notify about the final failure before rethrowing so the UI can
+        // display a model-failure notification.
+        const lastDescribed = describeFailoverError(normalized);
+        try {
+          await params.onError?.({
+            provider: candidate.provider,
+            model: candidate.model,
+            error: err,
+            attempt: i + 1,
+            total: candidates.length,
+          });
+        } catch {
+          // Ignore notification errors
+        }
         throw err;
       }
 

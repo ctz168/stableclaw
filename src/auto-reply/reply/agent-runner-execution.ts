@@ -300,18 +300,25 @@ export async function runAgentTurnWithFallback(params: {
             /\((rate_limit|overloaded|timeout|auth|billing|model_not_found|format|unknown)\)/i,
           );
           const reason = reasonMatch ? reasonMatch[1] : "error";
+          const isLast = attempt >= total;
           emitAgentEvent({
             runId,
             stream: "fallback",
+            sessionKey: params.sessionKey,
             data: {
               selectedProvider: params.followupRun.run.provider,
               selectedModel: params.followupRun.run.model,
-              fromProvider: failedProvider,
-              fromModel: failedModel,
-              reasonSummary: `${failedProvider}/${failedModel} failed (${reason}), switching to next model (${attempt}/${total})`,
+              activeProvider: failedProvider,
+              activeModel: failedModel,
+              previousActiveProvider: isLast ? undefined : params.followupRun.run.provider,
+              previousActiveModel: isLast ? undefined : params.followupRun.run.model,
+              reasonSummary: isLast
+                ? `${failedProvider}/${failedModel} failed (${reason}), no more models to try (${attempt}/${total})`
+                : `${failedProvider}/${failedModel} failed (${reason}), switching to next model (${attempt}/${total})`,
               reason,
               attempt,
               total,
+              isLast,
             },
           });
         },

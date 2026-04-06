@@ -402,10 +402,13 @@ function handleLifecycleFallbackEvent(host: CompactionHost, payload: AgentEventP
   const previous =
     resolveModelLabel(data.previousActiveProvider, data.previousActiveModel) ??
     toTrimmedString(data.previousActiveModel);
+  const isLast = data.isLast === true;
   if (!selected || !active) {
     return;
   }
-  if (phase === "fallback" && selected === active) {
+  // When isLast is true (all models failed), always show the notification
+  // even if selected === active (single model config that failed).
+  if (phase === "fallback" && !isLast && selected === active) {
     return;
   }
 
@@ -425,8 +428,10 @@ function handleLifecycleFallbackEvent(host: CompactionHost, payload: AgentEventP
     window.clearTimeout(host.fallbackClearTimer);
     host.fallbackClearTimer = null;
   }
+  // Use a longer display duration when all models failed (isLast)
+  const durationMs = isLast ? FALLBACK_TOAST_DURATION_MS * 3 : FALLBACK_TOAST_DURATION_MS;
   host.fallbackStatus = {
-    phase: phase === "fallback_cleared" ? "cleared" : "active",
+    phase: isLast ? "active" : phase === "fallback_cleared" ? "cleared" : "active",
     selected,
     active: phase === "fallback_cleared" ? selected : active,
     previous:
@@ -434,13 +439,15 @@ function handleLifecycleFallbackEvent(host: CompactionHost, payload: AgentEventP
         ? (previous ?? (active !== selected ? active : undefined))
         : undefined,
     reason: reason ?? undefined,
-    attempts,
+    attempts: isLast
+      ? [reason ?? `${active} failed, no more models to try`]
+      : attempts,
     occurredAt: Date.now(),
   };
   host.fallbackClearTimer = window.setTimeout(() => {
     host.fallbackStatus = null;
     host.fallbackClearTimer = null;
-  }, FALLBACK_TOAST_DURATION_MS);
+  }, durationMs);
 }
 
 export function handleAgentEvent(host: ToolStreamHost, payload?: AgentEventPayload) {
