@@ -50,6 +50,11 @@ function resolveRunner() {
   if (pnpm) {
     return { cmd: pnpm, kind: "pnpm" };
   }
+  // Fallback: use npx (available in every npm installation)
+  const npx = which("npx");
+  if (npx) {
+    return { cmd: npx, kind: "npx" };
+  }
   return null;
 }
 
@@ -168,7 +173,9 @@ export function main(argv = process.argv.slice(2)) {
 
   const runner = resolveRunner();
   if (!runner) {
-    process.stderr.write("Missing UI runner: install pnpm, then retry.\n");
+    process.stderr.write(
+      "Missing UI runner: install pnpm (preferred) or ensure npm/npx is available.\n",
+    );
     process.exit(1);
   }
 
@@ -179,17 +186,29 @@ export function main(argv = process.argv.slice(2)) {
   }
 
   if (action === "install") {
-    run(runner.cmd, ["install", ...rest]);
+    if (runner.kind === "npx") {
+      run("npm", ["install", ...rest]);
+    } else {
+      run(runner.cmd, ["install", ...rest]);
+    }
     return;
   }
 
   if (!depsInstalled(action === "test" ? "test" : "build")) {
     const installEnv = process.env;
-    const installArgs = ["install"];
-    runSync(runner.cmd, installArgs, installEnv);
+    if (runner.kind === "npx") {
+      runSync("npm", ["install"], installEnv);
+    } else {
+      runSync(runner.cmd, ["install"], installEnv);
+    }
   }
 
-  run(runner.cmd, ["run", script, ...rest]);
+  if (runner.kind === "npx") {
+    // npx can run vite directly without "run" subcommand
+    run("npx", [script, ...rest]);
+  } else {
+    run(runner.cmd, ["run", script, ...rest]);
+  }
 }
 
 const isDirectExecution = (() => {
