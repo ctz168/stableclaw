@@ -286,6 +286,35 @@ export async function runAgentTurnWithFallback(params: {
       const fallbackResult = await runWithModelFallback({
         ...resolveModelFallbackOptions(params.followupRun.run),
         runId,
+        onError: async ({
+          provider: failedProvider,
+          model: failedModel,
+          error: fallbackError,
+          attempt,
+          total,
+        }) => {
+          // Emit a fallback event so the UI can show a notification about the model switch.
+          const errorLabel =
+            fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+          const reasonMatch = errorLabel.match(
+            /\((rate_limit|overloaded|timeout|auth|billing|model_not_found|format|unknown)\)/i,
+          );
+          const reason = reasonMatch ? reasonMatch[1] : "error";
+          emitAgentEvent({
+            runId,
+            stream: "fallback",
+            data: {
+              selectedProvider: params.followupRun.run.provider,
+              selectedModel: params.followupRun.run.model,
+              fromProvider: failedProvider,
+              fromModel: failedModel,
+              reasonSummary: `${failedProvider}/${failedModel} failed (${reason}), switching to next model (${attempt}/${total})`,
+              reason,
+              attempt,
+              total,
+            },
+          });
+        },
         run: (provider, model, runOptions) => {
           // Notify that model selection is complete (including after fallback).
           // This allows responsePrefix template interpolation with the actual model.

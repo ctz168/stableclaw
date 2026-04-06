@@ -362,6 +362,41 @@ export async function runGatewayUpdateCheck(params: {
   };
 
   if (status.installKind !== "package") {
+    // For non-package installs (git, etc.), still check npm for newer versions
+    // so users running from source can see if a newer release is available.
+    const gitChannel =
+      normalizeUpdateChannel(params.cfg.update?.channel) ?? DEFAULT_PACKAGE_CHANNEL;
+    const gitResolved = await resolveNpmChannelTag({ channel: gitChannel, timeoutMs: 2500 });
+    if (gitResolved.version) {
+      const gitCmp = compareSemverStrings(VERSION, gitResolved.version);
+      if (gitCmp != null && gitCmp < 0) {
+        const gitNextAvailable: UpdateAvailable = {
+          currentVersion: VERSION,
+          latestVersion: gitResolved.version,
+          channel: gitResolved.tag,
+        };
+        if (shouldRunUpdateHints) {
+          setUpdateAvailableCache({
+            next: gitNextAvailable,
+            onUpdateAvailableChange: params.onUpdateAvailableChange,
+          });
+        }
+        nextState.lastAvailableVersion = gitResolved.version;
+        nextState.lastAvailableTag = gitResolved.tag;
+        const shouldNotify =
+          state.lastNotifiedVersion !== gitResolved.version ||
+          state.lastNotifiedTag !== gitResolved.tag;
+        if (shouldRunUpdateHints && shouldNotify) {
+          params.log.info(
+            `update available (${gitResolved.tag}): v${gitResolved.version} (current v${VERSION}, installed from ${status.installKind}). Run: ${formatCliCommand("stableclaw update")}`,
+          );
+          nextState.lastNotifiedVersion = gitResolved.version;
+          nextState.lastNotifiedTag = gitResolved.tag;
+        }
+        await writeState(statePath, nextState);
+        return;
+      }
+    }
     delete nextState.lastAvailableVersion;
     delete nextState.lastAvailableTag;
     clearAutoState(nextState);
