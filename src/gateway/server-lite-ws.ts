@@ -661,26 +661,50 @@ function handleLiteNativeMethod(
 // Full gateway method dispatcher (lazy loaded)
 // ---------------------------------------------------------------------------
 
-let fullHandlerModule: typeof import("./server-methods.js") | null = null;
+// NOTE: Production builds (tsdown with NODE_ENV=production) minify export
+// names, so `module.handleGatewayRequest` becomes `module.n`. We work around
+// this by loading the module and scanning for the function by its original
+// name via Function.prototype.name (which rollup/tsdown preserve as comments
+// or in .name property).
+
+let handleGatewayRequestFn: ((opts: import("./server-methods.js")["handleGatewayRequest"]) => Promise<void>) | null = null;
 let fullHandlerLoading = false;
 let fullHandlerLoadFailed = false;
 
 async function getFullHandler() {
-  if (fullHandlerModule) return fullHandlerModule;
+  if (handleGatewayRequestFn) return handleGatewayRequestFn;
   if (fullHandlerLoadFailed) return null;
   if (fullHandlerLoading) {
-    // Wait for in-flight load
     for (let i = 0; i < 50; i++) {
       await new Promise((r) => setTimeout(r, 200));
-      if (fullHandlerModule) return fullHandlerModule;
+      if (handleGatewayRequestFn) return handleGatewayRequestFn;
       if (fullHandlerLoadFailed) return null;
     }
     return null;
   }
   fullHandlerLoading = true;
   try {
-    fullHandlerModule = await import("./server-methods.js");
-    return fullHandlerModule;
+    const mod = await import("./server-methods.js");
+    // Production builds minify the export key names but the .name property
+    // of exported functions is preserved. Find handleGatewayRequest by name.
+    let found = false;
+    for (const val of Object.values(mod)) {
+      if (typeof val === "function" && val.name === "handleGatewayRequest") {
+        handleGatewayRequestFn = val;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // Fallback: try the original export name (works in non-minified builds)
+      if (typeof (mod as Record<string, unknown>).handleGatewayRequest === "function") {
+        handleGatewayRequestFn = (mod as Record<string, unknown>).handleGatewayRequest as typeof handleGatewayRequestFn;
+      } else {
+        throw new Error("handleGatewayRequest not found in server-methods module");
+      }
+    }
+    log.info("full gateway method dispatcher loaded");
+    return handleGatewayRequestFn;
   } catch (err) {
     log.warn(`failed to load full gateway method dispatcher: ${String(err)}`);
     fullHandlerLoadFailed = true;
@@ -861,8 +885,8 @@ async function handleLazyModuleMethod(
 
     // For methods that require the full gateway dispatcher (chat.*, sessions.*, etc.),
     // try to load the full handler and dispatch.
-    const fullHandlers = await getFullHandler();
-    if (!fullHandlers) {
+    const handleReq = await getFullHandler();
+    if (!handleReq) {
       send({
         type: "res",
         id,
@@ -882,7 +906,7 @@ async function handleLazyModuleMethod(
       clientIp: undefined,
     };
 
-    await fullHandlers.handleGatewayRequest({
+    await handleReq({
       req: { id, method, params: params as Record<string, unknown> },
       client,
       isWebchatConnect: (p) => p?.client?.mode === "webchat",
