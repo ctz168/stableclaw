@@ -33,6 +33,8 @@ import {
 } from "./protocol/index.js";
 import { isLoopbackAddress } from "./net.js";
 import { MAX_PREAUTH_PAYLOAD_BYTES, MAX_PAYLOAD_BYTES } from "./server-constants.js";
+import { createDefaultDeps } from "../cli/deps.js";
+import { NodeRegistry } from "./node-registry.js";
 
 const log = createSubsystemLogger("gateway/lite-ws");
 
@@ -732,8 +734,8 @@ function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestCont
   const compatClients = clients as unknown as Set<import("./server/ws-types.js").GatewayWsClient>;
 
   return {
-    // Lazy-filled stubs — most handlers check deps lazily
-    deps: undefined as unknown as GatewayRequestContext["deps"],
+    // Real deps — lazy-loading send functions (cheap, no heavy deps)
+    deps: createDefaultDeps(),
     cron: undefined as unknown as GatewayRequestContext["cron"],
     cronStorePath: "",
     execApprovalManager: undefined,
@@ -782,7 +784,7 @@ function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestCont
     nodeUnsubscribe: () => {},
     nodeUnsubscribeAll: () => {},
     hasConnectedMobileNode: () => false,
-    nodeRegistry: undefined as unknown as GatewayRequestContext["nodeRegistry"],
+    nodeRegistry: new NodeRegistry(),
     agentRunSeq,
     chatAbortControllers,
     chatAbortedRuns,
