@@ -190,7 +190,8 @@ export async function startGatewayLite(
   }
 
   // ── 3. Resolve bind address & port ─────────────────────────────────────
-  const actualPort = opts.port ?? resolveGatewayPort(cfg);
+  // opts.port takes priority, then the positional port arg, then config, then default
+  const actualPort = opts.port ?? port ?? resolveGatewayPort(cfg);
   const bindHost = resolveBindAddress(opts.bind, opts.host);
   process.env.OPENCLAW_GATEWAY_PORT = String(actualPort);
 
