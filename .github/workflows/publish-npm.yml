@@ -1,0 +1,75 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use current package.json version)'
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bump version (if specified)
+        if: inputs.version != ''
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT"
+          echo "Target version:  ${{ inputs.version }}"
+          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+          NEW=$(node -p "require('./package.json').version")
+          echo "New version:     $NEW"
+
+      - name: Build (pnpm build)
+        run: pnpm build
+
+      - name: Build UI (pnpm ui:build)
+        run: pnpm ui:build
+
+      - name: Verify dist/control-ui exists
+        run: |
+          if [ ! -d "dist/control-ui" ]; then
+            echo "ERROR: dist/control-ui/ missing — ui:build did not produce output"
+            exit 1
+          fi
+          echo "dist/control-ui/ OK — $(find dist/control-ui -type f | wc -l) files"
+
+      - name: Check pack size
+        run: |
+          npm pack --dry-run 2>&1 | tail -10
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Published summary
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "## Published stableclaw@$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry**: https://www.npmjs.com/package/stableclaw" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
