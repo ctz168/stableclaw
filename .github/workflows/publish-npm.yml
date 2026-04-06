@@ -11,21 +11,19 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -49,25 +47,20 @@ jobs:
       - name: Verify dist/control-ui exists
         run: |
           if [ ! -d "dist/control-ui" ]; then
-            echo "ERROR: dist/control-ui/ missing — ui:build did not produce output"
+            echo "ERROR: dist/control-ui/ missing"
             exit 1
           fi
           echo "dist/control-ui/ OK — $(find dist/control-ui -type f | wc -l) files"
 
       - name: Check pack size
-        run: |
-          npm pack --dry-run 2>&1 | tail -10
+        run: npm pack --dry-run 2>&1 | tail -10
 
       - name: Publish to npm
-        run: npm publish --access public --provenance --tag latest
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Published summary
+      - name: Summary
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "## Published stableclaw@$VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Registry**: https://www.npmjs.com/package/stableclaw" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
