@@ -1,6 +1,6 @@
 {
   "name": "stableclaw",
-  "version": "2026.5.1",
+  "version": "2026.5.2",
   "description": "Multi-channel AI gateway with extensible messaging integrations",
   "keywords": [],
   "homepage": "https://github.com/ctz168/stableclaw#readme",
@@ -1288,5 +1288,8 @@
         }
       }
     }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   }
 }
