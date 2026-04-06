@@ -20,6 +20,7 @@ import { lazyRegistry } from "./lazy-registry.js";
 import { type ResolvedGatewayAuth, authorizeGatewayConnect } from "./auth.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
+import type { GatewayRequestContext } from "./server-methods/types.js";
 import {
   type ConnectParams,
   ErrorCodes,
@@ -511,6 +512,8 @@ export function attachLiteWsHandler(
           requiredModule,
           moduleLoadTimeoutMs,
           connId,
+          clients,
+          client!.connect,
         );
         return;
       }
@@ -655,6 +658,176 @@ function handleLiteNativeMethod(
 }
 
 // ---------------------------------------------------------------------------
+// Full gateway method dispatcher (lazy loaded)
+// ---------------------------------------------------------------------------
+
+let fullHandlerModule: typeof import("./server-methods.js") | null = null;
+let fullHandlerLoading = false;
+let fullHandlerLoadFailed = false;
+
+async function getFullHandler() {
+  if (fullHandlerModule) return fullHandlerModule;
+  if (fullHandlerLoadFailed) return null;
+  if (fullHandlerLoading) {
+    // Wait for in-flight load
+    for (let i = 0; i < 50; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      if (fullHandlerModule) return fullHandlerModule;
+      if (fullHandlerLoadFailed) return null;
+    }
+    return null;
+  }
+  fullHandlerLoading = true;
+  try {
+    fullHandlerModule = await import("./server-methods.js");
+    return fullHandlerModule;
+  } catch (err) {
+    log.warn(`failed to load full gateway method dispatcher: ${String(err)}`);
+    fullHandlerLoadFailed = true;
+    return null;
+  }
+}
+
+/** Build a minimal GatewayRequestContext for lite mode dispatch. */
+function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestContext {
+  const chatAbortControllers = new Map<string, import("../chat-abort.js").ChatAbortControllerEntry>();
+  const chatAbortedRuns = new Map<string, number>();
+  const chatRunBuffers = new Map<string, string>();
+  const chatDeltaSentAt = new Map<string, number>();
+  const chatDeltaLastBroadcastLen = new Map<string, number>();
+  const agentRunSeq = new Map<string, number>();
+  const dedupe = new Map<string, import("./server-shared.js").DedupeEntry>();
+  const toolEventRecipients = new Map<string, Set<string>>();
+  const wizardSessions = new Map<string, import("../../wizard/session.js").WizardSession>();
+  const sessionSubscribers = new Map<string, Set<string>>();
+  const sessionMessageSubscribers = new Map<string, Map<string, Set<string>>>();
+
+  // Convert LiteWsClient set to a compatible broadcast target.
+  // The broadcast function iterates clients and calls socket.send() —
+  // LiteWsClient has the same socket/connect/connId shape.
+  const compatClients = clients as unknown as Set<import("./server/ws-types.js").GatewayWsClient>;
+
+  return {
+    // Lazy-filled stubs — most handlers check deps lazily
+    deps: undefined as unknown as GatewayRequestContext["deps"],
+    cron: undefined as unknown as GatewayRequestContext["cron"],
+    cronStorePath: "",
+    execApprovalManager: undefined,
+    pluginApprovalManager: undefined,
+    loadGatewayModelCatalog: async () => {
+      // Lazy-load model catalog from the plugins module
+      try {
+        const mods = await lazyRegistry.get("model-pricing");
+        return mods?.getModelCatalog?.() ?? [];
+      } catch {
+        return [];
+      }
+    },
+    getHealthCache: () => null,
+    refreshHealthSnapshot: async () => ({
+      status: lazyRegistry.isReady("plugins") ? "ready" : "starting",
+      uptime: 0,
+    }),
+    logHealth: { error: () => {} },
+    logGateway: log,
+    incrementPresenceVersion: () => 0,
+    getHealthVersion: () => 0,
+    broadcast: (event: string, payload: unknown) => {
+      for (const client of compatClients) {
+        try {
+          if (client.socket.readyState === client.socket.OPEN) {
+            client.socket.send(JSON.stringify({ type: "event", event, payload }));
+          }
+        } catch { /* ignore */ }
+      }
+    },
+    broadcastToConnIds: (event: string, payload: unknown, connIds: ReadonlySet<string>) => {
+      for (const client of compatClients) {
+        if (connIds.has(client.connId)) {
+          try {
+            if (client.socket.readyState === client.socket.OPEN) {
+              client.socket.send(JSON.stringify({ type: "event", event, payload }));
+            }
+          } catch { /* ignore */ }
+        }
+      }
+    },
+    nodeSendToSession: () => {},
+    nodeSendToAllSubscribed: () => {},
+    nodeSubscribe: () => {},
+    nodeUnsubscribe: () => {},
+    nodeUnsubscribeAll: () => {},
+    hasConnectedMobileNode: () => false,
+    nodeRegistry: undefined as unknown as GatewayRequestContext["nodeRegistry"],
+    agentRunSeq,
+    chatAbortControllers,
+    chatAbortedRuns,
+    chatRunBuffers,
+    chatDeltaSentAt,
+    chatDeltaLastBroadcastLen,
+    addChatRun: (_sessionId: string, _entry: { sessionKey: string; clientRunId: string }) => {},
+    removeChatRun: (_sessionId: string, _clientRunId: string) => undefined,
+    subscribeSessionEvents: (connId: string) => {
+      sessionSubscribers.set(connId, new Set());
+    },
+    unsubscribeSessionEvents: (connId: string) => {
+      sessionSubscribers.delete(connId);
+    },
+    subscribeSessionMessageEvents: (connId: string, sessionKey: string) => {
+      let subs = sessionMessageSubscribers.get(connId);
+      if (!subs) {
+        subs = new Map();
+        sessionMessageSubscribers.set(connId, subs);
+      }
+      if (!subs.has(sessionKey)) {
+        subs.set(sessionKey, new Set());
+      }
+    },
+    unsubscribeSessionMessageEvents: (connId: string, sessionKey: string) => {
+      const subs = sessionMessageSubscribers.get(connId);
+      if (subs) {
+        subs.delete(sessionKey);
+        if (subs.size === 0) sessionMessageSubscribers.delete(connId);
+      }
+    },
+    unsubscribeAllSessionEvents: (connId: string) => {
+      sessionSubscribers.delete(connId);
+      sessionMessageSubscribers.delete(connId);
+    },
+    getSessionEventSubscriberConnIds: () => new Set(sessionSubscribers.keys()),
+    registerToolEventRecipient: (runId: string, connId: string) => {
+      let set = toolEventRecipients.get(runId);
+      if (!set) {
+        set = new Set();
+        toolEventRecipients.set(runId, set);
+      }
+      set.add(connId);
+    },
+    dedupe,
+    wizardSessions,
+    findRunningWizard: () => null,
+    purgeWizardSession: (_id: string) => {},
+    getRuntimeSnapshot: () => ({ channels: {}, channelError: null }),
+    startChannel: async () => {},
+    stopChannel: async () => {},
+    markChannelLoggedOut: () => {},
+    wizardRunner: async () => {},
+    broadcastVoiceWakeChanged: () => {},
+  };
+}
+
+/** Cached context — rebuilt on first dispatch after modules are ready. */
+let cachedLiteContext: { context: GatewayRequestContext; clients: Set<LiteWsClient> } | null = null;
+
+function getOrCreateLiteContext(clients: Set<LiteWsClient>): GatewayRequestContext {
+  if (cachedLiteContext && cachedLiteContext.clients === clients) {
+    return cachedLiteContext.context;
+  }
+  cachedLiteContext = { context: buildLiteRequestContext(clients), clients };
+  return cachedLiteContext.context;
+}
+
+// ---------------------------------------------------------------------------
 // Lazy module method handler (with timeout)
 // ---------------------------------------------------------------------------
 
@@ -666,9 +839,16 @@ async function handleLazyModuleMethod(
   requiredModule: string,
   timeoutMs: number,
   connId: string,
+  clients: Set<LiteWsClient>,
+  connectParams: ConnectParams,
 ): Promise<void> {
+  // Build respond function matching the full gateway's signature
+  const respond = (ok: boolean, payload?: unknown, error?: unknown) => {
+    send({ type: "res", id, ok, payload, error });
+  };
+
   try {
-    // Wait for the module with timeout
+    // Wait for the required module with timeout
     await Promise.race([
       lazyRegistry.get(requiredModule),
       new Promise<never>((_, reject) =>
@@ -679,21 +859,35 @@ async function handleLazyModuleMethod(
       ),
     ]);
 
-    // Module loaded – but the lite kernel cannot dispatch arbitrary methods.
-    // This is expected: the full gateway handler (from server.impl.ts) should
-    // be swapped in once the module system is ready. For now, return a
-    // graceful "method not available in lite mode" response.
-    log.debug(
-      `module "${requiredModule}" loaded but lite kernel cannot dispatch "${method}" conn=${connId}`,
-    );
-    send({
-      type: "res",
-      id,
-      ok: false,
-      error: errorShape(
-        ErrorCodes.UNAVAILABLE,
-        `method "${method}" requires the full gateway runtime (module "${requiredModule}" loaded but lite kernel has limited dispatch). Restart with the full gateway for complete functionality.`,
-      ),
+    // For methods that require the full gateway dispatcher (chat.*, sessions.*, etc.),
+    // try to load the full handler and dispatch.
+    const fullHandlers = await getFullHandler();
+    if (!fullHandlers) {
+      send({
+        type: "res",
+        id,
+        ok: false,
+        error: errorShape(
+          ErrorCodes.UNAVAILABLE,
+          `method "${method}" requires the full gateway runtime (module "${requiredModule}" loaded but method dispatcher could not be loaded).`,
+        ),
+      });
+      return;
+    }
+
+    const context = getOrCreateLiteContext(clients);
+    const client: import("./server-methods/types.js").GatewayClient = {
+      connect: connectParams,
+      connId,
+      clientIp: undefined,
+    };
+
+    await fullHandlers.handleGatewayRequest({
+      req: { id, method, params: params as Record<string, unknown> },
+      client,
+      isWebchatConnect: (p) => p?.client?.mode === "webchat",
+      respond,
+      context,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
