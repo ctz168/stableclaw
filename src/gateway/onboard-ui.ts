@@ -205,6 +205,90 @@ const PROVIDERS = [
     group: "Popular",
   },
   {
+    id: "groq",
+    name: "Groq",
+    envKey: "GROQ_API_KEY",
+    models: ["llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+    group: "Popular",
+  },
+  {
+    id: "fireworks",
+    name: "Fireworks AI",
+    envKey: "FIREWORKS_API_KEY",
+    models: [],
+    group: "Popular",
+  },
+  {
+    id: "anyscale",
+    name: "Anyscale",
+    envKey: "ANYSCALE_API_KEY",
+    models: [],
+    group: "Popular",
+  },
+  {
+    id: "perplexity",
+    name: "Perplexity",
+    envKey: "PERPLEXITY_API_KEY",
+    models: ["sonar-pro", "sonar"],
+    group: "Popular",
+  },
+  {
+    id: "volcengine",
+    name: "Volcengine (\u5B57\u8282)",
+    envKey: "VOLCENGINE_API_KEY",
+    models: ["doubao-pro-32k", "doubao-pro-128k"],
+    group: "Chinese",
+  },
+  {
+    id: "moonshot",
+    name: "Moonshot (\u6708\u4E4B\u6697\u9762)",
+    envKey: "MOONSHOT_API_KEY",
+    models: ["moonshot-v1-128k", "moonshot-v1-32k"],
+    group: "Chinese",
+  },
+  {
+    id: "qianfan",
+    name: "Baidu Qianfan (\u767E\u5EA6\u5343\u5E06)",
+    envKey: "QIANFAN_API_KEY",
+    models: ["ernie-4.0-8k", "ernie-3.5-8k"],
+    group: "Chinese",
+  },
+  {
+    id: "zhipuai",
+    name: "Zhipu AI (\u667A\u8C31)",
+    envKey: "ZHIPUAI_API_KEY",
+    models: ["glm-4-plus", "glm-4-flash"],
+    group: "Chinese",
+  },
+  {
+    id: "minimax",
+    name: "MiniMax",
+    envKey: "MINIMAX_API_KEY",
+    models: ["abab6.5s-chat", "abab6.5-chat"],
+    group: "Chinese",
+  },
+  {
+    id: "ollama",
+    name: "Ollama (Local)",
+    envKey: "",
+    models: [],
+    group: "Self-Hosted",
+  },
+  {
+    id: "lmstudio",
+    name: "LM Studio (Local)",
+    envKey: "",
+    models: [],
+    group: "Self-Hosted",
+  },
+  {
+    id: "vllm",
+    name: "vLLM (Local)",
+    envKey: "",
+    models: [],
+    group: "Self-Hosted",
+  },
+  {
     id: "custom",
     name: "Custom (OpenAI-Compatible)",
     envKey: "",
@@ -230,6 +314,18 @@ const SEARCH_PROVIDERS = [
     envKey: "TAVILY_API_KEY",
     description: "AI-powered search optimized for LLMs",
   },
+  {
+    id: "searxng",
+    name: "SearXNG",
+    envKey: "SEARXNG_BASE_URL",
+    description: "Self-hosted meta search engine",
+  },
+  {
+    id: "google-pse",
+    name: "Google PSE",
+    envKey: "GOOGLE_PSE_API_KEY",
+    description: "Google Programmable Search Engine",
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -245,6 +341,17 @@ const BUILTIN_SKILLS = [
   { id: "model-usage", name: "Model Usage", description: "Track and display model usage stats", emoji: "\u{1F4CA}" },
   { id: "interview-designer", name: "Interview Designer", description: "Design interview guides", emoji: "\u{1F4DD}" },
   { id: "aminer-open-academic", name: "AMiner Academic", description: "Academic paper search", emoji: "\u{1F4DA}" },
+  { id: "canvas", name: "Canvas", description: "Visual design canvas tool", emoji: "\u{1F3A8}" },
+  { id: "weather", name: "Weather", description: "Get weather forecasts", emoji: "\u26C5" },
+  { id: "github", name: "GitHub", description: "GitHub repository integration", emoji: "\u{1F4BB}" },
+  { id: "session-logs", name: "Session Logs", description: "Browse and search session logs", emoji: "\u{1F4CB}" },
+  { id: "stock-analysis-skill", name: "Stock Analysis", description: "Analyze stocks and markets", emoji: "\u{1F4C8}" },
+  { id: "dream-interpreter", name: "Dream Interpreter", description: "Interpret dreams using psychology", emoji: "\u{1F4AD}" },
+  { id: "trello", name: "Trello", description: "Trello board integration", emoji: "\u{1F5C3}" },
+  { id: "slack", name: "Slack", description: "Slack workspace integration", emoji: "\u{1F4E8}" },
+  { id: "gifgrep", name: "GIF Search", description: "Search for GIF images", emoji: "\u{1F3AC}" },
+  { id: "songsee", name: "Song Identifier", description: "Identify songs from lyrics", emoji: "\u{1F3B5}" },
+  { id: "healthcheck", name: "Health Check", description: "System health monitoring", emoji: "\u{1FA7A}" },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -254,6 +361,8 @@ const BUILTIN_SKILLS = [
 const BUILTIN_HOOKS = [
   { id: "session-memory-on-new", name: "Session Memory on /new", description: "Save session context to memory when starting a new session", emoji: "\u{1F9E0}" },
   { id: "session-summary-on-reset", name: "Session Summary on /reset", description: "Generate a summary before resetting the session", emoji: "\u{1F504}" },
+  { id: "auto-compact", name: "Auto Compact", description: "Automatically compact long sessions to save context", emoji: "\u{1F504}" },
+  { id: "webhook-on-complete", name: "Webhook on Complete", description: "Send webhook notification when agent completes a task", emoji: "\u{1F517}" },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -341,6 +450,24 @@ function providerEnvVar(provider: string): string {
       return "XAI_API_KEY";
     case "together":
       return "TOGETHER_API_KEY";
+    case "groq":
+      return "GROQ_API_KEY";
+    case "fireworks":
+      return "FIREWORKS_API_KEY";
+    case "anyscale":
+      return "ANYSCALE_API_KEY";
+    case "perplexity":
+      return "PERPLEXITY_API_KEY";
+    case "volcengine":
+      return "VOLCENGINE_API_KEY";
+    case "moonshot":
+      return "MOONSHOT_API_KEY";
+    case "qianfan":
+      return "QIANFAN_API_KEY";
+    case "zhipuai":
+      return "ZHIPUAI_API_KEY";
+    case "minimax":
+      return "MINIMAX_API_KEY";
     default:
       return "";
   }
@@ -406,6 +533,35 @@ async function testProviderKey(
       headers = { Authorization: `Bearer ${apiKey}` };
     } else if (provider === "together") {
       endpoint = "https://api.together.xyz/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "groq") {
+      endpoint = "https://api.groq.com/openai/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "fireworks") {
+      endpoint = "https://api.fireworks.ai/inference/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "perplexity") {
+      endpoint = "https://api.perplexity.ai/chat/completions";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "volcengine") {
+      endpoint = `https://ark.cn-beijing.volces.com/api/v3/models?key=${apiKey}`;
+    } else if (provider === "moonshot") {
+      endpoint = "https://api.moonshot.cn/v1/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "qianfan") {
+      endpoint = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions?access_token=${apiKey}`;
+    } else if (provider === "zhipuai") {
+      endpoint = "https://open.bigmodel.cn/api/paas/v4/models";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "minimax") {
+      endpoint = "https://api.minimax.chat/v1/text/chatcompletion_v2";
+      headers = { Authorization: `Bearer ${apiKey}` };
+    } else if (provider === "ollama" && baseUrl) {
+      endpoint = `${baseUrl.replace(/\/+$/, "")}/api/tags`;
+    } else if (provider === "lmstudio" && baseUrl) {
+      endpoint = `${baseUrl.replace(/\/+$/, "")}/v1/models`;
+    } else if (provider === "vllm" && baseUrl) {
+      endpoint = `${baseUrl.replace(/\/+$/, "")}/v1/models`;
       headers = { Authorization: `Bearer ${apiKey}` };
     } else if (provider === "custom" && baseUrl) {
       endpoint = `${baseUrl.replace(/\/+$/, "")}/models`;
@@ -489,7 +645,15 @@ async function handleStatusRequest(): Promise<OnboardStatusResponse> {
     Boolean(envVars.DEEPSEEK_API_KEY) ||
     Boolean(envVars.MISTRAL_API_KEY) ||
     Boolean(envVars.XAI_API_KEY) ||
-    Boolean(envVars.TOGETHER_API_KEY);
+    Boolean(envVars.TOGETHER_API_KEY) ||
+    Boolean(envVars.GROQ_API_KEY) ||
+    Boolean(envVars.FIREWORKS_API_KEY) ||
+    Boolean(envVars.PERPLEXITY_API_KEY) ||
+    Boolean(envVars.VOLCENGINE_API_KEY) ||
+    Boolean(envVars.MOONSHOT_API_KEY) ||
+    Boolean(envVars.QIANFAN_API_KEY) ||
+    Boolean(envVars.ZHIPUAI_API_KEY) ||
+    Boolean(envVars.MINIMAX_API_KEY);
   const port = resolveGatewayPort(cfg);
 
   // Consider the gateway "configured" if it has auth set up and a provider key.
@@ -747,7 +911,7 @@ async function handleConfigRequest(
         gwConfig.port = port;
       }
 
-      if (bind === "loopback" || bind === "lan" || bind === "auto") {
+      if (bind === "loopback" || bind === "lan" || bind === "auto" || bind === "tailnet" || bind === "custom") {
         gwConfig.bind = bind;
       }
 
@@ -766,6 +930,18 @@ async function handleConfigRequest(
         authConfig.password = password;
       }
       gwConfig.auth = authConfig;
+
+      // Handle Tailscale
+      const tailscale = (body as Record<string, unknown>).tailscale as string | undefined;
+      if (tailscale && gwConfig) {
+        (gwConfig as Record<string, unknown>).tailscale = tailscale;
+      }
+
+      // Handle custom bind host
+      const customBind = (body as Record<string, unknown>).customBind as string | undefined;
+      if (customBind && (gwConfig as Record<string, unknown>)) {
+        (gwConfig as Record<string, unknown>).customBind = customBind;
+      }
 
       const nextConfig: OpenClawConfig = {
         ...base,

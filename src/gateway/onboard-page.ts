@@ -878,11 +878,83 @@ select {
           <div class="provider-name">Together AI</div>
           <div class="provider-env">TOGETHER_API_KEY</div>
         </label>
+        <label class="provider-card" data-provider="groq">
+          <input type="radio" name="provider" value="groq">
+          <div class="provider-icon">\u26A1</div>
+          <div class="provider-name">Groq</div>
+          <div class="provider-env">GROQ_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="perplexity">
+          <input type="radio" name="provider" value="perplexity">
+          <div class="provider-icon">\u{1F50D}</div>
+          <div class="provider-name">Perplexity</div>
+          <div class="provider-env">PERPLEXITY_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="fireworks">
+          <input type="radio" name="provider" value="fireworks">
+          <div class="provider-icon">\u{1F525}</div>
+          <div class="provider-name">Fireworks AI</div>
+          <div class="provider-env">FIREWORKS_API_KEY</div>
+        </label>
         <label class="provider-card" data-provider="custom">
           <input type="radio" name="provider" value="custom">
           <div class="provider-icon">\u{1F510}</div>
           <div class="provider-name">Custom</div>
           <div class="provider-env">OpenAI-Compatible</div>
+        </label>
+      </div>
+      <div class="step-label" style="margin-top:14px;">Chinese Providers</div>
+      <div class="provider-grid" id="providerGroup3">
+        <label class="provider-card" data-provider="volcengine">
+          <input type="radio" name="provider" value="volcengine">
+          <div class="provider-icon">\u{1F525}</div>
+          <div class="provider-name">Volcengine</div>
+          <div class="provider-env">VOLCENGINE_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="moonshot">
+          <input type="radio" name="provider" value="moonshot">
+          <div class="provider-icon">\u{1F319}</div>
+          <div class="provider-name">Moonshot</div>
+          <div class="provider-env">MOONSHOT_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="qianfan">
+          <input type="radio" name="provider" value="qianfan">
+          <div class="provider-icon">\u{1F30D}</div>
+          <div class="provider-name">Baidu Qianfan</div>
+          <div class="provider-env">QIANFAN_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="zhipuai">
+          <input type="radio" name="provider" value="zhipuai">
+          <div class="provider-icon">\u{1F9E0}</div>
+          <div class="provider-name">Zhipu AI</div>
+          <div class="provider-env">ZHIPUAI_API_KEY</div>
+        </label>
+        <label class="provider-card" data-provider="minimax">
+          <input type="radio" name="provider" value="minimax">
+          <div class="provider-icon">\u{1F4A1}</div>
+          <div class="provider-name">MiniMax</div>
+          <div class="provider-env">MINIMAX_API_KEY</div>
+        </label>
+      </div>
+      <div class="step-label" style="margin-top:14px;">Self-Hosted / Local</div>
+      <div class="provider-grid" id="providerGroup4">
+        <label class="provider-card" data-provider="ollama">
+          <input type="radio" name="provider" value="ollama">
+          <div class="provider-icon">\u{1F430}</div>
+          <div class="provider-name">Ollama</div>
+          <div class="provider-env">Local Models</div>
+        </label>
+        <label class="provider-card" data-provider="lmstudio">
+          <input type="radio" name="provider" value="lmstudio">
+          <div class="provider-icon">\u{1F3B5}</div>
+          <div class="provider-name">LM Studio</div>
+          <div class="provider-env">Local Models</div>
+        </label>
+        <label class="provider-card" data-provider="vllm">
+          <input type="radio" name="provider" value="vllm">
+          <div class="provider-icon">\u26A1</div>
+          <div class="provider-name">vLLM</div>
+          <div class="provider-env">Local Models</div>
         </label>
       </div>
       <div class="form-group" id="customBaseGroup" style="display:none; margin-top:14px;">
@@ -971,6 +1043,8 @@ select {
           <option value="loopback">Loopback (localhost only)</option>
           <option value="lan">LAN (all interfaces)</option>
           <option value="auto">Auto (loopback preferred)</option>
+          <option value="tailnet">Tailscale Network</option>
+          <option value="custom">Custom Host</option>
         </select>
       </div>
       <div class="form-group">
@@ -988,6 +1062,18 @@ select {
       <div class="form-group" id="passwordGroup" style="display:none;">
         <label>Gateway Password</label>
         <input type="password" id="gatewayPassword" placeholder="Enter a strong password" autocomplete="new-password">
+      </div>
+      <div class="form-group" id="tailscaleGroup" style="display:none;">
+        <label>Tailscale Mode</label>
+        <select id="tailscaleMode">
+          <option value="off">Off</option>
+          <option value="serve">Serve (tailscale serve)</option>
+          <option value="funnel">Funnel (public HTTPS)</option>
+        </select>
+      </div>
+      <div class="form-group" id="customBindGroup" style="display:none;">
+        <label>Custom Bind Host</label>
+        <input type="text" id="customBindHost" placeholder="0.0.0.0 or specific IP">
       </div>
       <div class="msg" id="gatewayError"></div>
       <div class="btn-row">
@@ -1026,6 +1112,22 @@ select {
           <div>
             <span class="radio-label">Tavily</span>
             <div class="radio-desc">AI-powered search optimized for LLMs</div>
+          </div>
+        </label>
+        <label class="radio-option" data-search="searxng">
+          <input type="radio" name="searchProvider" value="searxng">
+          <span class="radio-dot"></span>
+          <div>
+            <span class="radio-label">SearXNG (Self-hosted)</span>
+            <div class="radio-desc">Self-hosted meta search engine</div>
+          </div>
+        </label>
+        <label class="radio-option" data-search="google-pse">
+          <input type="radio" name="searchProvider" value="google-pse">
+          <span class="radio-dot"></span>
+          <div>
+            <span class="radio-label">Google PSE</span>
+            <div class="radio-desc">Google Programmable Search Engine</div>
           </div>
         </label>
       </div>
@@ -1185,7 +1287,7 @@ select {
     card.querySelector('input[type="radio"]').checked = true;
 
     var provider = getProvider();
-    var isCustom = provider === 'custom';
+    var isCustom = provider === 'custom' || provider === 'ollama' || provider === 'lmstudio' || provider === 'vllm' || provider === 'fireworks';
     $('customBaseGroup').style.display = isCustom ? 'block' : 'none';
     $('customModelGroup').style.display = isCustom ? 'block' : 'none';
   }
@@ -1214,6 +1316,8 @@ select {
   // Attach click handlers
   $('providerGroup').addEventListener('click', providerCardClick);
   $('providerGroup2').addEventListener('click', providerCardClick);
+  if ($('providerGroup3')) $('providerGroup3').addEventListener('click', providerCardClick);
+  if ($('providerGroup4')) $('providerGroup4').addEventListener('click', providerCardClick);
   $('modeGroup').addEventListener('click', modeCardClick);
   $('searchGroup').addEventListener('click', searchRadioClick);
 
@@ -1221,6 +1325,12 @@ select {
     var mode = this.value;
     $('tokenGroup').style.display = mode === 'token' ? 'block' : 'none';
     $('passwordGroup').style.display = mode === 'password' ? 'block' : 'none';
+  });
+
+  $('bindMode').addEventListener('change', function() {
+    var mode = this.value;
+    $('tailscaleGroup').style.display = mode === 'tailnet' ? 'block' : 'none';
+    $('customBindGroup').style.display = mode === 'custom' ? 'block' : 'none';
   });
 
   // Fetch providers and populate model list on load

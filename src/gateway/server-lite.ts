@@ -28,6 +28,7 @@ import { resolveGatewayPort, resolveStateDir } from "../config/paths.js";
 import { resolveGatewayAuth, type ResolvedGatewayAuth } from "./auth.js";
 import { handleControlUiHttpRequest } from "./control-ui.js";
 import { handleOnboardHttpRequest, type OnboardRequestOptions } from "./onboard-ui.js";
+import { handleSessionHistoryHttpRequest } from "./sessions-history-http.js";
 import { lazyRegistry } from "./lazy-registry.js";
 import { registerGatewayLazyModules } from "./lazy-modules.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -367,6 +368,21 @@ async function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResp
   };
   if (await handleOnboardHttpRequest(req, res, onboardOpts)) {
     return;
+  }
+
+  // Session history HTTP endpoint (AJAX chat history loading)
+  // Supports both JSON and SSE streaming responses for chat content retrieval.
+  if (activeAuth) {
+    const gwCfg = activeConfig?.gateway as Record<string, unknown> | undefined;
+    if (
+      await handleSessionHistoryHttpRequest(req, res, {
+        auth: activeAuth,
+        trustedProxies: (gwCfg?.trustedProxies as string[] | undefined) ?? [],
+        allowRealIpFallback: gwCfg?.allowRealIpFallback === true,
+      })
+    ) {
+      return;
+    }
   }
 
   // Control UI: delegate to the shared control-ui handler which serves

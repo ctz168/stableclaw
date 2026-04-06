@@ -318,7 +318,7 @@ export class PluginHotReloadManager {
 
       recordPluginError({
         pluginId,
-        type: "load",
+        type: "unload",
         severity: "error",
         message: errorMsg,
         error: error instanceof Error ? error : new Error(errorMsg),
