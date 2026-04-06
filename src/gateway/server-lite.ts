@@ -23,6 +23,7 @@ import {
 } from "../config/config.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import { resolveGatewayAuth, type ResolvedGatewayAuth } from "./auth.js";
+import { handleControlUiHttpRequest } from "./control-ui.js";
 import { lazyRegistry } from "./lazy-registry.js";
 import { registerGatewayLazyModules } from "./lazy-modules.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -306,19 +307,20 @@ function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse):
     return;
   }
 
-  // Control UI bootstrap config (lightweight, no SPA file serving yet)
-  const bootstrapPath = "/__openclaw/control-ui-config.json";
-  if (url === bootstrapPath && method === "GET") {
-    const body = JSON.stringify({
-      gatewayPort: process.env.OPENCLAW_GATEWAY_PORT,
-      version: "lite",
-    });
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(body);
+  // Control UI: delegate to the shared control-ui handler which serves
+  // static assets, the bootstrap config endpoint, avatar requests, and
+  // provides the SPA index.html fallback.
+  const basePath = activeConfig?.gateway?.controlUi?.basePath;
+  if (
+    handleControlUiHttpRequest(req, res, {
+      basePath,
+      config: activeConfig ?? undefined,
+    })
+  ) {
     return;
   }
 
-  // 404 for everything else (static file serving is loaded lazily)
+  // 404 for everything else
   res.writeHead(404, { "Content-Type": "application/json" });
   res.end(JSON.stringify({ error: "not found" }));
 }
