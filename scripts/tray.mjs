@@ -5,18 +5,21 @@
  * Provides a system tray/menu-bar icon with context menu options to:
  *   - Start / Stop the Gateway daemon service
  *   - Open the Dashboard in a browser
+ *   - Open the Onboard wizard
  *   - Exit the tray process
  *
  * Platform implementations:
  *   - macOS:  Uses osascript + JXA (no external deps)
  *   - Windows: Uses PowerShell + System.Windows.Forms (no external deps)
- *   - Linux:  Uses zenity --notification or yad (no external deps)
+ *   - Linux:  Uses python3 + gi (Gtk/AppIndicator3) (no external deps beyond python3-gi)
  */
 
-import { spawn, execSync, exec } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, "..");
@@ -27,42 +30,59 @@ function getPlatform() {
   return process.platform;
 }
 
+/**
+ * Resolve the path to the stableclaw CLI binary.
+ * Checks in order:
+ *   1. Development: project root symlink/binary
+ *   2. Global PATH resolution (for npm global installs)
+ *   3. process.env._ (shell-provided, last resort)
+ */
 function resolveBinPath() {
-  // Try to find the stableclaw binary
-  const candidates = [
-    process.env._, // from npm global bin
-    join(PROJECT_ROOT, process.platform === "win32" ? "stableclaw.cmd" : "stableclaw"),
-  ];
-  for (const c of candidates) {
-    if (c && existsSync(c)) return c;
-  }
-  return "stableclaw"; // fallback to PATH
+  // Check development path first
+  const devPath = join(PROJECT_ROOT, process.platform === "win32" ? "stableclaw.cmd" : "stableclaw");
+  if (existsSync(devPath)) return devPath;
+
+  // Check process.env._ (set by bash/zsh to last executed command)
+  if (process.env._ && existsSync(process.env._)) return process.env._;
+
+  // Fall back to PATH lookup
+  return "stableclaw";
 }
 
 const BIN = resolveBinPath();
 
-function runDaemonAction(action) {
-  return new Promise((resolve) => {
-    const child = spawn(BIN, ["daemon", action, "--json"], {
-      stdio: "pipe",
-      shell: getPlatform() === "win32",
-    });
-    let stdout = "";
-    child.stdout?.on("data", (d) => (stdout += d));
-    child.on("close", () => resolve(stdout));
-    child.on("error", () => resolve(""));
-  });
+/**
+ * Open a URL in the default browser, cross-platform.
+ */
+function openUrl(url) {
+  const platform = getPlatform();
+  let cmd;
+  let args;
+  if (platform === "darwin") {
+    cmd = "open";
+    args = [url];
+  } else if (platform === "win32") {
+    // Use cmd /c start on Windows — "start" is a CMD built-in, not a standalone executable
+    cmd = "cmd";
+    args = ["/c", "start", "", url];
+  } else {
+    cmd = "xdg-open";
+    args = [url];
+  }
+  spawn(cmd, args, { stdio: "ignore", detached: true, shell: platform === "win32" }).unref();
 }
 
-function openDashboard() {
-  const url = "http://localhost:18789";
-  const cmd =
-    getPlatform() === "darwin"
-      ? "open"
-      : getPlatform() === "win32"
-        ? "start"
-        : "xdg-open";
-  spawn(cmd, [url], { stdio: "ignore", detached: true }).unref();
+/**
+ * Create a temporary script file with cleanup on process exit.
+ * Returns the path to the created file.
+ */
+function writeTempScript(content, ext) {
+  const dir = join(tmpdir(), "stableclaw-tray");
+  mkdirSync(dir, { recursive: true });
+  const suffix = randomBytes(4).toString("hex");
+  const scriptPath = join(dir, `tray-${Date.now()}-${suffix}${ext}`);
+  writeFileSync(scriptPath, content, "utf8");
+  return scriptPath;
 }
 
 // ── macOS Tray (osascript + JXA) ──────────────────────────
@@ -74,9 +94,9 @@ function createMacOSTray() {
     const app = $.NSApplication.sharedApplication;
     app.setActivationPolicy($.NSApplicationActivationPolicyAccessory);
 
-    const statusItem = $.NSStatusBar.systemStatusBar.statusItemWithLength($.NSVariableStatusItemLength);
-    statusItem.button.title = "SC";
-    statusItem.button.toolTip = "StableClaw Gateway";
+    const statusBarItem = $.NSStatusBar.systemStatusBar.statusItemWithLength($.NSVariableStatusItemLength);
+    statusBarItem.button.title = "SC";
+    statusBarItem.button.toolTip = "StableClaw Gateway";
 
     const menu = $.NSMenu.alloc.init;
 
@@ -95,13 +115,17 @@ function createMacOSTray() {
     const dashItem = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent$("🌐 Open Dashboard", "openDashboard:", "");
     menu.addItem(dashItem);
 
+    // Onboard
+    const onboardItem = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent$("📋 Onboard", "openOnboard:", "");
+    menu.addItem(onboardItem);
+
     // Separator
     menu.addItem($.NSMenuItem.separatorItem);
 
-    // Status
-    const statusItem2 = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent$("Status: Checking...", "checkStatus:", "");
-    statusItem2.enabled = false;
-    menu.addItem(statusItem2);
+    // Status display (disabled menu item, updated by timer)
+    const statusMenuItem = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent$("Status: Checking...", "checkStatus:", "");
+    statusMenuItem.enabled = false;
+    menu.addItem(statusMenuItem);
 
     // Separator
     menu.addItem($.NSMenuItem.separatorItem);
@@ -110,53 +134,95 @@ function createMacOSTray() {
     const exitItem = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent$("❌ Exit", "exitApp:", "");
     menu.addItem(exitItem);
 
-    statusItem.menu = menu;
+    statusBarItem.menu = menu;
 
-    // Action handlers
+    // ── Single delegate class with all handlers ──
     ObjC.registerSubclass({
       name: "TrayDelegate",
       methods: {
         "startDaemon:": function (sender) {
-          $.NSTask.launchedTaskWithLaunchPathArguments("/usr/bin/env", ["node", "${BIN}", "daemon", "start"]);
-          statusItem2.title = "Status: Starting...";
+          $.NSTask.launchedTaskWithLaunchPathArguments(
+            "/usr/bin/env",
+            ["node", "${BIN}", "daemon", "start"]
+          );
+          statusMenuItem.title = "Status: Starting...";
         },
         "stopDaemon:": function (sender) {
-          $.NSTask.launchedTaskWithLaunchPathArguments("/usr/bin/env", ["node", "${BIN}", "daemon", "stop"]);
-          statusItem2.title = "Status: Stopping...";
+          $.NSTask.launchedTaskWithLaunchPathArguments(
+            "/usr/bin/env",
+            ["node", "${BIN}", "daemon", "stop"]
+          );
+          statusMenuItem.title = "Status: Stopping...";
         },
         "openDashboard:": function (sender) {
-          $.NSWorkspace.sharedWorkspace.openURL($.NSURL.URLWithString("http://localhost:18789"));
+          $.NSWorkspace.sharedWorkspace.openURL(
+            $.NSURL.URLWithString("http://localhost:18789")
+          );
         },
-        "checkStatus:": function (sender) {},
+        "openOnboard:": function (sender) {
+          $.NSWorkspace.sharedWorkspace.openURL(
+            $.NSURL.URLWithString("http://localhost:18789/onboard")
+          );
+        },
+        "checkStatus:": function (sender) {
+          // Run daemon status synchronously and update the status menu item
+          var task = $.NSTask.alloc.init;
+          task.launchPath = "/usr/bin/env";
+          task.arguments = ["node", "${BIN}", "daemon", "status", "--json"];
+          var pipe = $.NSPipe.pipe;
+          task.standardOutput = pipe;
+          task.standardError = $.NSPipe.pipe;
+          task.launch;
+          task.waitUntilExit;
+
+          var data = pipe.fileHandleForReading.readDataToEndOfFile;
+          var output = $.NSString.alloc.initWithDataEncoding(data, $.NSUTF8StringEncoding);
+          var statusText = "Status: Unknown";
+
+          if (output && output.length > 0) {
+            try {
+              var jsonStr = output.toString;
+              // Simple string-based check since JXA JSON parsing can be tricky
+              if (jsonStr.indexOf('"running"') !== -1 || jsonStr.indexOf('"running":true') !== -1 || jsonStr.indexOf('"running": true') !== -1) {
+                if (jsonStr.indexOf('"running":true') !== -1 || jsonStr.indexOf('"running": true') !== -1) {
+                  statusText = "Status: Running";
+                } else {
+                  statusText = "Status: Stopped";
+                }
+              } else {
+                // Try parsing as JSON for nested state.running
+                var parsed = JSON.parse(jsonStr);
+                if (parsed.running === true) {
+                  statusText = "Status: Running";
+                } else if (parsed.state && parsed.state.running === true) {
+                  statusText = "Status: Running";
+                } else {
+                  statusText = "Status: Stopped";
+                }
+              }
+            } catch (e) {
+              statusText = "Status: Error";
+            }
+          }
+
+          statusMenuItem.title = statusText;
+        },
         "exitApp:": function (sender) {
           $.NSApplication.sharedApplication.terminate(nil);
         },
       },
     });
 
-    const delegate = $.TrayDelegate.alloc.init;
+    var delegate = $.TrayDelegate.alloc.init;
     app.delegate = delegate;
 
-    // Periodic status check
-    const timer = $.NSTimer.scheduledTimerWithTimeIntervalTargetSelectorUserInfoRepeats(
+    // Periodic status check every 5 seconds
+    $.NSTimer.scheduledTimerWithTimeIntervalTargetSelectorUserInfoRepeats(
       5.0, delegate, "checkStatus:", null, true
     );
 
-    // Override checkStatus in delegate to actually check
-    ObjC.registerSubclass({
-      name: "TrayDelegate2",
-      methods: {
-        "checkStatus:": function (sender) {
-          const task = $.NSTask.alloc.init;
-          task.launchPath = "/usr/bin/env";
-          task.arguments = ["node", "${BIN}", "daemon", "status", "--json"];
-          const pipe = $.NSPipe.pipe;
-          task.standardOutput = pipe;
-          task.launch;
-          // We'll read output asynchronously
-        },
-      },
-    });
+    // Run initial status check
+    delegate.checkStatus(null);
 
     app.run;
   `;
@@ -176,7 +242,6 @@ function createWindowsTray() {
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-$icon = New-Object System.Drawing.Icon((Get-Process -Id $PID).MainModule.FileName, 16, 16)
 $notify = New-Object System.Windows.Forms.NotifyIcon
 $notify.Icon = [System.Drawing.SystemIcons]::Information
 $notify.Text = "StableClaw Gateway"
@@ -186,26 +251,31 @@ $notify.ShowBalloonTip(3000)
 
 $context = New-Object System.Windows.Forms.ContextMenuStrip
 
-$start = $context.Items.Add("Start Gateway")
+$start = $context.Items.Add("▶ Start Service")
 $start.Add_Click({
     Start-Process -FilePath "${BIN}" -ArgumentList "daemon","start" -WindowStyle Hidden
 })
 
-$stop = $context.Items.Add("Stop Gateway")
+$stop = $context.Items.Add("⏹ Stop Service")
 $stop.Add_Click({
     Start-Process -FilePath "${BIN}" -ArgumentList "daemon","stop" -WindowStyle Hidden
 })
 
 $context.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
 
-$dash = $context.Items.Add("Open Dashboard")
+$dash = $context.Items.Add("🌐 Open Dashboard")
 $dash.Add_Click({
     Start-Process "http://localhost:18789"
 })
 
+$onboard = $context.Items.Add("📋 Onboard")
+$onboard.Add_Click({
+    Start-Process "http://localhost:18789/onboard"
+})
+
 $context.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
 
-$exit = $context.Items.Add("Exit")
+$exit = $context.Items.Add("❌ Exit")
 $exit.Add_Click({
     $notify.Visible = $false
     $notify.Dispose()
@@ -217,8 +287,7 @@ $notify.ContextMenuStrip = $context
 
 $notify.Dispose()
 `;
-  const scriptPath = join(PROJECT_ROOT, "scripts", ".tray-windows.ps1");
-  writeFileSync(scriptPath, psScript, "utf8");
+  const scriptPath = writeTempScript(psScript, ".ps1");
 
   const child = spawn("powershell.exe", [
     "-NoProfile",
@@ -236,18 +305,16 @@ $notify.Dispose()
   return child;
 }
 
-// ── Linux Tray (zenity / yad / python3-gi) ───────────────
+// ── Linux Tray (python3-gi / Gtk) ─────────────────────────
 
 function createLinuxTray() {
-  // Try to use python3 with gi (Gtk/AppIndicator3)
   const pythonScript = `
 import subprocess
 import sys
 import os
 import signal
 import json
-import threading
-import time
+import tempfile
 
 try:
     from gi.repository import Gtk, GdkPixbuf, GLib
@@ -272,10 +339,12 @@ def run_daemon(action):
     except Exception:
         return False
 
-def open_dashboard():
+def open_url(url):
     try:
-        subprocess.Popen(["xdg-open", "http://localhost:18789"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.Popen(
+            ["xdg-open", url],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
     except Exception:
         pass
 
@@ -300,28 +369,63 @@ def on_stop(item):
     run_daemon("stop")
 
 def on_dashboard(item):
-    open_dashboard()
+    open_url("http://localhost:18789")
+
+def on_onboard(item):
+    open_url("http://localhost:18789/onboard")
 
 def on_exit(item):
     Gtk.main_quit()
     sys.exit(0)
 
-def create_icon():
-    """Create a simple icon programmatically."""
-    import cairo
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 32, 32)
-    ctx = cairo.Context(surface)
-    # Draw a circle
-    ctx.set_source_rgb(0.2, 0.6, 1.0)
-    ctx.arc(16, 16, 14, 0, 2 * 3.14159)
-    ctx.fill()
-    # Draw SC text
-    ctx.set_source_rgb(1.0, 1.0, 1.0)
-    ctx.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-    ctx.set_font_size(14)
-    ctx.move_to(6, 21)
-    ctx.show_text("SC")
-    return surface
+def create_icon_pixbuf():
+    """Create a simple icon programmatically using GdkPixbuf (no cairo needed)."""
+    import struct
+
+    width, height = 32, 32
+    rowstride = width * 4
+    # BGRA pixel data (premultiplied alpha)
+    pixels = bytearray(width * height * 4)
+
+    for y in range(height):
+        for x in range(width):
+            idx = (y * width + x) * 4
+            dx = x - 16
+            dy = y - 16
+            dist_sq = dx * dx + dy * dy
+            radius_sq = 14 * 14
+
+            if dist_sq <= radius_sq:
+                # Inside circle: blue (#3366FF) with alpha
+                pixels[idx]     = 0xFF  # B
+                pixels[idx + 1] = 0x66  # G
+                pixels[idx + 2] = 0x33  # R
+                pixels[idx + 3] = 0xFF  # A
+
+    raw_data = bytes(pixels)
+    return GdkPixbuf.Pixbuf.new_from_data(
+        raw_data,
+        GdkPixbuf.Colorspace.RGB,
+        True,   # has alpha
+        8,      # bits per sample
+        width,
+        height,
+        rowstride
+    )
+
+def save_icon_to_cache(pixbuf):
+    """Save pixbuf to a cache file for AppIndicator."""
+    cache_dir = os.path.join(
+        os.environ.get("HOME", tempfile.gettempdir()),
+        ".cache", "stableclaw-tray"
+    )
+    os.makedirs(cache_dir, exist_ok=True)
+    icon_path = os.path.join(cache_dir, "tray-icon.png")
+    try:
+        pixbuf.savev(icon_path, "png", [], [])
+    except Exception:
+        icon_path = None
+    return icon_path
 
 def main():
     if not Gtk:
@@ -330,6 +434,13 @@ def main():
 
     indicator = None
     statuswin = None
+    pixbuf = None
+
+    # Create icon (try without cairo first)
+    try:
+        pixbuf = create_icon_pixbuf()
+    except Exception:
+        pixbuf = None
 
     if HAS_INDICATOR:
         indicator = AppIndicator3.Indicator.new(
@@ -340,46 +451,36 @@ def main():
         indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         indicator.set_attention_icon("")
 
-        # Create icon
-        try:
-            surface = create_icon()
-            pixbuf = GdkPixbuf.Pixbuf.new_from_data(
-                surface.get_data(),
-                GdkPixbuf.Colorspace.RGB,
-                True,
-                8,
-                surface.get_width(),
-                surface.get_height(),
-                surface.get_stride()
-            )
-            icon_path = os.path.join(os.environ.get("HOME", "/tmp"), ".cache", "stableclaw-tray-icon.png")
-            os.makedirs(os.path.dirname(icon_path), exist_ok=True)
-            pixbuf.savev(icon_path, "png", [], [])
-            indicator.set_icon_full(icon_path, "StableClaw")
-        except Exception:
-            pass
+        if pixbuf:
+            icon_path = save_icon_to_cache(pixbuf)
+            if icon_path:
+                indicator.set_icon_full(icon_path, "StableClaw")
 
         indicator.set_label("StableClaw", "StableClaw")
 
     menu = Gtk.Menu()
 
-    start_item = Gtk.MenuItem(label="▶ Start")
+    start_item = Gtk.MenuItem(label="▶ Start Service")
     start_item.connect("activate", on_start)
     menu.append(start_item)
 
-    stop_item = Gtk.MenuItem(label="⏹ Stop")
+    stop_item = Gtk.MenuItem(label="⏹ Stop Service")
     stop_item.connect("activate", on_stop)
     menu.append(stop_item)
 
     menu.append(Gtk.SeparatorMenuItem())
 
-    dash_item = Gtk.MenuItem(label="Open Dashboard")
+    dash_item = Gtk.MenuItem(label="🌐 Open Dashboard")
     dash_item.connect("activate", on_dashboard)
     menu.append(dash_item)
 
+    onboard_item = Gtk.MenuItem(label="📋 Onboard")
+    onboard_item.connect("activate", on_onboard)
+    menu.append(onboard_item)
+
     menu.append(Gtk.SeparatorMenuItem())
 
-    exit_item = Gtk.MenuItem(label="Exit")
+    exit_item = Gtk.MenuItem(label="❌ Exit")
     exit_item.connect("activate", on_exit)
     menu.append(exit_item)
 
@@ -392,28 +493,22 @@ def main():
         statuswin = Gtk.StatusIcon()
         statuswin.set_name("StableClaw")
         statuswin.set_tooltip_text("StableClaw Gateway")
-        try:
-            surface = create_icon()
-            pixbuf = GdkPixbuf.Pixbuf.new_from_data(
-                surface.get_data(),
-                GdkPixbuf.Colorspace.RGB,
-                True,
-                8,
-                surface.get_width(),
-                surface.get_height(),
-                surface.get_stride()
-            )
+        if pixbuf:
             statuswin.set_from_pixbuf(pixbuf)
-        except Exception:
+        else:
             statuswin.set_from_stock(Gtk.STOCK_NETWORK)
-        statuswin.connect("popup-menu", lambda icon, button, time: menu.popup(None, None, None, 0, button, time))
+        statuswin.connect(
+            "popup-menu",
+            lambda icon, button, time: menu.popup(None, None, None, 0, button, time)
+        )
 
     def update_status():
         try:
+            text = get_status_text()
             if indicator:
-                indicator.set_label(get_status_text(), "StableClaw")
+                indicator.set_label(text, "StableClaw")
             elif statuswin:
-                statuswin.set_tooltip_text(get_status_text())
+                statuswin.set_tooltip_text(text)
         except Exception:
             pass
         return True
@@ -428,8 +523,7 @@ def main():
 if __name__ == "__main__":
     main()
 `;
-  const scriptPath = join(PROJECT_ROOT, "scripts", ".tray-linux.py");
-  writeFileSync(scriptPath, pythonScript, "utf8");
+  const scriptPath = writeTempScript(pythonScript, ".py");
 
   const child = spawn("python3", [scriptPath], {
     stdio: "ignore",
@@ -450,8 +544,8 @@ function main() {
   switch (platform) {
     case "darwin":
       createMacOSTray();
-      console.log("[stableclaw] macOS menu bar icon started (StableClaw = SC)");
-      console.log("[stableclaw] Close the menu item to exit the tray");
+      console.log("[stableclaw] macOS menu bar icon started (SC = StableClaw)");
+      console.log("[stableclaw] Use the menu to start/stop daemon or exit the tray");
       // On macOS, osascript runs in foreground, so we wait
       break;
 

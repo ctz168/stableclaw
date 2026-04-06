@@ -14,20 +14,25 @@
 
 import crypto from "node:crypto";
 import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
+import { execFile } from "node:child_process";
 import { WebSocketServer } from "ws";
 import {
   type OpenClawConfig,
   applyConfigOverrides,
   readConfigFileSnapshot,
-  replaceConfigFile,
+  CONFIG_PATH,
 } from "../config/config.js";
-import { resolveGatewayPort } from "../config/paths.js";
+import { resolveGatewayPort, resolveStateDir } from "../config/paths.js";
 import { resolveGatewayAuth, type ResolvedGatewayAuth } from "./auth.js";
 import { handleControlUiHttpRequest } from "./control-ui.js";
+import { handleOnboardHttpRequest, type OnboardRequestOptions } from "./onboard-ui.js";
 import { lazyRegistry } from "./lazy-registry.js";
 import { registerGatewayLazyModules } from "./lazy-modules.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { attachLiteWsHandler, type LiteWsClient } from "./server-lite-ws.js";
+import { existsSync } from "node:fs";
 
 const log = createSubsystemLogger("gateway/lite");
 
@@ -97,6 +102,7 @@ let activeClients = new Set<LiteWsClient>();
 let activeConfig: OpenClawConfig | null = null;
 let activeAuth: ResolvedGatewayAuth | null = null;
 let allLazyModulesReady = false;
+let isFirstBoot = false;
 
 export async function startGatewayLite(
   port = 18789,
@@ -104,6 +110,12 @@ export async function startGatewayLite(
 ): Promise<GatewayServer> {
   serverStartTime = Date.now();
   activeClients = new Set<LiteWsClient>();
+
+  // ── 0. Detect first boot (no config file exists) ─────────────────────
+  isFirstBoot = !existsSync(CONFIG_PATH);
+  if (isFirstBoot) {
+    log.info("first boot detected (no config file) — will ensure defaults + onboard");
+  }
 
   // ── 1. Load config (file I/O only, no plugin loading) ───────────────────
   log.info("loading configuration...");
@@ -115,7 +127,22 @@ export async function startGatewayLite(
     log.warn(`config load failed (starting with defaults): ${String(err)}`);
     cfg = {} as OpenClawConfig;
   }
+
+  // ── 1b. Ensure gateway defaults: mode=local, daemon-ready ────────────────
+  if (!cfg.gateway) {
+    cfg = { ...cfg, gateway: {} };
+  }
+  if (!cfg.gateway.mode) {
+    cfg = { ...cfg, gateway: { ...cfg.gateway, mode: "local" } };
+    log.info('set gateway.mode = "local" (default)');
+  }
   activeConfig = cfg;
+
+  // Persist default gateway.mode if we set it
+  if (!existsSync(CONFIG_PATH) || !cfg.gateway?.mode) {
+    writeConfigDirect(cfg);
+    log.info("persisted default gateway configuration");
+  }
 
   // ── 2. Resolve auth (config parsing only, no secrets system) ────────────
   log.info("resolving authentication...");
@@ -126,6 +153,7 @@ export async function startGatewayLite(
   });
   activeAuth = resolvedAuth;
 
+  // Auto-generate token for daemon mode (always ensure a token exists)
   if (resolvedAuth.mode === "token" && !resolvedAuth.token && !resolvedAuth.allowTailscale) {
     // Generate a persistent token so the gateway is usable immediately and across restarts.
     const generatedToken = crypto.randomBytes(24).toString("hex");
@@ -150,7 +178,8 @@ export async function startGatewayLite(
           },
         },
       };
-      await replaceConfigFile({ nextConfig: nextCfg });
+      writeConfigDirect(nextCfg);
+      activeConfig = nextCfg;
       log.info("Generated token persisted to config file.");
     } catch (persistErr) {
       log.warn(
@@ -168,7 +197,13 @@ export async function startGatewayLite(
   // ── 4. Create HTTP server (FAST) ───────────────────────────────────────
   log.info("starting HTTP server...");
   const httpServer = http.createServer((req, res) => {
-    handleHttpRequest(req, res);
+    handleHttpRequest(req, res).catch((err) => {
+      log.error(`HTTP handler error: ${String(err)}`);
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "internal server error" }));
+      }
+    });
   });
 
   // ── 5. Create WS server on same port (FAST) ────────────────────────────
@@ -195,11 +230,21 @@ export async function startGatewayLite(
   const bootTimeMs = Date.now() - serverStartTime;
   log.info(`gateway kernel ready in ${bootTimeMs}ms on ${bindHost}:${actualPort}`);
 
-  // ── 7. Background lazy initialisation (non-blocking) ───────────────────
+  // ── 7. Auto-install daemon on first boot ───────────────────────────────
+  if (isFirstBoot && !process.env.OPENCLAW_SKIP_DAEMON_INSTALL) {
+    log.info("first boot: auto-installing daemon service...");
+    try {
+      await autoInstallDaemon();
+    } catch (daemonErr) {
+      log.warn(`daemon auto-install failed (non-fatal): ${String(daemonErr)}`);
+    }
+  }
+
+  // ── 8. Background lazy initialisation (non-blocking) ───────────────────
   registerGatewayLazyModules();
   scheduleBackgroundInit();
 
-  // ── 8. Return server handle ────────────────────────────────────────────
+  // ── 9. Return server handle ────────────────────────────────────────────
   return {
     close: async (closeOpts) => {
       const reason = closeOpts?.reason ?? "shutdown";
@@ -276,11 +321,11 @@ function scheduleBackgroundInit(): void {
 // HTTP request handler
 // ---------------------------------------------------------------------------
 
-function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
+async function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   const url = req.url ?? "/";
   const method = req.method ?? "GET";
 
-  // CORS headers (for Control UI)
+  // CORS headers (for Control UI + Onboard)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -304,6 +349,22 @@ function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse):
       fullyLoaded: allLazyModulesReady,
     };
     res.end(JSON.stringify(body));
+    return;
+  }
+
+  // Onboard wizard: AJAX-based configuration wizard
+  // On first boot, this is opened automatically by the browser
+  const onboardOpts: OnboardRequestOptions = {
+    onComplete: async () => {
+      log.info("onboard complete: re-installing daemon with new config...");
+      try {
+        await autoInstallDaemon();
+      } catch (daemonErr) {
+        log.warn(`daemon re-install after onboard failed: ${String(daemonErr)}`);
+      }
+    },
+  };
+  if (await handleOnboardHttpRequest(req, res, onboardOpts)) {
     return;
   }
 
@@ -357,4 +418,67 @@ export function getActiveAuth(): ResolvedGatewayAuth | null {
 /** Get active WS clients. */
 export function getActiveClients(): Set<LiteWsClient> {
   return activeClients;
+}
+
+// ---------------------------------------------------------------------------
+// Config write helper (bypasses the config system's replaceConfigFile)
+// ---------------------------------------------------------------------------
+
+/**
+ * Write config directly to disk, ensuring the state directory exists.
+ * This is used during first boot and auto-setup because the config system's
+ * replaceConfigFile requires runtime config snapshot state that isn't
+ * available in the lite gateway startup path.
+ */
+function writeConfigDirect(cfg: OpenClawConfig): void {
+  try {
+    const dir = path.dirname(CONFIG_PATH);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2) + "\n", { mode: 0o600 });
+  } catch (err) {
+    log.error(`failed to write config: ${String(err)}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auto-install daemon helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Auto-installs the daemon service by spawning `stableclaw daemon install --force`.
+ * This is called on first boot and after onboard completion to ensure the
+ * gateway runs as a persistent system service.
+ */
+async function autoInstallDaemon(): Promise<void> {
+  const binPath = process.argv[1];
+  if (!binPath) {
+    log.warn("auto-install daemon: cannot determine binary path");
+    return;
+  }
+
+  log.info("auto-installing daemon service...");
+
+  await new Promise<void>((resolve, reject) => {
+    const child = execFile(
+      process.execPath,
+      [binPath, "daemon", "install", "--force", "--json"],
+      {
+        env: { ...process.env, OPENCLAW_SKIP_DAEMON_INSTALL: "1" },
+        timeout: 30_000,
+        maxBuffer: 1024 * 1024,
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          log.warn(`daemon install stderr: ${stderr || "(empty)"}`);
+          log.warn(`daemon install stdout: ${stdout || "(empty)"}`);
+          reject(new Error(`daemon install failed: ${err.message}`));
+          return;
+        }
+        log.info(`daemon install result: ${stdout?.trim() || "(no output)"}`);
+        resolve();
+      },
+    );
+  });
+
+  log.info("daemon service auto-installed successfully");
 }
