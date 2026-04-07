@@ -14,6 +14,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Allow running local scripts for the current process (fixes npm/pnpm blocked by ExecutionPolicy)
+if ($PSVersionTable.PSVersion.Major -ge 5) {
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+}
+
 Write-Host ""
 Write-Host " StableClaw Installer" -ForegroundColor Cyan
 Write-Host ""
