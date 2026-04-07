@@ -33,6 +33,41 @@ const ROOT_PREFIX = "/";
 const CONTROL_UI_ASSETS_MISSING_MESSAGE =
   "Control UI assets not found. Build them with `pnpm ui:build` (auto-installs UI deps), or run `pnpm ui:dev` during development.";
 
+/**
+ * Check whether the gateway needs the user to complete the onboard wizard.
+ * Mirrors the "configured" logic in onboard-ui.ts handleStatusRequest:
+ *   configured = hasConfig && hasAuth && providerSet
+ */
+function isOnboardNeeded(config: OpenClawConfig | undefined): boolean {
+  if (!config) return true;
+  const keys = Object.keys(config);
+  if (keys.length === 0) return true;
+
+  // Check auth
+  const gw = config.gateway as Record<string, unknown> | undefined;
+  const auth = gw?.auth as Record<string, unknown> | undefined;
+  const hasAuth = Boolean(
+    auth?.token ||
+      auth?.password ||
+      auth?.mode === "token" ||
+      auth?.mode === "password" ||
+      auth?.mode === "none",
+  );
+  if (!hasAuth) return true;
+
+  // Check provider (at least one API key in env vars)
+  const envVars = (config.env as Record<string, unknown> | undefined)?.vars as
+    | Record<string, unknown>
+    | undefined;
+  const providerSet = Object.entries(envVars ?? {}).some(
+    ([k, v]) =>
+      (k.endsWith("_API_KEY") || k === "VOLCENGINE_API_KEY") &&
+      typeof v === "string" &&
+      v.length > 0,
+  );
+  return !providerSet;
+}
+
 export type ControlUiRequestOptions = {
   basePath?: string;
   config?: OpenClawConfig;
@@ -364,6 +399,7 @@ export function handleControlUiHttpRequest(
       basePath,
       assistantName: identity.name,
       assistantAvatar: avatarValue ?? identity.avatar,
+      onboardNeeded: isOnboardNeeded(config),
     } satisfies ControlUiBootstrapConfig);
     return true;
   }
