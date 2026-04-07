@@ -10,6 +10,7 @@ const pluginLog = createSubsystemLogger("plugin");
  */
 export type PluginErrorType =
   | "load"
+  | "unload"
   | "runtime"
   | "hook"
   | "channel"

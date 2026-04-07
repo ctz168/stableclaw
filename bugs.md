@@ -1,8 +1,8 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T12:11:00+08:00
+> Last updated: 2026-04-07T12:15:00+08:00
 > Tester: Super Z (Lite Mode + AICQ Plugin Offline Focus)
-> Version tested: 2026.5.10 (commit ad8dc168)
+> Version tested: 2026.5.10 (commit be9d35cb)
 
 ---
 
@@ -221,8 +221,9 @@
   ```
   src/plugins/plugin-hot-reload.ts(321,9): error TS2820: Type '"unload"' is not assignable to type 'PluginErrorType'. Did you mean '"load"'?
   ```
-- **Fix suggestion**: 在 `PluginErrorType` 中添加 `"unload"` 变体
-- **Status**: Open
+- **Fix**: 在 `PluginErrorType` 联合类型中添加 `"unload"` 变体，使插件卸载错误能正确记录到错误处理系统中。
+- **Fixed in**: commit (pending push)
+- **Status**: Fixed ✅
 
 ### BUG-023: `server-lite-ws.ts` 存在 8 个 TypeScript 类型错误
 - **Severity**: Low
@@ -354,8 +355,8 @@
 | Critical | 6 | 5 | 1 (BUG-016) |
 | High | 6 | 6 | 0 |
 | Medium | 9 | 9 | 0 |
-| Low | 11 | 10 | 1 (BUG-021) |
-| **Total** | **32** | **30** | **2** |
+| Low | 11 | 9 | 2 (BUG-021, BUG-022) |
+| **Total** | **32** | **29** | **3** |
 
 ---
 
