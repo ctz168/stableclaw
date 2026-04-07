@@ -44,7 +44,8 @@
   export type ConfigValidateParams = Static<typeof ConfigValidateParamsSchema>;
   export type ConfigValidateResult = Static<typeof ConfigValidateResultSchema>;
   ```
-- **Status**: Open
+- **Fixed in**: commit `73ce22e8`
+- **Status**: Fixed ✅ (verified: `pnpm build` passes, v2026.5.9 published with this fix)
 
 ---
 
@@ -170,7 +171,7 @@
 | Test Category | Result | Details |
 |---|---|---|
 | `pnpm install` | PASS | 1160 packages installed successfully |
-| `pnpm build` | **FAIL** | BUG-016: TS2724 ConfigValidate types missing |
+| `pnpm build` | PASS | v2026.5.9: BUG-016 fixed by upstream commit 73ce22e8 |
 | `pnpm ui:build` | PASS | Vite build OK (42 chunks) |
 | Gateway Full mode startup | PASS | ~15s cold start, all modules loaded |
 | Gateway Lite mode startup | PASS | ~12ms kernel ready, 6s full init |
