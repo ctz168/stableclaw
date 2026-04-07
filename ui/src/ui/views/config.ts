@@ -4,6 +4,7 @@ import { BORDER_RADIUS_STOPS, type BorderRadiusStop } from "../storage.ts";
 import type { ThemeTransitionContext } from "../theme-transition.ts";
 import type { ThemeMode, ThemeName } from "../theme.ts";
 import type { ConfigUiHints } from "../types.ts";
+import type { ConfigValidationResult } from "../controllers/config-validation.ts";
 import {
   countSensitiveConfigValues,
   humanize,
@@ -44,6 +45,10 @@ export type ConfigProps = {
   searchQuery: string;
   activeSection: string | null;
   activeSubsection: string | null;
+  /** Pre-save validation result from config.validate RPC */
+  validationResult: ConfigValidationResult | null;
+  /** Whether a validation request is in-flight */
+  validationInProgress: boolean;
   onRawChange: (next: string) => void;
   onFormModeChange: (mode: "form" | "raw") => void;
   onFormPatch: (path: Array<string | number>, value: unknown) => void;
@@ -698,6 +703,141 @@ export function resetConfigViewStateForTests() {
   Object.assign(cvs, createConfigEphemeralState());
 }
 
+// ── Validation UI components ──────────────────────────────────────────
+
+/**
+ * Render a small inline validation indicator (✓ / ✗ / ⟳) next to the
+ * "Unsaved changes" badge in the config actions bar.
+ */
+function renderValidationIndicator(props: ConfigProps): TemplateResult | typeof nothing {
+  const result = props.validationResult;
+  const inFlight = props.validationInProgress;
+
+  if (inFlight && !result) {
+    // Validation in progress — show spinner
+    return html`
+      <span class="config-validation-indicator config-validation-indicator--pending" title="Validating…">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  if (!result) {
+    return nothing;
+  }
+
+  if (result.valid) {
+    if (result.issues.length > 0) {
+      // Valid but with warnings
+      return html`
+        <span class="config-validation-indicator config-validation-indicator--warning" title="Valid with warnings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </span>
+      `;
+    }
+    return html`
+      <span class="config-validation-indicator config-validation-indicator--valid" title="Config is valid">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </span>
+    `;
+  }
+
+  // Invalid
+  return html`
+    <span
+      class="config-validation-indicator config-validation-indicator--invalid"
+      title="${result.issues.length} validation error(s)"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+    </span>
+  `;
+}
+
+/**
+ * Render a panel with detailed validation error messages.
+ * Shown below the action bar when the config has validation errors.
+ */
+function renderValidationErrorsPanel(
+  result: ConfigValidationResult,
+  requestUpdate: () => void,
+): TemplateResult {
+  const issueCount = result.issues.length;
+  const maxVisible = 5;
+  const visibleIssues = result.issues.slice(0, maxVisible);
+  const hiddenCount = Math.max(0, issueCount - maxVisible);
+
+  return html`
+    <div class="config-validation-errors">
+      <div class="config-validation-errors__header">
+        <svg
+          class="config-validation-errors__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          width="16"
+          height="16"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span class="config-validation-errors__title">
+          Cannot save: ${issueCount} validation error${issueCount !== 1 ? "s" : ""}
+        </span>
+        <button
+          class="btn btn--sm"
+          @click=${() => requestUpdate()}
+        >
+          Dismiss
+        </button>
+      </div>
+      <div class="config-validation-errors__list">
+        ${visibleIssues.map(
+          (issue) => html`
+            <div class="config-validation-errors__item">
+              <span class="config-validation-errors__path">${issue.path || "<root>"}</span>
+              <span class="config-validation-errors__message">${issue.message}</span>
+              ${issue.suggestion
+                ? html`<span class="config-validation-errors__suggestion">${issue.suggestion}</span>`
+                : nothing}
+              ${issue.expected && issue.received
+                ? html`
+                    <span class="config-validation-errors__type-hint">
+                      Expected ${issue.expected}, got ${issue.received}
+                    </span>
+                  `
+                : nothing}
+            </div>
+          `,
+        )}
+        ${hiddenCount > 0
+          ? html`
+              <div class="config-validation-errors__more">
+                +${hiddenCount} more error${hiddenCount !== 1 ? "s" : ""}
+              </div>
+            `
+          : nothing}
+      </div>
+    </div>
+  `;
+}
+
 export function renderConfig(props: ConfigProps) {
   const showModeToggle = props.showModeToggle ?? false;
   const validity = props.valid == null ? "unknown" : props.valid ? "valid" : "invalid";
@@ -768,13 +908,20 @@ export function renderConfig(props: ConfigProps) {
   // Note: formUnsafe warns about unsupported schema paths but shouldn't block saving.
   const canSaveForm = Boolean(props.formValue) && !props.loading && Boolean(analysis.schema);
   const canSave =
-    props.connected && !props.saving && hasChanges && (formMode === "raw" ? true : canSaveForm);
+    props.connected &&
+    !props.saving &&
+    hasChanges &&
+    (formMode === "raw" ? true : canSaveForm) &&
+    // Block save when pre-save validation has failed
+    (!props.validationResult || props.validationResult.valid);
   const canApply =
     props.connected &&
     !props.applying &&
     !props.updating &&
     hasChanges &&
-    (formMode === "raw" ? true : canSaveForm);
+    (formMode === "raw" ? true : canSaveForm) &&
+    // Block apply when pre-save validation has failed
+    (!props.validationResult || props.validationResult.valid);
   const canUpdate = props.connected && !props.applying && !props.updating;
 
   const showAppearanceOnRoot =
@@ -821,6 +968,7 @@ export function renderConfig(props: ConfigProps) {
                   >
                 `
               : html` <span class="config-status muted">No changes</span> `}
+            ${renderValidationIndicator(props)}
           </div>
           <div class="config-actions__right">
             ${!rawAvailable
@@ -948,6 +1096,13 @@ export function renderConfig(props: ConfigProps) {
               </div>
             `
           : nothing}
+
+        <!-- Pre-save validation errors panel -->
+        ${hasChanges && props.validationResult && !props.validationResult.valid
+          ? renderValidationErrorsPanel(props.validationResult, requestUpdate)
+          : nothing}
+
+        <!-- Pre-save validation warnings (valid but with warnings) -->
 
         <!-- Diff panel (form mode only - raw mode doesn't have granular diff) -->
         ${hasChanges && formMode === "form"

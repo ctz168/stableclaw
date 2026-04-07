@@ -65,6 +65,8 @@ import {
   ConfigSchemaParamsSchema,
   ConfigSchemaResponseSchema,
   ConfigSetParamsSchema,
+  ConfigValidateParamsSchema,
+  ConfigValidateResultSchema,
   UpdateRunParamsSchema,
 } from "./config.js";
 import {
@@ -231,6 +233,8 @@ export const ProtocolSchemas = {
   SessionsUsageParams: SessionsUsageParamsSchema,
   ConfigGetParams: ConfigGetParamsSchema,
   ConfigSetParams: ConfigSetParamsSchema,
+  ConfigValidateParams: ConfigValidateParamsSchema,
+  ConfigValidateResult: ConfigValidateResultSchema,
   ConfigApplyParams: ConfigApplyParamsSchema,
   ConfigPatchParams: ConfigPatchParamsSchema,
   ConfigSchemaParams: ConfigSchemaParamsSchema,

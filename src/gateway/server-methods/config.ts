@@ -44,6 +44,7 @@ import {
   validateConfigSchemaLookupResult,
   validateConfigSchemaParams,
   validateConfigSetParams,
+  validateConfigValidateParams,
 } from "../protocol/index.js";
 import { resolveBaseHashParam } from "./base-hash.js";
 import { parseRestartRequestParams } from "./restart-request.js";
@@ -337,6 +338,73 @@ export const configHandlers: GatewayRequestHandlers = {
       return;
     }
     respond(true, loadSchemaWithPlugins(), undefined);
+  },
+  "config.validate": async ({ params, respond }) => {
+    if (!assertValidParams(params, validateConfigValidateParams, "config.validate", respond)) {
+      return;
+    }
+    const rawValue = parseRawConfigOrRespond(params, "config.validate", respond);
+    if (!rawValue) {
+      return;
+    }
+    const parsedRes = parseConfigJson5(rawValue);
+    if (!parsedRes.ok) {
+      respond(true, {
+        valid: false,
+        issues: [
+          {
+            path: "<root>",
+            message: parsedRes.error,
+            suggestion: "Check for common JSON/JSON5 syntax errors: missing commas, unmatched brackets, trailing commas, or improper quotes.",
+          },
+        ],
+      });
+      return;
+    }
+    const snapshot = await readConfigFileSnapshot();
+    const schema = loadSchemaWithPlugins();
+    const restored = restoreRedactedValues(parsedRes.parsed, snapshot.config, schema.uiHints);
+    if (!restored.ok) {
+      respond(true, {
+        valid: false,
+        issues: [
+          {
+            path: "<root>",
+            message: restored.humanReadableMessage ?? "invalid config",
+            suggestion: "Ensure sensitive values are not modified and all required fields are present.",
+          },
+        ],
+      });
+      return;
+    }
+    const validated = validateConfigObjectWithPlugins(restored.result);
+    if (!validated.ok) {
+      respond(true, {
+        valid: false,
+        issues: validated.issues.map((issue) => ({
+          path: issue.path ?? "<root>",
+          message: issue.message,
+          suggestion: issue.suggestion ?? undefined,
+          expected: issue.expected ?? undefined,
+          received: issue.received ?? undefined,
+          allowedValues: issue.allowedValues,
+        })),
+      });
+      return;
+    }
+    // If there are warnings, include them as informational issues
+    if (validated.warnings.length > 0) {
+      respond(true, {
+        valid: true,
+        issues: validated.warnings.map((w) => ({
+          path: w.path ?? "<root>",
+          message: w.message,
+          suggestion: w.suggestion ?? undefined,
+        })),
+      });
+      return;
+    }
+    respond(true, { valid: true, issues: [] });
   },
   "config.schema.lookup": ({ params, respond, context }) => {
     if (

@@ -80,6 +80,10 @@ import {
   ConfigSchemaResponseSchema,
   type ConfigSetParams,
   ConfigSetParamsSchema,
+  type ConfigValidateParams,
+  ConfigValidateParamsSchema,
+  type ConfigValidateResult,
+  ConfigValidateResultSchema,
   type ConnectParams,
   ConnectParamsSchema,
   type CronAddParams,
@@ -370,6 +374,7 @@ export const validateSessionsUsageParams =
   ajv.compile<SessionsUsageParams>(SessionsUsageParamsSchema);
 export const validateConfigGetParams = ajv.compile<ConfigGetParams>(ConfigGetParamsSchema);
 export const validateConfigSetParams = ajv.compile<ConfigSetParams>(ConfigSetParamsSchema);
+export const validateConfigValidateParams = ajv.compile<ConfigValidateParams>(ConfigValidateParamsSchema);
 export const validateConfigApplyParams = ajv.compile<ConfigApplyParams>(ConfigApplyParamsSchema);
 export const validateConfigPatchParams = ajv.compile<ConfigPatchParams>(ConfigPatchParamsSchema);
 export const validateConfigSchemaParams = ajv.compile<ConfigSchemaParams>(ConfigSchemaParamsSchema);
@@ -546,6 +551,8 @@ export {
   SessionsUsageParamsSchema,
   ConfigGetParamsSchema,
   ConfigSetParamsSchema,
+  ConfigValidateParamsSchema,
+  ConfigValidateResultSchema,
   ConfigApplyParamsSchema,
   ConfigPatchParamsSchema,
   ConfigSchemaParamsSchema,
@@ -640,6 +647,7 @@ export type {
   DevicePairRejectParams,
   ConfigGetParams,
   ConfigSetParams,
+  ConfigValidateParams,
   ConfigApplyParams,
   ConfigPatchParams,
   ConfigSchemaParams,

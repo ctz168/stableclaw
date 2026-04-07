@@ -21,6 +21,7 @@ import {
   readConfigFileSnapshot,
   writeConfigFile,
 } from "../config/config.js";
+import { validateConfigAndRestoreBackup } from "../config/config-startup-validation.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
@@ -392,6 +393,19 @@ export async function startGatewayServer(
     key: "OPENCLAW_RAW_STREAM_PATH",
     description: "raw stream log path override",
   });
+
+  // ── Pre-flight: validate config and auto-restore from backup if needed ─
+  const startupValidation = await validateConfigAndRestoreBackup();
+  if (!startupValidation.ok) {
+    // No valid config and no valid backup — cannot start.
+    throw new Error(startupValidation.error);
+  }
+  if (startupValidation.restored) {
+    log.warn(
+      `gateway: startup config was invalid; automatically restored from backup. ` +
+        `Review and fix the original issue to prevent this on next restart.`,
+    );
+  }
 
   let configSnapshot = await readConfigFileSnapshot();
   if (configSnapshot.legacyIssues.length > 0) {

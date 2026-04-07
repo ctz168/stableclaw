@@ -9,6 +9,30 @@ const ConfigSchemaLookupPathString = Type.String({
 
 export const ConfigGetParamsSchema = Type.Object({}, { additionalProperties: false });
 
+export const ConfigValidateParamsSchema = Type.Object(
+  {
+    raw: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
+export const ConfigValidateResultSchema = Type.Object(
+  {
+    valid: Type.Boolean(),
+    issues: Type.Array(
+      Type.Object(
+        {
+          path: Type.String(),
+          message: Type.String(),
+          suggestion: Type.Optional(Type.String()),
+        },
+        { additionalProperties: true },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
+
 export const ConfigSetParamsSchema = Type.Object(
   {
     raw: NonEmptyString,

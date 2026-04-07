@@ -303,6 +303,47 @@ export function clearConfigError(env: NodeJS.ProcessEnv = process.env): void {
 }
 
 /**
+ * Attempt to restore a valid config at gateway startup.
+ *
+ * Unlike the hot-reload scenario (where the gateway is already running and
+ * can fall back to its in-memory config), at startup we MUST have a valid
+ * config on disk. This function:
+ * 1. Searches backup slots for a valid config
+ * 2. Restores the first valid backup found
+ * 3. Returns the restored config content, or null if no valid backup exists
+ */
+export async function attemptStartupConfigRestore(
+  configPath: string = CONFIG_PATH,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ success: true; backupPath: string; raw: string } | { success: false }> {
+  const backupPath = await findLatestValidBackup(configPath);
+
+  if (!backupPath) {
+    configLog.error("No valid backup available for startup restoration");
+    return { success: false };
+  }
+
+  markConfigRollingBack("Invalid configuration at startup, rolling back to last valid backup", env);
+
+  try {
+    const backupContent = await fs.promises.readFile(backupPath, "utf-8");
+
+    // Restore the valid backup
+    const tempPath = `${configPath}.rollback-tmp`;
+    await fs.promises.writeFile(tempPath, backupContent, "utf-8");
+    await fs.promises.rename(tempPath, configPath);
+
+    markConfigValid({ backupPath }, env);
+    configLog.info(`Startup config restored from backup: ${backupPath}`);
+
+    return { success: true, backupPath, raw: backupContent };
+  } catch (err) {
+    configLog.error(`Startup config restore failed: ${String(err)}`);
+    return { success: false };
+  }
+}
+
+/**
  * Check if there's a pending configuration error.
  * Useful for startup warnings.
  */

@@ -1,6 +1,15 @@
 import type { GatewayBrowserClient } from "../gateway.ts";
 import type { ConfigSchemaResponse, ConfigSnapshot, ConfigUiHints } from "../types.ts";
 import type { JsonSchema } from "../views/config-form.shared.ts";
+import {
+  canSaveWithValidation,
+  cancelPendingValidation,
+  type ConfigValidationState,
+  createConfigValidationState,
+  requestValidation,
+  type ConfigValidationResult,
+  validateConfigNow,
+} from "./config-validation.ts";
 import { coerceFormValues } from "./config/form-coerce.ts";
 import {
   cloneConfigObject,
@@ -34,6 +43,8 @@ export type ConfigState = {
   configActiveSection: string | null;
   configActiveSubsection: string | null;
   lastError: string | null;
+  /** Pre-save validation state */
+  validation: ConfigValidationState;
 };
 
 export async function loadConfig(state: ConfigState) {
@@ -138,10 +149,20 @@ export async function saveConfig(state: ConfigState) {
   if (!state.client || !state.connected) {
     return;
   }
+
+  // ── Pre-save validation gate ───────────────────────────────────────
+  const raw = serializeFormForSubmit(state);
+  const validationResult = await validateConfigNow(raw, state.validation, state.client);
+  if (validationResult && !validationResult.valid) {
+    const issueCount = validationResult.issues.length;
+    state.lastError = `Config validation failed: ${issueCount} error${issueCount !== 1 ? "s" : ""}. Fix the error${issueCount !== 1 ? "s" : ""} before saving.`;
+    state.validation.lastResult = validationResult;
+    return;
+  }
+
   state.configSaving = true;
   state.lastError = null;
   try {
-    const raw = serializeFormForSubmit(state);
     const baseHash = state.configSnapshot?.hash;
     if (!baseHash) {
       state.lastError = "Config hash missing; reload and retry.";
@@ -161,10 +182,20 @@ export async function applyConfig(state: ConfigState) {
   if (!state.client || !state.connected) {
     return;
   }
+
+  // ── Pre-apply validation gate ──────────────────────────────────────
+  const raw = serializeFormForSubmit(state);
+  const validationResult = await validateConfigNow(raw, state.validation, state.client);
+  if (validationResult && !validationResult.valid) {
+    const issueCount = validationResult.issues.length;
+    state.lastError = `Config validation failed: ${issueCount} error${issueCount !== 1 ? "s" : ""}. Fix the error${issueCount !== 1 ? "s" : ""} before applying.`;
+    state.validation.lastResult = validationResult;
+    return;
+  }
+
   state.configApplying = true;
   state.lastError = null;
   try {
-    const raw = serializeFormForSubmit(state);
     const baseHash = state.configSnapshot?.hash;
     if (!baseHash) {
       state.lastError = "Config hash missing; reload and retry.";
@@ -209,6 +240,17 @@ export async function runUpdate(state: ConfigState) {
   }
 }
 
+/**
+ * Trigger debounced validation for the current config state.
+ * Call this after any form or raw edit.
+ */
+export function triggerConfigValidation(state: ConfigState): void {
+  const raw = state.configFormMode === "form"
+    ? serializeConfigForm(state.configForm ?? {})
+    : state.configRaw;
+  requestValidation(raw, state.validation, state.client);
+}
+
 export function updateConfigFormValue(
   state: ConfigState,
   path: Array<string | number>,
@@ -221,6 +263,8 @@ export function updateConfigFormValue(
   if (state.configFormMode === "form") {
     state.configRaw = serializeConfigForm(base);
   }
+  // Trigger debounced validation after form edit
+  triggerConfigValidation(state);
 }
 
 export function removeConfigFormValue(state: ConfigState, path: Array<string | number>) {
@@ -231,6 +275,8 @@ export function removeConfigFormValue(state: ConfigState, path: Array<string | n
   if (state.configFormMode === "form") {
     state.configRaw = serializeConfigForm(base);
   }
+  // Trigger debounced validation after form edit
+  triggerConfigValidation(state);
 }
 
 export function findAgentConfigEntryIndex(
