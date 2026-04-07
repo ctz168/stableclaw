@@ -1,8 +1,8 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T11:35:00+08:00
+> Last updated: 2026-04-07T12:11:00+08:00
 > Tester: Super Z (Lite Mode + AICQ Plugin Offline Focus)
-> Version tested: 2026.5.10 (commit 90e9fdb)
+> Version tested: 2026.5.10 (commit ad8dc168)
 
 ---
 
@@ -343,9 +343,9 @@
 | Plugin Mgmt UI (port 6109) | ❌ FAIL | 未启动 (BUG-025) |
 | Gateway Plugin UI `/plugins/aicq-chat/` | ❌ FAIL | HTTP 404 (BUG-025) |
 | ModelScope Step-3.5-Flash | ⚠️ PARTIAL | 返回 "Hello!" 但 completion_tokens=56（含内部推理） |
-| ModelScope GLM-5 | ❌ FAIL | 返回空响应：`choices: null, usage: all 0` |
+| ModelScope GLM-5 | ✅ PASS | 返回正常响应（含 reasoning_content 推理链，BUG-018） |
 | ModelScope MiniMax-M2.5 | ❌ FAIL | 400: `Invalid model id: Minimal/MiniMax-M2.5` |
-| ModelScope Kimi-K2.5 | ✅ PASS | "Hello! It's nice to meet you." (26 tokens) |
+| ModelScope Kimi-K2.5 | ⚠️ PARTIAL | API 返回 HTTP 200 但 `choices: null, usage: all 0`（模型端问题） |
 
 ### Bug Statistics
 
@@ -356,3 +356,39 @@
 | Medium | 9 | 9 | 0 |
 | Low | 11 | 10 | 1 (BUG-021) |
 | **Total** | **32** | **30** | **2** |
+
+---
+
+## Auto Test Cycle Results
+
+### Cycle: 2026-04-07T12:05:00+08:00 (commit ad8dc168)
+
+**Changes analyzed**: `fix: implement plugin hot-reload handler in config hot-reload system`
+- 2 files changed, 53 insertions
+- `src/gateway/server-reload-handlers.ts`: Added `reloadPluginsFn` parameter and plugin hot-reload logic
+- `src/gateway/server.impl.ts`: Implemented `reloadPluginsFn` with plugin registry reload
+
+**Build results**:
+| Step | Result | Notes |
+|------|--------|-------|
+| `pnpm install` | ✅ PASS | Lockfile up to date, 91 workspace projects |
+| `pnpm build` | ✅ PASS | Compiled output includes `reloadPluginsFn` |
+| `pnpm ui:build` | ✅ PASS | Vite build OK (2.16s, 1628 modules) |
+| AICQ plugin rebuild | ⏭️ SKIPPED | No plugin source files changed |
+
+**Lite mode smoke test** (port 18791):
+| Endpoint | Result | Details |
+|----------|--------|---------|
+| `/healthz` | ✅ 200 | 16 modules ready, fullyLoaded: true |
+| `/` | ✅ 200 | UI served correctly |
+| `/canvas` | ✅ 200 | Canvas UI served correctly |
+| `/readyz` | ❌ 404 | Known issue (BUG-002) |
+
+**ModelScope API test**:
+| Model | Result | Details |
+|-------|--------|---------|
+| `ZhipuAI/GLM-5` | ✅ PASS | "Hello there!" (305 tokens, 含 reasoning) |
+| `moonshotai/Kimi-K2.5` | ⚠️ PARTIAL | HTTP 200 but `choices: null` (model-side issue) |
+
+**New bugs found**: None
+**Bugs verified still open**: BUG-002 (/readyz 404), BUG-018 (reasoning_content leak), BUG-020 (/v1/* not available in Lite)
