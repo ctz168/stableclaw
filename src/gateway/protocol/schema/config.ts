@@ -1,4 +1,4 @@
-import { Type } from "@sinclair/typebox";
+import { Type, type Static } from "@sinclair/typebox";
 import { NonEmptyString } from "./primitives.js";
 
 const ConfigSchemaLookupPathString = Type.String({
@@ -32,6 +32,10 @@ export const ConfigValidateResultSchema = Type.Object(
   },
   { additionalProperties: false },
 );
+
+/** TypeScript types derived from the TypeBox schemas above. */
+export type ConfigValidateParams = Static<typeof ConfigValidateParamsSchema>;
+export type ConfigValidateResult = Static<typeof ConfigValidateResultSchema>;
 
 export const ConfigSetParamsSchema = Type.Object(
   {
