@@ -1,8 +1,8 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T00:55:00Z
+> Last updated: 2026-04-07T09:00:00+08:00
 > Tester: Auto QA Bot
-> Version tested: 2026.5.8 (commit d6324a0a)
+> Version tested: 2026.5.8 (commit d60d7b8c)
 
 ---
 
@@ -25,6 +25,25 @@
 - **Component**: Gateway Lite Server
 - **Reproduction**: `stableclaw gateway run --allow-unconfigured --bind loopback --port 18789`（不带 --full），启动后访问 `/healthz`、`/readyz`、`/health`、`/ready` 均返回空响应或 Connection Refused。
 - **Description**: Lite 模式声称 "gateway kernel ready" 但实际 HTTP 端点不响应请求。`/ready` 返回 `{"error":"not found"}`，其他端点完全无响应。Full 模式下所有端点正常。
+- **Status**: Open
+
+### BUG-016: `pnpm build` 构建失败 — ConfigValidate 类型未导出
+- **Severity**: Critical
+- **Component**: `src/gateway/protocol/schema/config.ts` / `src/gateway/protocol/index.ts`
+- **Introduced in**: commit `18fa66b4` (feat: enhance hot config with startup backup restore and pre-save validation)
+- **Reproduction**: 执行 `pnpm build`
+- **Description**: `build:plugin-sdk:dts` 步骤（`tsc -p tsconfig.plugin-sdk.dts.json`）报错，`src/gateway/protocol/index.ts` 导入了 `type ConfigValidateParams` 和 `type ConfigValidateResult`，但 `src/gateway/protocol/schema/config.ts` 中只导出了 `ConfigValidateParamsSchema` 和 `ConfigValidateResultSchema`（TypeBox const），未导出对应的 TypeScript 类型。需要在 `schema/config.ts` 中添加 `export type ConfigValidateParams = Static<typeof ConfigValidateParamsSchema>` 等类型导出。
+- **Error**:
+  ```
+  src/gateway/protocol/index.ts(83,8): error TS2724: '"./schema.js"' has no exported member named 'ConfigValidateParams'. Did you mean 'ConfigValidateParamsSchema'?
+  src/gateway/protocol/index.ts(85,8): error TS2724: '"./schema.js"' has no exported member named 'ConfigValidateResult'. Did you mean 'ConfigValidateResultSchema'?
+  ```
+- **Fix suggestion**: 在 `src/gateway/protocol/schema/config.ts` 中添加：
+  ```typescript
+  import { Static } from "@sinclair/typebox";
+  export type ConfigValidateParams = Static<typeof ConfigValidateParamsSchema>;
+  export type ConfigValidateResult = Static<typeof ConfigValidateResultSchema>;
+  ```
 - **Status**: Open
 
 ---
@@ -151,7 +170,7 @@
 | Test Category | Result | Details |
 |---|---|---|
 | `pnpm install` | PASS | 1160 packages installed successfully |
-| `pnpm build` | PASS | TypeScript + plugin SDK build OK |
+| `pnpm build` | **FAIL** | BUG-016: TS2724 ConfigValidate types missing |
 | `pnpm ui:build` | PASS | Vite build OK (42 chunks) |
 | Gateway Full mode startup | PASS | ~15s cold start, all modules loaded |
 | Gateway Lite mode startup | PASS | ~12ms kernel ready, 6s full init |
