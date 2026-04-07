@@ -15,7 +15,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
-Write-Host "  🦞 StableClaw Installer" -ForegroundColor Cyan
+Write-Host " StableClaw Installer" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if running in PowerShell
@@ -66,12 +66,14 @@ function Check-Node {
             if ($version -ge 22) {
                 Write-Host "[OK] Node.js $nodeVersion found" -ForegroundColor Green
                 return $true
-            } else {
+            }
+            else {
                 Write-Host "[!] Node.js $nodeVersion found, but v22+ required" -ForegroundColor Yellow
                 return $false
             }
         }
-    } catch {
+    }
+    catch {
         Write-Host "[!] Node.js not found" -ForegroundColor Yellow
         return $false
     }
@@ -88,7 +90,7 @@ function Install-Node {
         winget install OpenJS.NodeJS.LTS --source winget --accept-package-agreements --accept-source-agreements
 
         # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         if (Check-Node) {
             Write-Host "[OK] Node.js installed via winget" -ForegroundColor Green
             return
@@ -104,7 +106,7 @@ function Install-Node {
         choco install nodejs-lts -y
 
         # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         if (Check-Node) {
             Write-Host "[OK] Node.js installed via Chocolatey" -ForegroundColor Green
             return
@@ -136,7 +138,8 @@ function Check-Git {
     try {
         $null = Get-Command git -ErrorAction Stop
         return $true
-    } catch {
+    }
+    catch {
         return $false
     }
 }
@@ -167,11 +170,11 @@ function Get-PortableGitRoot {
 function Get-PortableGitCommandPath {
     $root = Get-PortableGitRoot
     foreach ($candidate in @(
-        (Join-Path $root "mingw64\bin\git.exe"),
-        (Join-Path $root "cmd\git.exe"),
-        (Join-Path $root "bin\git.exe"),
-        (Join-Path $root "git.exe")
-    )) {
+            (Join-Path $root "mingw64\bin\git.exe"),
+            (Join-Path $root "cmd\git.exe"),
+            (Join-Path $root "bin\git.exe"),
+            (Join-Path $root "git.exe")
+        )) {
         if (Test-Path $candidate) {
             return $candidate
         }
@@ -187,10 +190,10 @@ function Use-PortableGitIfPresent {
 
     $portableRoot = Get-PortableGitRoot
     foreach ($pathEntry in @(
-        (Join-Path $portableRoot "mingw64\bin"),
-        (Join-Path $portableRoot "usr\bin"),
-        (Split-Path -Parent $gitExe)
-    )) {
+            (Join-Path $portableRoot "mingw64\bin"),
+            (Join-Path $portableRoot "usr\bin"),
+            (Split-Path -Parent $gitExe)
+        )) {
         if (Test-Path $pathEntry) {
             Add-ToProcessPath $pathEntry
         }
@@ -205,7 +208,7 @@ function Resolve-PortableGitDownload {
     $releaseApi = "https://api.github.com/repos/git-for-windows/git/releases/latest"
     $headers = @{
         "User-Agent" = "stableclaw-installer"
-        "Accept" = "application/vnd.github+json"
+        "Accept"     = "application/vnd.github+json"
     }
     $release = Invoke-RestMethod -Uri $releaseApi -Headers $headers
     if (-not $release -or -not $release.assets) {
@@ -213,17 +216,17 @@ function Resolve-PortableGitDownload {
     }
 
     $asset = $release.assets |
-        Where-Object { $_.name -match '^MinGit-.*-64-bit\.zip$' -and $_.name -notmatch 'busybox' } |
-        Select-Object -First 1
+    Where-Object { $_.name -match '^MinGit-.*-64-bit\.zip$' -and $_.name -notmatch 'busybox' } |
+    Select-Object -First 1
 
     if (-not $asset) {
         throw "Could not find a MinGit zip asset in the latest git-for-windows release."
     }
 
     return @{
-        Tag = $release.tag_name
+        Tag  = $release.tag_name
         Name = $asset.name
-        Url = $asset.browser_download_url
+        Url  = $asset.browser_download_url
     }
 }
 
@@ -258,7 +261,8 @@ function Install-PortableGit {
         Invoke-WebRequest -Uri $download.Url -OutFile $tmpZip
         Expand-Archive -Path $tmpZip -DestinationPath $tmpExtract -Force
         Move-Item -Path (Join-Path $tmpExtract "*") -Destination $portableRoot -Force
-    } finally {
+    }
+    finally {
         if (Test-Path $tmpZip) {
             Remove-Item -Force $tmpZip
         }
@@ -283,7 +287,8 @@ function Ensure-Git {
         if (Check-Git) {
             return
         }
-    } catch {
+    }
+    catch {
         Write-Host "[!] Portable Git bootstrap failed: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
@@ -380,7 +385,8 @@ function Ensure-StableClawOnPath {
     $npmPrefix = $null
     try {
         $npmPrefix = (& (Get-NpmCommandPath) config get prefix 2>$null).Trim()
-    } catch {
+    }
+    catch {
         $npmPrefix = $null
     }
 
@@ -393,7 +399,7 @@ function Ensure-StableClawOnPath {
         $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
         if (-not ($userPath -split ";" | Where-Object { $_ -ieq $npmBin })) {
             [Environment]::SetEnvironmentVariable("Path", "$userPath;$npmBin", "User")
-            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
             Write-Host "[!] Added $npmBin to user PATH (restart terminal if command not found)" -ForegroundColor Yellow
         }
         return $true
@@ -406,7 +412,8 @@ function Ensure-StableClawOnPath {
         foreach ($npmBin in $npmBins) {
             Write-Host "  $npmBin" -ForegroundColor Cyan
         }
-    } else {
+    }
+    else {
         Write-Host 'Hint: run "npm config get prefix" to find your npm global path.' -ForegroundColor Gray
     }
     return $false
@@ -425,7 +432,8 @@ function Ensure-Pnpm {
                 Write-Host "[OK] pnpm installed via corepack" -ForegroundColor Green
                 return
             }
-        } catch {
+        }
+        catch {
             # fallthrough to npm install
         }
     }
@@ -434,7 +442,8 @@ function Ensure-Pnpm {
     $env:NPM_CONFIG_SCRIPT_SHELL = "cmd.exe"
     try {
         & (Get-NpmCommandPath) install -g pnpm
-    } finally {
+    }
+    finally {
         $env:NPM_CONFIG_SCRIPT_SHELL = $prevScriptShell
     }
     Write-Host "[OK] pnpm installed" -ForegroundColor Green
@@ -476,14 +485,16 @@ function Install-StableClaw {
                 Write-Host "Error: git is missing from PATH." -ForegroundColor Red
                 Write-Host "Install Git for Windows, then reopen PowerShell and retry:" -ForegroundColor Yellow
                 Write-Host "  https://git-scm.com/download/win" -ForegroundColor Cyan
-            } else {
+            }
+            else {
                 Write-Host "Re-run with verbose output to see the full error:" -ForegroundColor Yellow
                 Write-Host '  powershell -c "irm https://raw.githubusercontent.com/ctz168/stableclaw/main/install/install.ps1 | iex"' -ForegroundColor Cyan
             }
             $npmOutput | ForEach-Object { Write-Host $_ }
             exit 1
         }
-    } finally {
+    }
+    finally {
         $env:NPM_CONFIG_LOGLEVEL = $prevLogLevel
         $env:NPM_CONFIG_UPDATE_NOTIFIER = $prevUpdateNotifier
         $env:NPM_CONFIG_FUND = $prevFund
@@ -512,10 +523,12 @@ function Install-StableClawFromGit {
     if (-not $SkipUpdate) {
         if (-not (git -C $RepoDir status --porcelain 2>$null)) {
             git -C $RepoDir pull --rebase 2>$null
-        } else {
+        }
+        else {
             Write-Host "[!] Repo is dirty; skipping git pull" -ForegroundColor Yellow
         }
-    } else {
+    }
+    else {
         Write-Host "[!] Git update disabled; skipping git pull" -ForegroundColor Yellow
     }
 
@@ -528,7 +541,8 @@ function Install-StableClawFromGit {
     try {
         & $pnpmCommand -C $RepoDir install
         & $pnpmCommand -C $RepoDir build
-    } finally {
+    }
+    finally {
         $env:NPM_CONFIG_SCRIPT_SHELL = $prevPnpmScriptShell
     }
 
@@ -543,7 +557,7 @@ function Install-StableClawFromGit {
     $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if (-not ($userPath -split ";" | Where-Object { $_ -ieq $binDir })) {
         [Environment]::SetEnvironmentVariable("Path", "$userPath;$binDir", "User")
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         Write-Host "[!] Added $binDir to user PATH (restart terminal if command not found)" -ForegroundColor Yellow
     }
 
@@ -556,7 +570,8 @@ function Run-Doctor {
     Write-Host "[*] Running doctor to migrate settings..." -ForegroundColor Yellow
     try {
         Invoke-StableClawCommand doctor --non-interactive
-    } catch {
+    }
+    catch {
         # Ignore errors from doctor
     }
     Write-Host "[OK] Migration complete" -ForegroundColor Green
@@ -572,7 +587,8 @@ function Test-GatewayServiceLoaded {
         if ($parsed -and $parsed.service -and $parsed.service.loaded) {
             return $true
         }
-    } catch {
+    }
+    catch {
         return $false
     }
     return $false
@@ -589,7 +605,8 @@ function Refresh-GatewayServiceIfLoaded {
     Write-Host "[*] Refreshing loaded gateway service..." -ForegroundColor Yellow
     try {
         Invoke-StableClawCommand gateway install --force | Out-Null
-    } catch {
+    }
+    catch {
         Write-Host "[!] Gateway service refresh failed; continuing." -ForegroundColor Yellow
         return
     }
@@ -598,7 +615,8 @@ function Refresh-GatewayServiceIfLoaded {
         Invoke-StableClawCommand gateway restart | Out-Null
         Invoke-StableClawCommand gateway status --json | Out-Null
         Write-Host "[OK] Gateway service refreshed" -ForegroundColor Green
-    } catch {
+    }
+    catch {
         Write-Host "[!] Gateway service restart failed; continuing." -ForegroundColor Yellow
     }
 }
@@ -645,7 +663,8 @@ function Main {
     if ($InstallMethod -eq "git") {
         $finalGitDir = $GitDir
         Install-StableClawFromGit -RepoDir $GitDir -SkipUpdate:$NoGitUpdate
-    } else {
+    }
+    else {
         Install-StableClaw
     }
 
@@ -665,7 +684,8 @@ function Main {
     $installedVersion = $null
     try {
         $installedVersion = (Invoke-StableClawCommand --version 2>$null).Trim()
-    } catch {
+    }
+    catch {
         $installedVersion = $null
     }
     if (-not $installedVersion) {
@@ -674,7 +694,8 @@ function Main {
             if ($npmList -and $npmList.dependencies -and $npmList.dependencies.stableclaw -and $npmList.dependencies.stableclaw.version) {
                 $installedVersion = $npmList.dependencies.stableclaw.version
             }
-        } catch {
+        }
+        catch {
             $installedVersion = $null
         }
     }
@@ -682,7 +703,8 @@ function Main {
     Write-Host ""
     if ($installedVersion) {
         Write-Host "StableClaw installed successfully ($installedVersion)!" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "StableClaw installed successfully!" -ForegroundColor Green
     }
     Write-Host ""
@@ -697,12 +719,14 @@ function Main {
         Write-Host "Upgrade complete. Run " -NoNewline
         Write-Host "stableclaw doctor" -ForegroundColor Cyan -NoNewline
         Write-Host " to check for additional migrations."
-    } else {
+    }
+    else {
         if ($NoOnboard) {
             Write-Host "Skipping onboard (requested). Run " -NoNewline
             Write-Host "stableclaw onboard" -ForegroundColor Cyan -NoNewline
             Write-Host " later."
-        } else {
+        }
+        else {
             Write-Host "Starting setup (daemon mode, local gateway)..." -ForegroundColor Cyan
             Write-Host ""
             Invoke-StableClawCommand onboard --install-daemon --mode local
