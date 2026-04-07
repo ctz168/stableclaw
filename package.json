@@ -1,6 +1,6 @@
 {
   "name": "stableclaw",
-  "version": "2026.5.9",
+  "version": "2026.5.10",
   "description": "Multi-channel AI gateway with extensible messaging integrations",
   "keywords": [],
   "homepage": "https://github.com/ctz168/stableclaw#readme",
@@ -1239,7 +1239,6 @@
   "engines": {
     "node": ">=22.14.0"
   },
-  "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "overrides": {
       "@anthropic-ai/sdk": "0.81.0",
@@ -1288,5 +1287,6 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "packageManager": "pnpm@10.32.1"
 }
