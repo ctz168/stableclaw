@@ -1,8 +1,8 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T12:15:00+08:00
+> Last updated: 2026-04-07T20:25:00+08:00
 > Tester: Super Z (Lite Mode + AICQ Plugin Offline Focus)
-> Version tested: 2026.5.10 (commit be9d35cb)
+> Version tested: 2026.5.14 (commit ffb5e9a0)
 
 ---
 
@@ -116,6 +116,19 @@
   - `MiniMax/MiniMax-M2.5` — reasoning_content 包含完整的决策分析过程（454 tokens）
 - **GLM-5 streaming 行为**: 在 streaming 模式下，推理内容通过 `delta.reasoning_content` 逐步发送，但每个 chunk 的 `message.reasoning_content` 为空字符串（字段不一致）
 - **Status**: Open
+
+### BUG-030: Control UI 聊天框选择模型报错 — STABLECLAW_CONTROL_UI 客户端身份未被识别
+- **Severity**: High
+- **Component**: `src/gateway/server-methods/sessions.ts` / `src/utils/message-channel.ts`
+- **Reproduction**: 在 Control UI 的聊天框中选择模型（通过下拉框或 `/model` 命令）
+- **Description**: 项目从 `openclaw` 重命名为 `stableclaw` 后，新增了客户端 ID `STABLECLAW_CONTROL_UI = "stableclaw-control-ui"`（`ui/src/ui/app-gateway.ts:222`），但服务端多处身份识别逻辑仅检查旧 ID `CONTROL_UI = "openclaw-control-ui"`。当 Control UI 以 `mode: "webchat"` + `id: "stableclaw-control-ui"` 连接时，`rejectWebchatSessionMutation()` 误判其为普通 webchat 客户端并拒绝 `sessions.patch` 请求。具体影响：
+  1. `rejectWebchatSessionMutation()`（`sessions.ts:212`）：只放行 `CONTROL_UI`，遗漏 `STABLECLAW_CONTROL_UI`
+  2. `isOperatorUiClient()`（`message-channel.ts:39`）：只识别 `CONTROL_UI` + `TUI`，遗漏 `STABLECLAW_CONTROL_UI`
+  3. `isBrowserOperatorUiClient()`（`message-channel.ts:44`）：只识别 `CONTROL_UI`，遗漏 `STABLECLAW_CONTROL_UI`
+- **Error**: `GatewayRequestError: webchat clients cannot patch sessions; use chat.send for session-scoped updates`
+- **Fix**: 在以上三处增加 `STABLECLAW_CONTROL_UI` 的身份检查。所有运行时身份检查均通过 `isOperatorUiClient()` 和 `isBrowserOperatorUiClient()` 集中路由，修复覆盖了完整的调用链。
+- **Fixed in**: commit `daf82289`
+- **Status**: Fixed ✅
 
 ---
 
@@ -353,10 +366,10 @@
 | Severity | Count | Open | Fixed |
 |---|---|---|---|
 | Critical | 6 | 5 | 1 (BUG-016) |
-| High | 6 | 6 | 0 |
+| High | 7 | 6 | 1 (BUG-030) |
 | Medium | 9 | 9 | 0 |
 | Low | 11 | 9 | 2 (BUG-021, BUG-022) |
-| **Total** | **32** | **29** | **3** |
+| **Total** | **33** | **29** | **4** |
 
 ---
 
