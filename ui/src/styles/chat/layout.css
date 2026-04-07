@@ -1185,5 +1185,311 @@
   color: var(--accent);
 }
 
+/* =============================================
+   TASK PANEL - Enhanced rich format styles
+   ============================================= */
+
+/* Plan tabs */
+.task-panel__tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-panel__tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.task-panel__tab:hover {
+  color: var(--fg);
+  background: var(--panel-hover);
+}
+
+.task-panel__tab--active {
+  color: var(--accent);
+  background: rgba(var(--accent-rgb, 99,102,241), 0.08);
+  border-color: rgba(var(--accent-rgb, 99,102,241), 0.2);
+  font-weight: 500;
+}
+
+.task-panel__tab-label {
+  white-space: nowrap;
+}
+
+.task-panel__tab-count {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb, 99,102,241), 0.12);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Task count badge */
+.task-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 6px;
+  margin-left: 6px;
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Progress bar */
+.task-panel__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+}
+
+.task-panel__progress-bar {
+  flex: 1;
+  min-width: 0;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: -0.5px;
+  overflow: hidden;
+}
+
+.task-panel__progress-fill {
+  color: var(--success, #22c55e);
+}
+
+.task-panel__progress-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Goal line */
+.task-panel__goal {
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.task-panel__goal strong {
+  color: var(--fg);
+}
+
+/* Status summary badges */
+.task-panel__status-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 12px 6px;
+}
+
+.task-panel__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.task-panel__status-badge--progress {
+  color: var(--accent);
+  background: rgba(var(--accent-rgb, 99,102,241), 0.08);
+}
+
+.task-panel__status-badge--failed {
+  color: var(--danger, #ef4444);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Rich format task items */
+.task-panel--rich .task-panel__body {
+  max-height: 360px;
+}
+
+.task-panel__item--pending {
+  border-left: 3px solid transparent;
+}
+
+.task-panel__item--in_progress {
+  border-left: 3px solid var(--accent);
+  background: rgba(var(--accent-rgb, 99,102,241), 0.04);
+}
+
+.task-panel__item--completed .task-panel__text--done {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.task-panel__item--failed {
+  border-left: 3px solid var(--danger, #ef4444);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.task-panel__item--failed .task-panel__text {
+  opacity: 0.75;
+}
+
+/* Drag handle */
+.task-panel__drag-handle {
+  display: inline-flex;
+  align-items: center;
+  cursor: grab;
+  opacity: 0.25;
+  transition: opacity var(--duration-fast) ease;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.task-panel__item:hover .task-panel__drag-handle {
+  opacity: 0.6;
+}
+
+.task-panel__drag-handle:hover {
+  opacity: 1 !important;
+}
+
+.task-panel__drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Status icon button */
+.task-panel__status-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+  font-size: 14px;
+  transition: transform 0.15s ease;
+}
+
+.task-panel__status-btn:hover {
+  transform: scale(1.2);
+}
+
+.task-panel__status-btn:active {
+  transform: scale(0.95);
+}
+
+/* Status icon */
+.task-panel__status-icon {
+  font-size: 14px;
+  line-height: 1;
+  transition: color var(--duration-fast) ease;
+}
+
+/* Task detail text */
+.task-panel__detail {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Inline edit input */
+.task-panel__edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
+  font-size: 13px;
+  background: var(--panel-strong);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  outline: none;
+  font-family: inherit;
+}
+
+.task-panel__edit-save {
+  padding: 2px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.task-panel__edit-save svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Drag & drop states */
+.task-panel__item--dragging {
+  opacity: 0.4;
+  background: var(--panel-hover);
+}
+
+.task-panel__item--drag-over-before {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+
+.task-panel__item--drag-over-after {
+  box-shadow: 0 2px 0 0 var(--accent);
+}
+
+/* Empty state */
+.task-panel__empty {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.task-panel__empty-icon {
+  display: block;
+  font-size: 28px;
+  margin-bottom: 6px;
+  opacity: 0.5;
+}
+
+/* Rich format remove button visible more readily */
+.task-panel--rich .task-panel__item:hover .task-panel__remove {
+  opacity: 0.7;
+}
+
+.task-panel--rich .task-panel__remove:hover {
+  opacity: 1 !important;
+}
+
+/* Collapse/expand animation */
+.task-panel__body {
+  animation: task-panel-expand 0.2s ease-out;
+}
+
+@keyframes task-panel-expand {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    max-height: 360px;
+    transform: translateY(0);
+  }
+}
+
 /* Mobile dropdown toggle — hidden on desktop */
 /* Mobile gear toggle + dropdown are hidden by default in layout.css */

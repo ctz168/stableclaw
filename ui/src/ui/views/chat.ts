@@ -1278,6 +1278,9 @@ export function renderChat(props: ChatProps) {
           props.onTaskMdChange(addTask(base, text));
         },
         hasTasks: props.taskMdContent ? parseTaskMd(props.taskMdContent).length > 0 : false,
+        onTaskMdChange: (content: string) => {
+          props.onTaskMdChange(content);
+        },
       })}
 
       <div class="chat-split-container ${sidebarOpen ? "chat-split-container--open" : ""}">
