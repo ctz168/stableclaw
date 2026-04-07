@@ -22,6 +22,7 @@ export const es: TranslationMap = {
     settings: "Ajustes",
     expand: "Expandir barra lateral",
     collapse: "Contraer barra lateral",
+    configWizard: "Asistente de Configuración",
   },
   tabs: {
     agents: "Agentes",

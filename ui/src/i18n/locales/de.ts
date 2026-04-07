@@ -22,6 +22,7 @@ export const de: TranslationMap = {
     settings: "Einstellungen",
     expand: "Seitenleiste ausklappen",
     collapse: "Seitenleiste einklappen",
+    configWizard: "Einrichtungsassistent",
   },
   tabs: {
     agents: "Agenten",

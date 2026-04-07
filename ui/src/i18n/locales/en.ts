@@ -25,6 +25,7 @@ export const en: TranslationMap = {
     expand: "Expand sidebar",
     collapse: "Collapse sidebar",
     resize: "Resize sidebar",
+    configWizard: "Setup Wizard",
   },
   tabs: {
     agents: "Agents",

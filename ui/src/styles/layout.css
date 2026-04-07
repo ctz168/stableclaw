@@ -723,6 +723,44 @@
   gap: 8px;
 }
 
+/* Config wizard button in sidebar */
+.nav-item--wizard {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 60%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  gap: 10px;
+  min-height: 38px;
+  border-radius: var(--radius-lg);
+  opacity: 0.85;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.nav-item--wizard:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-elevated) 92%);
+}
+
+.nav-item--wizard:hover .nav-item__icon {
+  color: var(--accent);
+}
+
+.nav-item--wizard .nav-item__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.sidebar--collapsed .nav-item--wizard {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 40%, transparent);
+  min-height: 34px;
+  width: 42px;
+  justify-content: center;
+}
+
 .sidebar-utility-link {
   min-height: 42px;
 }
