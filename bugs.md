@@ -127,7 +127,7 @@
   3. `isBrowserOperatorUiClient()`（`message-channel.ts:44`）：只识别 `CONTROL_UI`，遗漏 `STABLECLAW_CONTROL_UI`
 - **Error**: `GatewayRequestError: webchat clients cannot patch sessions; use chat.send for session-scoped updates`
 - **Fix**: 在以上三处增加 `STABLECLAW_CONTROL_UI` 的身份检查。所有运行时身份检查均通过 `isOperatorUiClient()` 和 `isBrowserOperatorUiClient()` 集中路由，修复覆盖了完整的调用链。
-- **Fixed in**: commit `pending`
+- **Fixed in**: commit `daf82289`
 - **Status**: Fixed ✅
 
 ---
