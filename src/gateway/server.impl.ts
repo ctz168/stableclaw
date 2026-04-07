@@ -1426,6 +1426,32 @@ export async function startGatewayServer(
               cronState,
               channelHealthMonitor,
             }),
+            reloadPluginsFn: async (nextConfig) => {
+              try {
+                const { loadGatewayStartupPlugins } = await import(
+                  "./server-plugin-bootstrap.js",
+                );
+                const autoEnabled = applyPluginAutoEnable({
+                  config: nextConfig,
+                  env: process.env,
+                });
+                const result = loadGatewayStartupPlugins({
+                  cfg: autoEnabled.config,
+                  workspaceDir: defaultWorkspaceDir,
+                  log,
+                  coreGatewayHandlers,
+                  baseMethods,
+                  preferSetupRuntimeForChannelPlugins: deferredConfiguredChannelPluginIds.length > 0,
+                });
+                pluginRegistry = result.pluginRegistry;
+                baseGatewayMethods = result.gatewayMethods;
+                params.logReload.info(
+                  `plugins hot-reloaded (${result.pluginRegistry.plugins.length} plugins, ${result.gatewayMethods.length} gateway methods)`,
+                );
+              } catch (err) {
+                params.logReload.error(`plugin hot-reload failed: ${String(err)}`);
+              }
+            },
             setState: (nextState) => {
               hooksConfig = nextState.hooksConfig;
               hookClientIpConfig = nextState.hookClientIpConfig;

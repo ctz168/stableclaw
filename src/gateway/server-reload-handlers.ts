@@ -41,6 +41,12 @@ export function createGatewayReloadHandlers(params: {
   setState: (state: GatewayHotReloadState) => void;
   startChannel: (name: ChannelKind) => Promise<void>;
   stopChannel: (name: ChannelKind) => Promise<void>;
+  /**
+   * Optional callback to hot-reload plugins when plugin-related config changes.
+   * When provided and plan.reloadPlugins is true, this is called instead of
+   * triggering a full gateway restart for plugin-only changes.
+   */
+  reloadPluginsFn?: (nextConfig: ReturnType<typeof loadConfig>) => Promise<void>;
   logHooks: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -104,6 +110,27 @@ export function createGatewayReloadHandlers(params: {
                 maxRestartsPerHour: nextConfig.gateway.channelMaxRestartsPerHour,
               }),
             });
+    }
+
+    // Handle plugin hot-reload: when the plugin list changes (install/uninstall/update),
+    // trigger a plugin system reload instead of a full gateway restart.
+    // This allows newly installed or updated plugins to become available
+    // without restarting the entire gateway process.
+    if (plan.reloadPlugins && params.reloadPluginsFn) {
+      try {
+        params.logReload.info("reloading plugins (config change detected)");
+        await params.reloadPluginsFn(nextConfig);
+      } catch (err) {
+        params.logReload.error(`plugin reload failed: ${String(err)}`);
+      // If plugin reload fails, fall through — the dashboard notification
+      // below will still inform clients that a plugin change occurred.
+      }
+    } else if (plan.reloadPlugins && !params.reloadPluginsFn) {
+      // No reload handler registered — log a warning so operators know
+      // plugin changes are not being hot-reloaded.
+      params.logReload.warn(
+        "plugin config changed but no plugin reload handler is available; plugin changes will take effect on next gateway restart",
+      );
     }
 
     if (plan.restartGmailWatcher) {
