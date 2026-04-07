@@ -57,6 +57,8 @@ export type ChatProps = {
   loading: boolean;
   sending: boolean;
   canAbort?: boolean;
+  /** Timestamp when the current chat run started (ms since epoch). Used for long-run confirmation. */
+  chatRunStartedAt?: number | null;
   compactionStatus?: CompactionIndicatorStatus | null;
   fallbackStatus?: FallbackIndicatorStatus | null;
   chatRunId?: string | null;
@@ -117,6 +119,9 @@ export type ChatProps = {
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
 const FALLBACK_TOAST_DURATION_MS = 8000;
+const RESPONSE_STOPPED_DURATION_MS = 4000;
+/** Runs longer than this require confirmation before abort. */
+const ABORT_CONFIRM_THRESHOLD_MS = 30_000;
 
 // Persistent instances keyed by session
 const inputHistories = new Map<string, InputHistory>();
@@ -155,6 +160,10 @@ interface ChatEphemeralState {
   searchOpen: boolean;
   searchQuery: string;
   pinnedExpanded: boolean;
+  /** Timestamp when the response was stopped via abort; auto-dismisses after a delay. */
+  responseStoppedAt: number | null;
+  /** Whether the abort confirmation dialog is showing. */
+  abortConfirmVisible: boolean;
 }
 
 function createChatEphemeralState(): ChatEphemeralState {
@@ -170,6 +179,8 @@ function createChatEphemeralState(): ChatEphemeralState {
     searchOpen: false,
     searchQuery: "",
     pinnedExpanded: false,
+    responseStoppedAt: null,
+    abortConfirmVisible: false,
   };
 }
 
@@ -694,6 +705,82 @@ function renderWelcomeState(props: ChatProps): TemplateResult {
 }
 
 /**
+ * Render the "Response stopped" indicator that appears after an abort.
+ * Auto-dismisses after RESPONSE_STOPPED_DURATION_MS or on next message.
+ */
+function renderResponseStoppedIndicator(): TemplateResult | typeof nothing {
+  if (!vs.responseStoppedAt) {
+    return nothing;
+  }
+  const elapsed = Date.now() - vs.responseStoppedAt;
+  if (elapsed >= RESPONSE_STOPPED_DURATION_MS) {
+    vs.responseStoppedAt = null;
+    return nothing;
+  }
+  return html`
+    <div class="response-stopped-indicator" role="status" aria-live="polite">
+      ${icons.stop} <span>Response stopped</span>
+    </div>
+  `;
+}
+
+/**
+ * Render the abort confirmation dialog for long-running tasks.
+ */
+function renderAbortConfirmDialog(
+  onConfirm: () => void,
+  onCancel: () => void,
+  requestUpdate: () => void,
+): TemplateResult | typeof nothing {
+  if (!vs.abortConfirmVisible) {
+    return nothing;
+  }
+  return html`
+    <div
+      class="abort-confirm-overlay"
+      @click=${(e: Event) => {
+        if ((e.target as HTMLElement).classList.contains("abort-confirm-overlay")) {
+          vs.abortConfirmVisible = false;
+          requestUpdate();
+        }
+      }}
+    >
+      <div class="abort-confirm-dialog" role="alertdialog" aria-label="Confirm abort">
+        <div class="abort-confirm-dialog__icon">${icons.stop}</div>
+        <div class="abort-confirm-dialog__body">
+          <p class="abort-confirm-dialog__title">Stop agent?</p>
+          <p class="abort-confirm-dialog__desc">
+            The agent is actively working. Are you sure you want to stop?
+          </p>
+        </div>
+        <div class="abort-confirm-dialog__actions">
+          <button
+            class="abort-confirm-dialog__btn abort-confirm-dialog__btn--cancel"
+            type="button"
+            @click=${() => {
+              vs.abortConfirmVisible = false;
+              onCancel();
+            }}
+          >
+            Cancel <kbd>Esc</kbd>
+          </button>
+          <button
+            class="abort-confirm-dialog__btn abort-confirm-dialog__btn--confirm"
+            type="button"
+            @click=${() => {
+              vs.abortConfirmVisible = false;
+              onConfirm();
+            }}
+          >
+            Stop <kbd>Ctrl+C</kbd>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Animated thinking/execution indicator shown when the agent is actively
  * processing a request but has not yet started streaming a response.
  *
@@ -1015,6 +1102,39 @@ export function renderChat(props: ChatProps) {
   const isAgentBusy = props.sending || props.stream !== null || Boolean(props.canAbort && props.chatRunId);
   const isWaitingForResponse = props.sending && props.stream === null && !isBusy;
 
+  // Determine agent activity status text
+  const agentActivityStatus = isAgentBusy
+    ? props.sending && props.stream === null
+      ? "Thinking..."
+      : props.stream !== null
+        ? "Generating..."
+        : "Working..."
+    : null;
+
+  // Whether the abort confirmation should be required (run > 30s)
+  const runElapsed = isAgentBusy && props.chatRunStartedAt ? Date.now() - props.chatRunStartedAt : 0;
+  const needsAbortConfirm = isAgentBusy && runElapsed > ABORT_CONFIRM_THRESHOLD_MS;
+
+  // Handler for stop/abort action with optional confirmation
+  const handleStopClick = () => {
+    if (needsAbortConfirm && !vs.abortConfirmVisible) {
+      vs.abortConfirmVisible = true;
+      requestUpdate();
+      return;
+    }
+    vs.abortConfirmVisible = false;
+    vs.responseStoppedAt = Date.now();
+    props.onAbort?.();
+    requestUpdate();
+  };
+
+  // Clear response stopped indicator when a new message is sent
+  const clearResponseStopped = () => {
+    if (vs.responseStoppedAt) {
+      vs.responseStoppedAt = null;
+    }
+  };
+
   const thread = html`
     <div
       class="chat-thread"
@@ -1112,6 +1232,7 @@ export function renderChat(props: ChatProps) {
           },
         )}
         ${renderAgentThinkingIndicator(props, assistantIdentity, isWaitingForResponse, isAgentBusy)}
+        ${renderResponseStoppedIndicator()}
       </div>
     </div>
   `;
@@ -1197,6 +1318,21 @@ export function renderChat(props: ChatProps) {
       }
     }
 
+    // Ctrl+C to abort when agent is busy (only when no text is selected)
+    if ((e.ctrlKey || e.metaKey) && e.key === "c" && isAgentBusy && !window.getSelection()?.toString()) {
+      e.preventDefault();
+      handleStopClick();
+      return;
+    }
+
+    // Escape to dismiss abort confirmation dialog
+    if (e.key === "Escape" && vs.abortConfirmVisible) {
+      e.preventDefault();
+      vs.abortConfirmVisible = false;
+      requestUpdate();
+      return;
+    }
+
     // Cmd+F for search
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === "f") {
       e.preventDefault();
@@ -1218,6 +1354,7 @@ export function renderChat(props: ChatProps) {
       }
       e.preventDefault();
       if (canCompose) {
+        clearResponseStopped();
         if (props.draft.trim()) {
           inputHistory.push(props.draft);
         }
@@ -1392,6 +1529,22 @@ export function renderChat(props: ChatProps) {
 
         <div class="agent-chat__toolbar">
           <div class="agent-chat__toolbar-left">
+            ${canAbort && isAgentBusy
+              ? html`
+                <button
+                  class="agent-chat__stop-btn"
+                  @click=${handleStopClick}
+                  title=${agentActivityStatus ? `Stop: ${agentActivityStatus.replace("...", "")}` : "Stop agent"}
+                  aria-label="Stop agent"
+                >
+                  ${icons.stop}
+                </button>
+                ${agentActivityStatus
+                  ? html`<span class="agent-chat__stop-status">${agentActivityStatus}</span>`
+                  : nothing}
+                <div class="agent-chat__input-divider"></div>
+              `
+              : nothing}
             <button
               class="agent-chat__input-btn"
               @click=${() => {
@@ -1459,13 +1612,16 @@ export function renderChat(props: ChatProps) {
                 `
                 : nothing
             }
+            ${isAgentBusy && !vs.abortConfirmVisible
+              ? html`<span class="agent-chat__ctrl-c-hint"><kbd>Ctrl</kbd>+<kbd>C</kbd> to stop</span>`
+              : nothing}
             ${tokens ? html`<span class="agent-chat__token-count">${tokens}</span>` : nothing}
           </div>
 
           <div class="agent-chat__toolbar-right">
             ${nothing /* search hidden for now */}
             ${
-              canAbort
+              canAbort && isAgentBusy
                 ? nothing
                 : html`
                   <button
@@ -1488,39 +1644,36 @@ export function renderChat(props: ChatProps) {
               ${icons.download}
             </button>
 
-            ${
-              canAbort && (isBusy || props.sending)
-                ? html`
-                  <button
-                    class="chat-send-btn chat-send-btn--stop"
-                    @click=${props.onAbort}
-                    title="Stop"
-                    aria-label="Stop generating"
-                  >
-                    ${icons.stop}
-                  </button>
-                `
-                : html`
-                  <button
-                    class="chat-send-btn"
-                    @click=${() => {
-                      if (props.draft.trim()) {
-                        inputHistory.push(props.draft);
-                      }
-                      props.onSend();
-                    }}
-                    ?disabled=${!props.connected || props.sending}
-                    title=${isBusy ? "Queue" : "Send"}
-                    aria-label=${isBusy ? "Queue message" : "Send message"}
-                  >
-                    ${icons.send}
-                  </button>
-                `
-            }
+            <button
+              class="chat-send-btn"
+              @click=${() => {
+                clearResponseStopped();
+                if (props.draft.trim()) {
+                  inputHistory.push(props.draft);
+                }
+                props.onSend();
+              }}
+              ?disabled=${!props.connected || (props.sending && !canAbort)}
+              title=${isAgentBusy ? "Queue message" : "Send message"}
+              aria-label=${isAgentBusy ? "Queue message" : "Send message"}
+            >
+              ${icons.send}
+            </button>
           </div>
         </div>
       </div>
     </section>
+    ${renderAbortConfirmDialog(
+      () => {
+        vs.responseStoppedAt = Date.now();
+        props.onAbort?.();
+        requestUpdate();
+      },
+      () => {
+        requestUpdate();
+      },
+      requestUpdate,
+    )}
   `;
 }
 

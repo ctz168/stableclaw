@@ -1468,6 +1468,7 @@ export function renderApp(state: AppViewState) {
               onAttachmentsChange: (next) => (state.chatAttachments = next),
               onSend: () => state.handleSendChat(),
               canAbort: Boolean(state.chatRunId),
+              chatRunStartedAt: state.chatStreamStartedAt,
               onAbort: () => void state.handleAbortChat(),
               onQueueRemove: (id) => state.removeQueuedMessage(id),
               onNewSession: () => state.handleSendChat("/new", { restoreDraft: true }),

@@ -1493,3 +1493,275 @@
 
 /* Mobile dropdown toggle — hidden on desktop */
 /* Mobile gear toggle + dropdown are hidden by default in layout.css */
+
+/* =============================================
+   STOP BUTTON - Pulsing red stop button in toolbar
+   ============================================= */
+
+.agent-chat__stop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--danger);
+  color: var(--destructive-foreground, #fff);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: all var(--duration-fast) ease;
+  animation: stop-btn-pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+.agent-chat__stop-btn svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.agent-chat__stop-btn:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #fff);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 20%, transparent);
+}
+
+.agent-chat__stop-btn:active {
+  transform: scale(0.92);
+}
+
+@keyframes stop-btn-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 15%, transparent);
+  }
+}
+
+/* Agent activity status text next to stop button */
+.agent-chat__stop-status {
+  font-size: 0.7rem;
+  color: var(--danger);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Ctrl+C hint in toolbar */
+.agent-chat__ctrl-c-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.7;
+  animation: fade-in 0.3s ease-out;
+}
+
+.agent-chat__ctrl-c-hint kbd {
+  display: inline-block;
+  padding: 0px 3px;
+  font-size: 0.6rem;
+  font-family: var(--mono);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  line-height: 1.4;
+}
+
+/* =============================================
+   RESPONSE STOPPED INDICATOR
+   ============================================= */
+
+.response-stopped-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin: 4px auto 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel-strong) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: var(--radius-full);
+  align-self: center;
+  animation: fade-in 0.2s ease-out, fade-out 0.4s ease-in 3.6s forwards;
+  user-select: none;
+}
+
+.response-stopped-indicator svg {
+  width: 12px;
+  height: 12px;
+  fill: var(--muted);
+  stroke: none;
+  flex-shrink: 0;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* =============================================
+   ABORT CONFIRMATION DIALOG
+   ============================================= */
+
+.abort-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.15s ease-out;
+}
+
+.abort-confirm-dialog {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  background: var(--popover);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 420px;
+  width: 90%;
+  animation: dialog-in 0.2s ease-out;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.abort-confirm-dialog__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.abort-confirm-dialog__icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.abort-confirm-dialog__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.abort-confirm-dialog__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0 0 4px;
+}
+
+.abort-confirm-dialog__desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.abort-confirm-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.abort-confirm-dialog__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) ease;
+  font-family: inherit;
+}
+
+.abort-confirm-dialog__btn kbd {
+  display: inline-block;
+  padding: 0px 4px;
+  font-size: 0.6rem;
+  font-family: var(--mono);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  line-height: 1.3;
+  opacity: 0.6;
+}
+
+.abort-confirm-dialog__btn--cancel:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-strong);
+}
+
+.abort-confirm-dialog__btn--confirm {
+  background: var(--danger);
+  color: var(--destructive-foreground, #fff);
+  border-color: var(--danger);
+}
+
+.abort-confirm-dialog__btn--confirm:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #fff);
+  border-color: color-mix(in srgb, var(--danger) 85%, #fff);
+}
+
+/* Light theme overrides */
+:root[data-theme-mode="light"] .abort-confirm-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme-mode="light"] .response-stopped-indicator {
+  background: rgba(241, 245, 249, 0.95);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .abort-confirm-dialog {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .agent-chat__ctrl-c-hint {
+    display: none;
+  }
+}
