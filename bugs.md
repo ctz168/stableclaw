@@ -1,6 +1,6 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T09:30:00+08:00
+> Last updated: 2026-04-07T09:25:00+08:00
 > Tester: Auto QA Bot (Comprehensive Check)
 > Version tested: 2026.5.9 (commit 76b9dbde)
 
@@ -198,6 +198,43 @@
 - **Description**: 通过 `node stableclaw.mjs gateway run` 在后台启动网关后，当父 Shell 会话结束时，网关进程也会被终止（即使使用 `nohup` 和 `disown`）。可能是 gateway 内部的进程 fork 机制导致子进程在父进程退出后无法独立存活。需要使用 `stableclaw gateway start`（systemd/launchd）来持久化运行。
 - **Status**: Open
 
+### BUG-022: `PluginErrorType` 缺少 `"unload"` 变体
+- **Severity**: Low
+- **Component**: `src/plugins/plugin-error-handler.ts` / `src/plugins/plugin-hot-reload.ts`
+- **Reproduction**: `npx tsgo` 类型检查
+- **Description**: `PluginErrorType` 联合类型仅定义了 `load | runtime | hook | channel | provider | tool | command`，但 `plugin-hot-reload.ts:321` 在记录卸载错误时使用了 `type: "unload"`，导致类型不匹配（TS2820）。
+- **Error**:
+  ```
+  src/plugins/plugin-hot-reload.ts(321,9): error TS2820: Type '"unload"' is not assignable to type 'PluginErrorType'. Did you mean '"load"'?
+  ```
+- **Fix suggestion**: 在 `PluginErrorType` 中添加 `"unload"` 变体
+- **Status**: Open
+
+### BUG-023: `server-lite-ws.ts` 存在 8 个 TypeScript 类型错误
+- **Severity**: Low
+- **Component**: `src/gateway/server-lite-ws.ts`
+- **Reproduction**: `npx tsgo` 类型检查
+- **Description**: Lite 模式 WebSocket 处理器存在多个类型错误，包括：模块导入作为类型使用（TS1340）、缺少模块声明（TS2307: `../chat-abort.js`、`../../wizard/session.js`）、对象类型上缺少属性（`getModelCatalog`、`channelAccounts`）、HealthSummary 类型不匹配、隐式 any 参数。
+- **Errors**:
+  ```
+  server-lite-ws.ts(719,37): error TS1340: Module './server-methods.js' does not refer to a type
+  server-lite-ws.ts(766,55): error TS2307: Cannot find module '../chat-abort.js'
+  server-lite-ws.ts(774,49): error TS2307: Cannot find module '../../wizard/session.js'
+  server-lite-ws.ts(794,22): error TS2339: Property 'getModelCatalog' does not exist on type '{}'
+  server-lite-ws.ts(800,40): error TS2322: Promise type mismatch (HealthSummary)
+  server-lite-ws.ts(883,31): error TS2741: Missing 'channelAccounts' in ChannelRuntimeSnapshot
+  server-lite-ws.ts(961,26): error TS7006: Parameter 'p' implicitly has an 'any' type
+  ```
+- **Impact**: 不影响运行时（tsdown 构建正常），但说明 Lite WS 模块类型定义不完整
+- **Status**: Open
+
+### BUG-024: UI 组件 `AppViewState` 缺少 `validation` 属性 — 72 个类型错误
+- **Severity**: Low
+- **Component**: `ui/src/ui/app-render.ts` / `ui/src/ui/app-settings.ts`
+- **Reproduction**: `npx tsgo` 类型检查
+- **Description**: `AppViewState` 和 `OpenClawApp` 类型缺少 `ConfigState` 要求的 `validation` 属性。`app-render.ts` 中约 72 处报 TS2741 错误（Property 'validation' missing），`app-settings.ts` 中 6 处。同时 `ConfigProps` 缺少 `validationResult` 和 `validationInProgress` 属性（TS2739）。可能是因为 Config validation 功能（commit 18fa66b4）添加后，UI 类型未同步更新。
+- **Status**: Open
+
 ### BUG-021: Gateway Lite 模式 `/` 和 `/canvas` 返回 503
 - **Severity**: Low
 - **Component**: Gateway Lite Server / Static assets
@@ -228,6 +265,7 @@
 | `/canvas` (Lite) | **FAIL** | HTTP 503, UI assets not served (BUG-021) |
 | `/v1/chat/completions` (Lite) | **FAIL** | Returns `{"error":"not found"}` (BUG-020) |
 | `/v1/models` (Lite) | **FAIL** | Returns UI not found message (BUG-020) |
+| `npx tsgo` (Go type checker) | **WARN** | 93 type errors: 13 in src/ (BUG-022,023), 80 in ui/src/ (BUG-024) |
 | `stableclaw models list` | PASS | Shows 2 models: step-3.5-flash, glm5 |
 | `stableclaw status` | PASS | Full status report, gateway connection OK |
 | `stableclaw doctor` | WARN | 5 warnings (BUG-006,007,009,010,014) |
@@ -245,5 +283,5 @@
 | Critical | 4 | 3 | 1 (BUG-016) |
 | High | 5 | 5 | 0 |
 | Medium | 6 | 6 | 0 |
-| Low | 7 | 7 | 0 |
-| **Total** | **22** | **21** | **1** |
+| Low | 10 | 10 | 0 |
+| **Total** | **25** | **24** | **1** |
