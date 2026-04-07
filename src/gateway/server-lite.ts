@@ -354,6 +354,31 @@ async function handleHttpRequest(req: http.IncomingMessage, res: http.ServerResp
     return;
   }
 
+  // ── Auto-redirect to onboard wizard when configuration is incomplete ──
+  // When the gateway is not yet fully configured (no auth or no provider),
+  // redirect the browser root path to the onboard wizard so first-time
+  // users are guided through setup automatically.
+  if (method === "GET") {
+    try {
+      const parsedUrl = new URL(url, "http://localhost");
+      if (
+        (parsedUrl.pathname === "/" || parsedUrl.pathname === "") &&
+        !parsedUrl.search &&
+        !parsedUrl.hash
+      ) {
+        const onboardNeeded = checkOnboardNeeded();
+        if (onboardNeeded) {
+          log.info("configuration incomplete — redirecting to /onboard");
+          res.writeHead(302, { Location: "/onboard" });
+          res.end();
+          return;
+        }
+      }
+    } catch {
+      // fall through to normal routing
+    }
+  }
+
   // Onboard wizard: AJAX-based configuration wizard
   // On first boot, this is opened automatically by the browser
   const onboardOpts: OnboardRequestOptions = {
@@ -438,15 +463,61 @@ export function getActiveClients(): Set<LiteWsClient> {
 }
 
 // ---------------------------------------------------------------------------
-// Config write helper (bypasses the config system's replaceConfigFile)
+// Onboard-needed check (mirrors handleStatusRequest in onboard-ui.ts)
 // ---------------------------------------------------------------------------
 
 /**
- * Write config directly to disk, ensuring the state directory exists.
- * This is used during first boot and auto-setup because the config system's
- * replaceConfigFile requires runtime config snapshot state that isn't
- * available in the lite gateway startup path.
+ * Returns true when the gateway config is incomplete and the user should be
+ * sent through the onboard wizard.  Mirrors the `configured` logic in
+ * {@link handleStatusRequest} so that the redirect and the status endpoint
+ * always agree.
  */
+function checkOnboardNeeded(): boolean {
+  try {
+    if (!existsSync(CONFIG_PATH)) {
+      return true;
+    }
+    const raw = fs.readFileSync(CONFIG_PATH, "utf8");
+    const cfg = JSON.parse(raw) as Record<string, unknown>;
+
+    if (Object.keys(cfg).length === 0) {
+      return true;
+    }
+
+    // Check auth
+    const gw = cfg.gateway as Record<string, unknown> | undefined;
+    const auth = gw?.auth as Record<string, unknown> | undefined;
+    const hasAuth = Boolean(
+      auth?.token ||
+        auth?.password ||
+        auth?.mode === "token" ||
+        auth?.mode === "password" ||
+        auth?.mode === "none",
+    );
+    if (!hasAuth) {
+      return true;
+    }
+
+    // Check provider (at least one API key in env vars)
+    const envVars = (cfg.env as Record<string, unknown> | undefined)?.vars as
+      | Record<string, unknown>
+      | undefined;
+    const providerSet = Object.entries(envVars ?? {}).some(
+      ([k, v]) =>
+        (k.endsWith("_API_KEY") || k === "VOLCENGINE_API_KEY") &&
+        typeof v === "string" &&
+        v.length > 0,
+    );
+    return !providerSet;
+  } catch {
+    return true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Config write helper (bypasses the config system's replaceConfigFile)
+// ---------------------------------------------------------------------------
+
 function writeConfigDirect(cfg: OpenClawConfig): void {
   try {
     const dir = path.dirname(CONFIG_PATH);
