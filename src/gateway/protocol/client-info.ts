@@ -1,6 +1,7 @@
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
   CONTROL_UI: "openclaw-control-ui",
+  STABLECLAW_CONTROL_UI: "stableclaw-control-ui",
   TUI: "openclaw-tui",
   WEBCHAT: "webchat",
   CLI: "cli",
