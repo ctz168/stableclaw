@@ -783,8 +783,8 @@ function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestCont
   return {
     // Real deps — lazy-loading send functions (cheap, no heavy deps)
     deps: createDefaultDeps(),
-    cron: undefined as unknown as GatewayRequestContext["cron"],
-    cronStorePath: "",
+    cron: (liteCronState?.cron ?? undefined) as unknown as GatewayRequestContext["cron"],
+    cronStorePath: liteCronState?.storePath ?? "",
     execApprovalManager: undefined,
     pluginApprovalManager: undefined,
     loadGatewayModelCatalog: async () => {
@@ -889,14 +889,66 @@ function buildLiteRequestContext(clients: Set<LiteWsClient>): GatewayRequestCont
   };
 }
 
-/** Cached context — rebuilt on first dispatch after modules are ready. */
-let cachedLiteContext: { context: GatewayRequestContext; clients: Set<LiteWsClient> } | null = null;
+/**
+ * Lazily-built cron service for the lite gateway.
+ * Populated on first cron.* method call after the cron lazy module loads.
+ */
+let liteCronState: {
+  cron: GatewayRequestContext["cron"];
+  storePath: string;
+} | null = null;
+
+/**
+ * Build the cron service from the already-loaded cron lazy module.
+ * Called once after lazyRegistry.get("cron") resolves.
+ */
+async function buildLiteCronService(clients: Set<LiteWsClient>): Promise<void> {
+  if (liteCronState) return;
+  try {
+    const cronMod = await lazyRegistry.get("cron");
+    const buildFn = (cronMod as Record<string, unknown>).buildGatewayCronService as
+      | ((params: {
+          cfg: Record<string, unknown>;
+          deps: ReturnType<typeof createDefaultDeps>;
+          broadcast: (event: string, payload: unknown, opts?: { dropIfSlow?: boolean }) => void;
+        }) => { cron: GatewayRequestContext["cron"]; storePath: string })
+      | undefined;
+    if (typeof buildFn !== "function") {
+      log.warn("cron module loaded but buildGatewayCronService not found");
+      return;
+    }
+    const { loadConfig } = await import("../config/config.js");
+    const cfg = loadConfig();
+    const deps = createDefaultDeps();
+    const compatClients = clients as unknown as Set<import("./server/ws-types.js").GatewayWsClient>;
+    const broadcast = (event: string, payload: unknown) => {
+      for (const c of compatClients) {
+        try {
+          if (c.socket.readyState === c.socket.OPEN) {
+            c.socket.send(JSON.stringify({ type: "event", event, payload }));
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    const state = buildFn({ cfg: cfg as Parameters<typeof buildFn>[0]["cfg"], deps, broadcast });
+    liteCronState = { cron: state.cron, storePath: state.storePath };
+    log.info("lite cron service initialized");
+  } catch (err) {
+    log.warn(`failed to build lite cron service: ${String(err)}`);
+  }
+}
+
+/** Cached context — rebuilt when cron state changes. */
+let cachedLiteContext: { context: GatewayRequestContext; clients: Set<LiteWsClient>; hasCron: boolean } | null = null;
 
 function getOrCreateLiteContext(clients: Set<LiteWsClient>): GatewayRequestContext {
-  if (cachedLiteContext && cachedLiteContext.clients === clients) {
+  const hasCron = liteCronState !== null;
+  if (cachedLiteContext && cachedLiteContext.clients === clients && cachedLiteContext.hasCron === hasCron) {
     return cachedLiteContext.context;
   }
-  cachedLiteContext = { context: buildLiteRequestContext(clients), clients };
+  cachedLiteContext = { context: buildLiteRequestContext(clients), clients, hasCron };
   return cachedLiteContext.context;
 }
 
@@ -931,6 +983,13 @@ async function handleLazyModuleMethod(
         ),
       ),
     ]);
+
+    // For cron methods, ensure the cron service is built before dispatching.
+    // The lazy module import only loads the module; we still need to
+    // instantiate the CronService so that context.cron is not undefined.
+    if (requiredModule === "cron") {
+      await buildLiteCronService(clients);
+    }
 
     // For methods that require the full gateway dispatcher (chat.*, sessions.*, etc.),
     // try to load the full handler and dispatch.
