@@ -222,7 +222,7 @@
   src/plugins/plugin-hot-reload.ts(321,9): error TS2820: Type '"unload"' is not assignable to type 'PluginErrorType'. Did you mean '"load"'?
   ```
 - **Fix**: 在 `PluginErrorType` 联合类型中添加 `"unload"` 变体，使插件卸载错误能正确记录到错误处理系统中。
-- **Fixed in**: commit (pending push)
+- **Fixed in**: commit `d403240c`
 - **Status**: Fixed ✅
 
 ### BUG-023: `server-lite-ws.ts` 存在 8 个 TypeScript 类型错误
