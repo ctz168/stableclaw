@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 import { buildChannelConfigSchema } from "../channels/plugins/config-schema.js";
+import { CHAT_CHANNEL_ORDER } from "../channels/ids.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
 import {
   getPackageManifestMetadata,
@@ -185,15 +186,37 @@ function collectRuntimeSidecarArtifacts(
   return artifacts.length > 0 ? artifacts : undefined;
 }
 
+function isExtensionDirPopulated(dir: string, requiredChannelIds: readonly string[]): boolean {
+  if (!fs.existsSync(dir)) {
+    return false;
+  }
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  if (entries.length === 0) {
+    return false;
+  }
+  // If no specific channel IDs to check, just verify the dir has subdirectories
+  if (requiredChannelIds.length === 0) {
+    return entries.some((e) => e.isDirectory());
+  }
+  // Verify at least one known channel extension has a package.json (metadata)
+  for (const channelId of requiredChannelIds) {
+    const channelDir = path.join(dir, channelId);
+    if (fs.existsSync(channelDir) && fs.existsSync(path.join(channelDir, "package.json"))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function resolveBundledPluginScanDir(packageRoot: string): string | undefined {
   const sourceDir = path.join(packageRoot, "extensions");
   const runtimeDir = path.join(packageRoot, "dist-runtime", "extensions");
   const builtDir = path.join(packageRoot, "dist", "extensions");
   if (RUNNING_FROM_BUILT_ARTIFACT) {
-    if (fs.existsSync(builtDir)) {
+    if (isExtensionDirPopulated(builtDir, CHAT_CHANNEL_ORDER)) {
       return builtDir;
     }
-    if (fs.existsSync(runtimeDir)) {
+    if (isExtensionDirPopulated(runtimeDir, CHAT_CHANNEL_ORDER)) {
       return runtimeDir;
     }
   }
