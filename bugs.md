@@ -1,8 +1,8 @@
 # StableClaw Bug Tracker
 
-> Last updated: 2026-04-07T09:25:00+08:00
-> Tester: Auto QA Bot (Comprehensive Check)
-> Version tested: 2026.5.9 (commit 76b9dbde)
+> Last updated: 2026-04-07T11:35:00+08:00
+> Tester: Super Z (Lite Mode + AICQ Plugin Offline Focus)
+> Version tested: 2026.5.10 (commit 90e9fdb)
 
 ---
 
@@ -24,9 +24,23 @@
 - **Severity**: Critical
 - **Component**: Gateway Lite Server
 - **Reproduction**: `stableclaw gateway run --allow-unconfigured --bind loopback --port 18789`，启动后访问 `/readyz`、`/ready`
-- **Description**: Lite 模式下 `/readyz` 和 `/ready` 返回 `{"error":"not found"}`，而 `/healthz` 和 `/health` 在等待模块完全加载后（约 7 秒）能正常返回完整状态信息。`/` 根路径和 `/canvas` 返回 HTTP 503，提示需要 `pnpm ui:build` 构建 UI 资源。
-- **Note**: 上次测试（v2026.5.8）时 `/healthz` 完全无响应，当前版本（v2026.5.9）`/healthz` 和 `/health` 已修复可用，但 `/readyz` 和 `/ready` 仍然 404。
+- **Description**: Lite 模式下 `/readyz` 和 `/ready` 返回 `{"error":"not found"}`，而 `/healthz` 和 `/health` 在等待模块完全加载后（约 7 秒）能正常返回完整状态信息。
+- **Note v2026.5.10**: `/` 和 `/canvas` 不再返回 503，现在返回 HTTP 200（UI 资源已正确提供）。`/readyz` 和 `/ready` 仍然 404。
 - **Status**: Open (部分改善)
+
+### BUG-025: Lite 模式下第三方插件完全不可用
+- **Severity**: Critical
+- **Component**: Gateway Lite Server / Plugin runtime
+- **Reproduction**: 安装 AICQ 插件后，以 Lite 模式启动网关，通过 WebSocket RPC 调用插件方法
+- **Description**: Lite 模式仅暴露 4 个极简方法 (`ping`, `version`, `health.get`, `status`)，所有插件方法（`plugins.list`, `aicq-chat.status`, `aicq-chat.getFriends` 等）均返回 `unknown method`。虽然 healthz 报告 plugins 模块状态为 "ready"，但插件运行时并未在 Lite 模式中初始化。具体表现：
+  1. 插件管理 UI (port 6109) 不会启动
+  2. 插件 HTTP 路由 (`/plugins/aicq-chat/`) 返回 404
+  3. 插件工具 (chat-send, chat-friend) 无法调用
+  4. 插件离线消息队列功能不可用
+  5. 插件配置 API 全部 404
+- **Expected**: 至少应该暴露 `plugins.list` 和插件注册的方法，或者给出明确提示"Lite 模式不支持插件"
+- **Workaround**: 使用 `--full` 模式启动
+- **Status**: Open
 
 ### BUG-016: `pnpm build` 构建失败 — ConfigValidate 类型未导出
 - **Severity**: Critical
@@ -235,53 +249,110 @@
 - **Description**: `AppViewState` 和 `OpenClawApp` 类型缺少 `ConfigState` 要求的 `validation` 属性。`app-render.ts` 中约 72 处报 TS2741 错误（Property 'validation' missing），`app-settings.ts` 中 6 处。同时 `ConfigProps` 缺少 `validationResult` 和 `validationInProgress` 属性（TS2739）。可能是因为 Config validation 功能（commit 18fa66b4）添加后，UI 类型未同步更新。
 - **Status**: Open
 
-### BUG-021: Gateway Lite 模式 `/` 和 `/canvas` 返回 503
-- **Severity**: Low
+### BUG-021: ~~Gateway Lite 模式 `/` 和 `/canvas` 返回 503~~ ✅ 已修复
+- **Severity**: ~~Low~~ → Fixed
 - **Component**: Gateway Lite Server / Static assets
-- **Reproduction**: 启动 Lite 模式后访问 `http://127.0.0.1:18789/` 和 `/canvas`
-- **Description**: 根路径 `/` 和 `/canvas` 返回 HTTP 503，错误消息为 "Control UI assets not found. Build them with `pnpm ui:build`"。即使已执行 `pnpm ui:build` 成功（42 chunks in 1.35s），Lite 模式仍不提供 UI 资源服务。UI 资源仅在 Full 模式下通过控制面板提供服务。
+- **Description**: ~~根路径 `/` 和 `/canvas` 返回 HTTP 503~~ → **已修复**: v2026.5.10 中 `/` 和 `/canvas` 现在正确返回 HTTP 200。
+- **Status**: Fixed ✅ (v2026.5.10)
+
+### BUG-026: AICQ 插件安装被安全沙箱阻止
+- **Severity**: High
+- **Component**: Plugin security scan / `src/plugins/install-security-scan.runtime.ts`
+- **Reproduction**: `stableclaw plugins install /path/to/aicq/plugin/`
+- **Description**: AICQ 插件使用 `child_process` (用于获取系统指纹) 和环境变量访问（用于构建 auth headers），触发 stableclaw 的安全沙箱扫描，默认阻止安装。错误信息：
+  ```
+  Plugin "aicq-chat" installation blocked: dangerous code patterns detected:
+  Shell command execution detected (child_process) (dist/index.js:117);
+  Environment variable access combined with network send — possible credential harvesting (dist/index.js:171)
+  ```
+- **Workaround**: 使用 `--dangerously-force-unsafe-install` 标志强制安装
+- **Suggestion**: 
+  1. 安全扫描应区分 `exec()` 和 `execFile()`（后者更安全）
+  2. 环境变量访问是正常功能（读 HOME/PATH 等），不应标记为"凭证窃取"
+  3. 应支持插件清单声明所需权限（类似 Android permission model）
+- **Status**: Open
+
+### BUG-027: AICQ 插件使用 xdg-open 在无头环境崩溃
+- **Severity**: Medium
+- **Component**: AICQ Plugin / `src/index.ts`
+- **Reproduction**: 安装 AICQ 插件后运行 `stableclaw plugins list`
+- **Description**: 插件初始化时尝试用 `xdg-open` 打开浏览器访问管理 UI，在无头/服务器环境中失败：`Command failed: xdg-open "http://127.0.0.1:6109/"`。虽然非致命（被 try-catch 捕获），但产生不必要的错误日志。
+- **Fix suggestion**: 检测 `DISPLAY` 或 `WAYLAND_DISPLAY` 环境变量，或使用 `process.env.OPENCLAW_NO_BROWSER=1` 控制
+- **Status**: Open
+
+### BUG-028: AICQ 插件 manifest 版本与 package.json 不同步
+- **Severity**: Low
+- **Component**: AICQ Plugin
+- **Description**: `openclaw.plugin.json` 中 version 为 `1.3.0`，而 `package.json` 中 version 为 `1.5.0`。两处版本不一致，可能导致混淆。
+- **Status**: Open
+
+### BUG-029: AICQ 插件 `enabledByDefault: false` 导致安装后不生效
+- **Severity**: Medium
+- **Component**: AICQ Plugin / `openclaw.plugin.json`
+- **Description**: 插件 manifest 中 `enabledByDefault: false`，意味着即使安装了插件，也需要手动在配置中启用。但 `plugins install` 命令完成后已经在 `stableclaw.json` 中设置了 `"enabled": true`，所以 manifest 中的默认值实际无效。应统一为 `true` 或在安装时明确提示。
 - **Status**: Open
 
 ---
 
-## Test Results Summary
+## AICQ Plugin Offline Feature Test Results
 
-> Comprehensive check performed on 2026-04-07T09:30:00+08:00
+> 测试时间: 2026-04-07T11:30:00+08:00
+> 测试方式: Bundle 静态分析 + WebSocket RPC 集成测试 (Lite 模式)
+> 环境: aicq.online DNS 不可达（模拟离线环境）
 
-| Test Category | Result | Details |
-|---|---|---|
-| `pnpm install` | PASS | 1160 packages installed |
-| `pnpm build` | PASS | v2026.5.9, all steps including plugin-sdk:dts |
-| `pnpm ui:build` | PASS | Vite build OK (42 chunks, 1.35s) |
-| `pnpm lint` (oxlint) | **WARN** | 1147 errors: 1052 no-explicit-any, 49 curly, 40 no-unused-vars (BUG-019) |
-| `pnpm vitest run` | **FAIL** | 1 failed suite: lazy-registry.test.ts empty (BUG-012); 3 suite files skipped (BUG-011) |
-| `npx tsc --noEmit` | **FAIL** | OOM crash — heap limit exceeded (BUG-017) |
-| Gateway Lite startup | PASS | 30ms kernel ready, ~7s full module init |
-| `/healthz` (Lite) | PASS ✅ | Returns full status with 16 modules (was FAIL in v2026.5.8) |
-| `/health` (Lite) | PASS ✅ | Same as /healthz |
-| `/readyz` (Lite) | **FAIL** | Returns `{"error":"not found"}` (BUG-002) |
-| `/ready` (Lite) | **FAIL** | Returns `{"error":"not found"}` (BUG-002) |
-| `/` root (Lite) | **FAIL** | HTTP 503, UI assets not served (BUG-021) |
-| `/canvas` (Lite) | **FAIL** | HTTP 503, UI assets not served (BUG-021) |
-| `/v1/chat/completions` (Lite) | **FAIL** | Returns `{"error":"not found"}` (BUG-020) |
-| `/v1/models` (Lite) | **FAIL** | Returns UI not found message (BUG-020) |
-| `npx tsgo` (Go type checker) | **WARN** | 93 type errors: 13 in src/ (BUG-022,023), 80 in ui/src/ (BUG-024) |
-| `stableclaw models list` | PASS | Shows 2 models: step-3.5-flash, glm5 |
-| `stableclaw status` | PASS | Full status report, gateway connection OK |
-| `stableclaw doctor` | WARN | 5 warnings (BUG-006,007,009,010,014) |
-| `stableclaw security audit` | PASS | 0 critical, 1 warn (trusted proxies), 1 info |
-| ModelScope GLM-5 | PASS ⚠️ | Returns valid content, but reasoning_content leaks (BUG-018) |
-| ModelScope Kimi-K2.5 | PASS | Returns valid response: "Hello there, nice to meet you!" |
-| ModelScope Step-3.5-Flash | **FAIL** | Empty content, finish_reason=length (BUG-004) |
-| ModelScope MiniMax-M2.5 | PASS ⚠️ | Returns valid content (was 400 error), but reasoning_content leaks 454 tokens (BUG-018) |
-| Plugin SDK exports | PASS | 4 required exports verified |
+### 离线功能代码审计（Bundle 静态分析）
+
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| 小时级重连检查 | ✅ 通过 | `hourlyCheckMode` 实现完整：初始窗口 1 分钟内指数退避重试，之后每小时检查一次 |
+| 离线消息队列 | ✅ 通过 | `pendingMessages` 队列实现：离线时消息入队，上线后自动 flush |
+| 重连后批量发送 | ✅ 通过 | `flushOfflineMessages()` 在连接恢复时逐条发送队列中的消息 |
+| 指数退避重连 | ✅ 通过 | 1s → 2s → 4s → ... → 60s max，含 0.75-1.25 随机 jitter |
+| WebSocket 心跳 | ✅ 通过 | 30s 间隔 ping，连接断开自动清理定时器 |
+| Noise-XK 握手 | ✅ 通过 | Ed25519/X25519/AES-256-GCM 端到端加密 |
+| 加密/解密 | ✅ 通过 | AES-256-GCM 对称加密 + X25519 密钥交换 |
+| 连接状态机 | ✅ 通过 | offline → reconnecting → online 三态转换 |
+| P2P 直连 | ✅ 通过 | 支持直连模式（`enableP2P: true`） |
+| 文件传输 | ✅ 通过 | 分块传输 + 断点续传（`fileMissingChunks`） |
+| JWT 认证 | ✅ 通过 | 节点注册获取 token，WS 和 REST API 均使用 Bearer token |
+
+### 集成测试结果（Lite 模式 + AICQ 插件）
+
+| 测试项 | 结果 | 说明 |
+|--------|------|------|
+| `pnpm install` (stableclaw) | ✅ PASS | 749 packages (npm), 1160 packages (pnpm) |
+| `pnpm build` | ✅ PASS | v2026.5.10, all steps OK |
+| `pnpm ui:build` | ✅ PASS | Vite build OK (1.31s) |
+| `@aicq/crypto` build | ✅ PASS | TypeScript 编译成功 |
+| AICQ plugin build | ✅ PASS | esbuild bundle 617.1 KB |
+| `plugins install` (默认) | ❌ BLOCKED | 安全沙箱阻止 (BUG-026) |
+| `plugins install --dangerously-force-unsafe-install` | ✅ PASS | 强制安装成功 |
+| Gateway Lite startup | ✅ PASS | 11ms kernel ready, 16 modules ready |
+| `/healthz` (Lite) | ✅ PASS | HTTP 200, 16 modules ready |
+| `/health` (Lite) | ✅ PASS | HTTP 200 |
+| `/readyz` (Lite) | ❌ FAIL | HTTP 404 (BUG-002) |
+| `/ready` (Lite) | ❌ FAIL | HTTP 404 (BUG-002) |
+| `/` root (Lite) | ✅ PASS | HTTP 200 (was 503 in v2026.5.9) |
+| `/canvas` (Lite) | ✅ PASS | HTTP 200 (was 503 in v2026.5.9) |
+| `/v1/chat/completions` (Lite) | ❌ FAIL | HTTP 404 (expected: Lite 不支持 API) |
+| `/v1/models` (Lite) | ❌ FAIL | 返回 UI HTML (expected: Lite 不支持 API) |
+| WS connect (Lite) | ✅ PASS | protocol 3, 4 methods available |
+| WS `plugins.list` | ❌ FAIL | "unknown method" (BUG-025) |
+| WS `aicq-chat.status` | ❌ FAIL | "unknown method" (BUG-025) |
+| WS `tool.call` (chat-send) | ❌ FAIL | "unknown method" (BUG-025) |
+| Plugin Mgmt UI (port 6109) | ❌ FAIL | 未启动 (BUG-025) |
+| Gateway Plugin UI `/plugins/aicq-chat/` | ❌ FAIL | HTTP 404 (BUG-025) |
+| ModelScope Step-3.5-Flash | ⚠️ PARTIAL | 返回 "Hello!" 但 completion_tokens=56（含内部推理） |
+| ModelScope GLM-5 | ❌ FAIL | 返回空响应：`choices: null, usage: all 0` |
+| ModelScope MiniMax-M2.5 | ❌ FAIL | 400: `Invalid model id: Minimal/MiniMax-M2.5` |
+| ModelScope Kimi-K2.5 | ✅ PASS | "Hello! It's nice to meet you." (26 tokens) |
 
 ### Bug Statistics
 
 | Severity | Count | Open | Fixed |
 |---|---|---|---|
-| Critical | 4 | 3 | 1 (BUG-016) |
-| High | 5 | 5 | 0 |
-| Medium | 6 | 6 | 0 |
-| Low | 10 | 10 | 0 |
-| **Total** | **25** | **24** | **1** |
+| Critical | 6 | 5 | 1 (BUG-016) |
+| High | 6 | 6 | 0 |
+| Medium | 9 | 9 | 0 |
+| Low | 11 | 10 | 1 (BUG-021) |
+| **Total** | **32** | **30** | **2** |
