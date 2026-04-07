@@ -63,12 +63,12 @@ function Check-Node {
         $nodeVersion = (node -v 2>$null)
         if ($nodeVersion) {
             $version = [int]($nodeVersion -replace 'v(\d+)\..*', '$1')
-            if ($version -ge 22) {
+            if ($version -ge 24) {
                 Write-Host "[OK] Node.js $nodeVersion found" -ForegroundColor Green
                 return $true
             }
             else {
-                Write-Host "[!] Node.js $nodeVersion found, but v22+ required" -ForegroundColor Yellow
+                Write-Host "[!] Node.js $nodeVersion found, but v24+ required" -ForegroundColor Yellow
                 return $false
             }
         }
@@ -80,59 +80,153 @@ function Check-Node {
     return $false
 }
 
+function Get-PortableNodeRoot {
+    $base = Join-Path $env:LOCALAPPDATA "StableClaw\deps"
+    return (Join-Path $base "node")
+}
+
+function Use-PortableNodeIfPresent {
+    $root = Get-PortableNodeRoot
+    $nodeExe = Join-Path $root "node.exe"
+    if (-not (Test-Path $nodeExe)) {
+        return $false
+    }
+
+    Add-ToProcessPath $root
+    if (Check-Node) {
+        return $true
+    }
+    return $false
+}
+
+function Install-PortableNode {
+    if (Use-PortableNodeIfPresent) {
+        return
+    }
+
+    Write-Host "[*] Bootstrapping user-local portable Node.js (v24 LTS)..." -ForegroundColor Yellow
+
+    # We hardcode a known stable LTS version for the fallback to avoid complex version resolution logic
+    $nodeVersion = "v24.14.1"
+    $nodeZip = "node-$nodeVersion-win-x64.zip"
+    $downloadUrl = "https://nodejs.org/dist/$nodeVersion/$nodeZip"
+
+    $portableRoot = Get-PortableNodeRoot
+    $portableParent = Split-Path -Parent $portableRoot
+    $tmpZip = Join-Path $env:TEMP $nodeZip
+    $tmpExtract = Join-Path $env:TEMP ("stableclaw-portable-node-" + [guid]::NewGuid().ToString("N"))
+
+    New-Item -ItemType Directory -Force -Path $portableParent | Out-Null
+    if (Test-Path $portableRoot) {
+        Remove-Item -Recurse -Force $portableRoot -ErrorAction SilentlyContinue
+    }
+    New-Item -ItemType Directory -Force -Path $tmpExtract | Out-Null
+
+    try {
+        Write-Host "  Downloading $nodeVersion ..." -ForegroundColor Gray
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $tmpZip
+        
+        Write-Host "  Extracting..." -ForegroundColor Gray
+        Expand-Archive -Path $tmpZip -DestinationPath $tmpExtract -Force
+
+        # The zip contains a subfolder like node-v24.x.x-win-x64
+        $extractedFolder = Get-ChildItem -Path $tmpExtract -Directory | Select-Object -First 1
+        
+        # Using robocopy for better reliability than Move-Item on large trees
+        robocopy $extractedFolder.FullName $portableRoot /E /MOVE /V /NFL /NDL /NJH /NJS /R:3 /W:1 | Out-Null
+    }
+    finally {
+        if (Test-Path $tmpZip) {
+            Remove-Item -Force $tmpZip -ErrorAction SilentlyContinue
+        }
+        if (Test-Path $tmpExtract) {
+            Remove-Item -Recurse -Force $tmpExtract -ErrorAction SilentlyContinue
+        }
+    }
+
+    if (-not (Use-PortableNodeIfPresent)) {
+        throw "Portable Node.js bootstrap completed, but node is still unavailable."
+    }
+
+    Write-Host "[OK] User-local Node.js ready" -ForegroundColor Green
+}
+
+
 # Install Node.js
 function Install-Node {
-    Write-Host "[*] Installing Node.js 22+ ..." -ForegroundColor Yellow
+    Write-Host "[*] Installing Node.js 24+ ..." -ForegroundColor Yellow
 
     # Try winget first (Windows 11 / Windows 10 with App Installer)
     if (Get-Command winget -ErrorAction SilentlyContinue) {
         Write-Host "  Using winget..." -ForegroundColor Gray
-        winget install OpenJS.NodeJS.LTS --source winget --accept-package-agreements --accept-source-agreements
-
-        # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-        if (Check-Node) {
-            Write-Host "[OK] Node.js installed via winget" -ForegroundColor Green
-            return
+        try {
+            winget install OpenJS.NodeJS.LTS --source winget --accept-package-agreements --accept-source-agreements
+            # Refresh PATH
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            if (Check-Node) {
+                Write-Host "[OK] Node.js installed via winget" -ForegroundColor Green
+                return
+            }
         }
-        Write-Host "[!] winget completed, but Node.js is still unavailable in this shell" -ForegroundColor Yellow
-        Write-Host "Restart PowerShell and re-run the installer if Node.js was installed successfully." -ForegroundColor Yellow
-        exit 1
+        catch {
+            Write-Host "  winget install failed; trying fallbacks..." -ForegroundColor Gray
+        }
     }
 
     # Try Chocolatey
     if (Get-Command choco -ErrorAction SilentlyContinue) {
         Write-Host "  Using Chocolatey..." -ForegroundColor Gray
-        choco install nodejs-lts -y
-
-        # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-        if (Check-Node) {
-            Write-Host "[OK] Node.js installed via Chocolatey" -ForegroundColor Green
-            return
+        try {
+            choco install nodejs-lts -y
+            # Refresh PATH
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            if (Check-Node) {
+                Write-Host "[OK] Node.js installed via Chocolatey" -ForegroundColor Green
+                return
+            }
+        }
+        catch {
+            Write-Host "  Chocolatey install failed; trying fallbacks..." -ForegroundColor Gray
         }
     }
 
     # Try Scoop
     if (Get-Command scoop -ErrorAction SilentlyContinue) {
         Write-Host "  Using Scoop..." -ForegroundColor Gray
-        scoop install nodejs-lts
-        if (Check-Node) {
-            Write-Host "[OK] Node.js installed via Scoop" -ForegroundColor Green
-            return
+        try {
+            scoop install nodejs-lts
+            if (Check-Node) {
+                Write-Host "[OK] Node.js installed via Scoop" -ForegroundColor Green
+                return
+            }
+        }
+        catch {
+            Write-Host "  Scoop install failed; trying fallbacks..." -ForegroundColor Gray
         }
     }
 
-    # Manual download fallback
+    # Manual portable download fallback
+    try {
+        Install-PortableNode
+        if (Check-Node) {
+            return
+        }
+    }
+    catch {
+        Write-Host "[!] Portable Node.js bootstrap failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+
+    # Manual download fallback instruction
     Write-Host ""
-    Write-Host "Error: Could not find a package manager (winget, choco, or scoop)" -ForegroundColor Red
+    Write-Host "Error: Could not install Node.js automatically." -ForegroundColor Red
     Write-Host ""
-    Write-Host "Please install Node.js 22+ manually:" -ForegroundColor Yellow
+    Write-Host "Please install Node.js 24+ manually:" -ForegroundColor Yellow
     Write-Host "  https://nodejs.org/en/download/" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Or install winget (App Installer) from the Microsoft Store." -ForegroundColor Gray
     exit 1
 }
+
 
 function Check-Git {
     try {
@@ -623,6 +717,10 @@ function Refresh-GatewayServiceIfLoaded {
 
 # Main installation flow
 function Main {
+    # Use portable node/git early if present
+    Use-PortableNodeIfPresent | Out-Null
+    Use-PortableGitIfPresent | Out-Null
+
     if ($InstallMethod -ne "npm" -and $InstallMethod -ne "git") {
         Write-Host "Error: invalid -InstallMethod (use npm or git)." -ForegroundColor Red
         exit 2
